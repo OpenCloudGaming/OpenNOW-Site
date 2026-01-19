@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Docs-opennow.zortos.me-blue?style=for-the-badge" alt="Documentation">
   </a>
   <a href="https://github.com/zortos293/OpenNOW">
-    <img src="https://img.shields.io/badge/Main_Repo-GFNClient-green?style=for-the-badge&logo=github" alt="Main Repository">
+    <img src="https://img.shields.io/badge/Main_Repo-OpenNOW-green?style=for-the-badge&logo=github" alt="Main Repository">
   </a>
   <a href="https://discord.gg/8EJYaJcNfD">
     <img src="https://img.shields.io/badge/Discord-Join_Us-7289da?style=for-the-badge&logo=discord" alt="Discord">
