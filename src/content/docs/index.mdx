@@ -1,9 +1,9 @@
 ---
 title: OpenNOW
-description: High-performance native streaming client for GeForce NOW
+description: High-performance GeForce NOW client built with Electron and React
 template: splash
 hero:
-  tagline: Open source GeForce NOW client built from the ground up in Native Rust
+  tagline: Open source GeForce NOW client v0.2.4 — built with Electron 40, React 19, and TypeScript
   image:
     file: ../../assets/houston.webp
   actions:
@@ -29,17 +29,17 @@ Check [Known Issues](#known-issues) for current limitations.
 ## Why OpenNOW?
 
 <CardGrid>
-	<Card title="Native Performance" icon="rocket">
-		Written in Rust with zero-overhead graphics bindings using wgpu and egui. No Electron, no web views.
+	<Card title="Modern Stack" icon="rocket">
+		Built with Electron 40, React 19, and TypeScript 5.7 for a polished, responsive experience.
 	</Card>
 	<Card title="Uncapped Potential" icon="open-book">
-		No artificial limits on FPS, resolution, or bitrate. Stream at 240+ FPS if your connection supports it.
+		No artificial limits on FPS, resolution, or bitrate. Stream up to 5K at 240+ FPS if your connection supports it.
 	</Card>
 	<Card title="Privacy Focused" icon="approve-check">
-		No telemetry by default. Your data stays on your machine.
+		Zero telemetry. No data collection. Your gaming stays private.
 	</Card>
 	<Card title="Cross-Platform" icon="laptop">
-		Native builds for Windows, macOS (Apple Silicon + Intel), and Linux.
+		Native builds for Windows, macOS (Apple Silicon + Intel), and Linux (x64 + ARM64 including Raspberry Pi).
 	</Card>
 </CardGrid>
 
@@ -48,14 +48,14 @@ Check [Known Issues](#known-issues) for current limitations.
 <Steps>
 1. **Download** the latest release from [GitHub Releases](https://github.com/zortos293/OpenNOW/releases)
 
-2. **Extract** and run the application
-   - Windows: Extract zip, run `opennow-streamer.exe`
-   - macOS: Extract zip, drag `OpenNOW.app` to Applications
-   - Linux: Make AppImage executable and run it
+2. **Install** the application
+   - Windows: Run the installer or extract portable version
+   - macOS: Mount DMG and drag to Applications
+   - Linux: Install .deb/.rpm or use AppImage
 
 3. **Login** with your NVIDIA GeForce NOW account
 
-4. **Play** - Browse games and start streaming!
+4. **Play** — Browse games and start streaming!
 </Steps>
 
 <LinkCard
@@ -75,16 +75,17 @@ Check [Known Issues](#known-issues) for current limitations.
 | Authentication | <Badge text="Working" variant="success" /> | OAuth login with NVIDIA accounts |
 | Game Library | <Badge text="Working" variant="success" /> | Browse and search games via CloudMatch |
 | WebRTC Streaming | <Badge text="Working" variant="success" /> | Low-latency video streaming |
-| Hardware Decoding | <Badge text="Working" variant="success" /> | D3D11VA, VideoToolbox, Vulkan Video |
-| Zero-Copy Rendering | <Badge text="Working" variant="success" /> | GPU textures direct to display |
-| Mouse & Keyboard | <Badge text="Working" variant="success" /> | Raw input capture on all platforms |
-| Gamepad Support | <Badge text="Working" variant="success" /> | Controllers via gilrs library |
+| Hardware Decoding | <Badge text="Working" variant="success" /> | H.264, HEVC, and AV1 codec support |
+| Up to 5K@240fps | <Badge text="Working" variant="success" /> | Stream at high resolutions and frame rates |
+| Mouse & Keyboard | <Badge text="Working" variant="success" /> | Full input capture on all platforms |
+| Gamepad Support | <Badge text="Working" variant="success" /> | Controller support with customizable bindings |
 | Audio Playback | <Badge text="Working" variant="success" /> | Low-latency Opus audio |
-| Stats Overlay | <Badge text="Working" variant="success" /> | FPS, bitrate, latency monitoring |
-| Anti-AFK | <Badge text="Working" variant="success" /> | Prevent session timeout |
+| Stats Overlay | <Badge text="Working" variant="success" /> | Real-time FPS, bitrate, and latency monitoring |
+| Anti-AFK | <Badge text="Working" variant="success" /> | Prevent session timeout during gameplay |
+| Adjustable Shortcuts | <Badge text="Working" variant="success" /> | Customize keyboard shortcuts to your preference |
 | Alliance Partners | <Badge text="Working" variant="success" /> | au, Taiwan Mobile, bro.game |
 | Clipboard Paste | <Badge text="Working" variant="success" /> | Paste text to remote session |
-| AV1 Codec | <Badge text="Working" variant="success" /> | Modern codec support |
+| AV1 Codec | <Badge text="Working" variant="success" /> | Modern codec for better quality |
 
 ### Coming Soon
 
@@ -100,22 +101,21 @@ Check [Known Issues](#known-issues) for current limitations.
 
 ## Platform Support
 
-| Platform | Status | Hardware Decoding |
-|----------|:------:|-------------------|
-| Windows x64 | <Badge text="Working" variant="success" /> | D3D11VA (NVIDIA, AMD, Intel) |
-| Windows ARM64 | <Badge text="Untested" variant="note" /> | Should work |
-| macOS ARM64 | <Badge text="Working" variant="success" /> | VideoToolbox (M1/M2/M3) |
-| macOS Intel | <Badge text="Working" variant="success" /> | VideoToolbox via Rosetta 2 |
-| Linux x64 | <Badge text="Buggy" variant="caution" /> | Vulkan Video (RTX, Arc, RDNA2+) |
-| Linux ARM64 | <Badge text="Buggy" variant="caution" /> | GStreamer |
-| Raspberry Pi | <Badge text="Broken" variant="danger" /> | Under investigation |
+| Platform | Status | Notes |
+|----------|:------:|-------|
+| Windows x64 | <Badge text="Working" variant="success" /> | Full hardware decoding support |
+| Windows ARM64 | <Badge text="Working" variant="success" /> | Native ARM64 builds available |
+| macOS ARM64 | <Badge text="Working" variant="success" /> | Apple Silicon (M1/M2/M3/M4) |
+| macOS Intel | <Badge text="Working" variant="success" /> | Intel x64 support |
+| Linux x64 | <Badge text="Working" variant="success" /> | Ubuntu, Fedora, Arch, and more |
+| Linux ARM64 | <Badge text="Working" variant="success" /> | Including Raspberry Pi support |
 
 ---
 
 ## Known Issues
 
 <Aside type="danger" title="Performance Notice">
-The app is being actively optimized. High CPU usage and stuttering are being addressed.
+The app is being actively optimized. Report any issues on GitHub.
 </Aside>
 
 | Issue | Workaround |
@@ -123,9 +123,7 @@ The app is being actively optimized. High CPU usage and stuttering are being add
 | **High CPU usage** | Lower FPS/resolution. Optimization ongoing. |
 | **Green screen flashes** | Switch to H.264 codec in settings. |
 | **Audio stuttering** | Restart stream. Buffer improvements planned. |
-| **Laggy input feeling** | Enable `low_latency_mode`. Being improved. |
-| **Linux instability** | Use Windows/macOS for now. |
-| **Raspberry Pi broken** | V4L2 decoder issues being investigated. |
+| **Laggy input feeling** | Enable low-latency mode in settings. |
 
 ---
 
@@ -134,7 +132,7 @@ The app is being actively optimized. High CPU usage and stuttering are being add
 | Key | Action |
 |-----|--------|
 | `F2` | Toggle sidebar |
-| `F3` | Toggle stats |
+| `F3` | Toggle stats overlay |
 | `F8` | Toggle mouse capture |
 | `F9` | Start/stop recording |
 | `F11` | Toggle fullscreen |
@@ -175,6 +173,10 @@ The app is being actively optimized. High CPU usage and stuttering are being add
 </CardGrid>
 
 ---
+
+<Aside type="tip" title="Open Source">
+OpenNOW is MIT licensed and open source. Contribute on [GitHub](https://github.com/zortos293/OpenNOW).
+</Aside>
 
 <Aside type="tip" title="Not affiliated with NVIDIA">
 OpenNOW is an independent project not affiliated with NVIDIA Corporation. 

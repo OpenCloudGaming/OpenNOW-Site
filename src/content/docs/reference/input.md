@@ -1,367 +1,755 @@
 ---
 title: Input System
-description: Cross-platform input handling in OpenNow Streamer
+description: Cross-platform input handling in OpenNow Electron client
 ---
 
-OpenNow Streamer implements a low-latency input system with mouse coalescing, local cursor rendering, and support for gamepads and racing wheels.
+OpenNow implements a low-latency input system with native event listeners, mouse sensitivity adjustment, local cursor rendering, and support for up to 4 simultaneous gamepads.
 
 ## Architecture
 
 ```
-Raw Input (WM_INPUT / CGEvent / evdev)
-       │
-       ▼
+Native Event Listeners (Renderer Process)
+        │
+        ▼
 ┌─────────────────────┐
-│   Platform Layer    │  windows.rs / macos.rs / linux.rs
+│  Keyboard Capture   │  keydown/keyup events
+│  Mouse Capture      │  mousemove/mousedown/mouseup/wheel
+│  Gamepad Polling    │  navigator.getGamepads() @ 250Hz
 └─────────────────────┘
-       │
-       ├── Local Cursor Update (immediate)
-       │
-       ▼
+        │
+        ▼
 ┌─────────────────────┐
-│   Mouse Coalescer   │  2ms batching (500Hz)
+│  Input Processor    │  Event normalization & sensitivity
 └─────────────────────┘
-       │
-       ▼
+        │
+        ▼
 ┌─────────────────────┐
-│   Input Handler     │  Event normalization
+│  Binary Protocol    │  Efficient encoding (inputProtocol.ts)
 └─────────────────────┘
-       │
-       ▼
+        │
+        ▼
 ┌─────────────────────┐
-│   Input Task        │  Async encoding
-└─────────────────────┘
-       │
-       ▼
-┌─────────────────────┐
-│   WebRTC Channel    │  Network transmission
+│  WebRTC Data Channel│  Network transmission
 └─────────────────────┘
 ```
 
-## Configuration Constants
+## Input Event Types
 
-```rust
-/// Mouse event coalescing interval (2ms = 500Hz effective rate)
-pub const MOUSE_COALESCE_INTERVAL_US: u64 = 2_000;
+```typescript
+export enum InputEventType {
+  KeyDown = 0x01,
+  KeyUp = 0x02,
+  MouseMove = 0x03,
+  MouseButtonDown = 0x04,
+  MouseButtonUp = 0x05,
+  MouseWheel = 0x06,
+  GamepadState = 0x07,
+  ClipboardPaste = 0x08,
+  Heartbeat = 0x09,
+}
 
-/// Maximum input queue depth before throttling
-pub const MAX_INPUT_QUEUE_DEPTH: usize = 8;
+export interface InputEvent {
+  type: InputEventType;
+  timestamp: number;  // Monotonic clock (microseconds)
+  data: KeyEventData | MouseEventData | GamepadEventData | ClipboardData;
+}
 
-/// Maximum clipboard paste size (64KB like official GFN)
-pub const MAX_CLIPBOARD_PASTE_SIZE: usize = 65536;
-```
+export interface KeyEventData {
+  keycode: number;    // DOM keyCode normalized to Windows VK
+  scancode: number;   // Platform scancode
+  modifiers: number;  // Shift/Ctrl/Alt/Meta flags
+}
 
-## Input Events
+export interface MouseEventData {
+  dx?: number;        // Relative X (can be scaled)
+  dy?: number;        // Relative Y (can be scaled)
+  button?: number;    // 0=Left, 1=Middle, 2=Right, 3=Back, 4=Forward
+  delta?: number;     // Wheel delta
+}
 
-```rust
-pub enum InputEvent {
-    KeyDown {
-        keycode: u16,        // Windows Virtual Key code
-        scancode: u16,       // Hardware scancode
-        modifiers: u16,      // Shift/Ctrl/Alt/Super flags
-        timestamp_us: u64,
-    },
-    KeyUp {
-        keycode: u16,
-        scancode: u16,
-        modifiers: u16,
-        timestamp_us: u64,
-    },
-    MouseMove {
-        dx: i16,             // Relative X movement
-        dy: i16,             // Relative Y movement
-        timestamp_us: u64,
-    },
-    MouseButtonDown {
-        button: u8,          // 1=Left, 2=Middle, 3=Right, 4=Back, 5=Forward
-        timestamp_us: u64,
-    },
-    MouseButtonUp {
-        button: u8,
-        timestamp_us: u64,
-    },
-    MouseWheel {
-        delta: i16,          // Scroll delta (positive = up)
-        timestamp_us: u64,
-    },
-    Gamepad {
-        controller_id: u8,
-        buttons: u32,
-        left_stick_x: i16,
-        left_stick_y: i16,
-        right_stick_x: i16,
-        right_stick_y: i16,
-        left_trigger: u8,
-        right_trigger: u8,
-        timestamp_us: u64,
-    },
-    ClipboardPaste {
-        text: String,
-    },
-    Heartbeat,
+export interface GamepadEventData {
+  controllerId: number;  // 0-3
+  buttons: number;       // 32-bit button bitmask
+  leftStickX: number;    // -32768 to 32767
+  leftStickY: number;
+  rightStickX: number;
+  rightStickY: number;
+  leftTrigger: number;   // 0-255
+  rightTrigger: number;
+}
+
+export interface ClipboardData {
+  text: string;  // UTF-8 encoded, max 64KB
 }
 ```
 
-## Mouse Coalescer
+## Binary Input Protocol
 
-The `MouseCoalescer` batches high-frequency mouse events to reduce network overhead:
+Input events are encoded to binary format for efficient transmission:
 
-```rust
-pub struct MouseCoalescer {
-    accumulated_dx: AtomicI32,
-    accumulated_dy: AtomicI32,
-    last_send_us: AtomicU64,
-    coalesce_interval_us: u64,  // Default: 2000 (2ms)
-    coalesced_count: AtomicU64,
+**File**: `renderer/src/gfn/inputProtocol.ts`
+
+```typescript
+export class InputProtocol {
+  private buffer: ArrayBuffer;
+  private view: DataView;
+  private offset: number = 0;
+
+  constructor(bufferSize: number = 1024) {
+    this.buffer = new ArrayBuffer(bufferSize);
+    this.view = new DataView(this.buffer);
+  }
+
+  encodeKeyEvent(type: InputEventType, data: KeyEventData): Uint8Array {
+    this.offset = 0;
+    this.view.setUint8(this.offset++, type);
+    this.view.setUint16(this.offset, data.keycode, true);
+    this.offset += 2;
+    this.view.setUint16(this.offset, data.scancode, true);
+    this.offset += 2;
+    this.view.setUint8(this.offset++, data.modifiers);
+    return new Uint8Array(this.buffer, 0, this.offset);
+  }
+
+  encodeMouseMove(dx: number, dy: number): Uint8Array {
+    this.offset = 0;
+    this.view.setUint8(this.offset++, InputEventType.MouseMove);
+    this.view.setInt16(this.offset, Math.max(-32768, Math.min(32767, dx)), true);
+    this.offset += 2;
+    this.view.setInt16(this.offset, Math.max(-32768, Math.min(32767, dy)), true);
+    this.offset += 2;
+    return new Uint8Array(this.buffer, 0, this.offset);
+  }
+
+  encodeGamepad(data: GamepadEventData): Uint8Array {
+    this.offset = 0;
+    this.view.setUint8(this.offset++, InputEventType.GamepadState);
+    this.view.setUint8(this.offset++, data.controllerId & 0x03);
+    this.view.setUint32(this.offset, data.buttons, true);
+    this.offset += 4;
+    this.view.setInt16(this.offset, data.leftStickX, true);
+    this.offset += 2;
+    this.view.setInt16(this.offset, data.leftStickY, true);
+    this.offset += 2;
+    this.view.setInt16(this.offset, data.rightStickX, true);
+    this.offset += 2;
+    this.view.setInt16(this.offset, data.rightStickY, true);
+    this.offset += 2;
+    this.view.setUint8(this.offset++, data.leftTrigger);
+    this.view.setUint8(this.offset++, data.rightTrigger);
+    return new Uint8Array(this.buffer, 0, this.offset);
+  }
 }
 ```
 
-### Usage
+## Native Event Listeners
 
-```rust
-// Accumulate delta, returns Some if ready to send
-if let Some((dx, dy, timestamp_us)) = coalescer.accumulate(dx, dy) {
-    send_event(InputEvent::MouseMove { dx, dy, timestamp_us });
-}
+### Renderer Process Input Capture
 
-// Force flush (before button events for proper ordering)
-if let Some((dx, dy, timestamp_us)) = coalescer.flush() {
-    send_event(InputEvent::MouseMove { dx, dy, timestamp_us });
+Input is captured in the renderer process using native DOM events:
+
+```typescript
+// renderer/src/input/InputCapture.ts
+
+export class InputCapture {
+  private isPointerLocked: boolean = false;
+  private sensitivity: number = 1.0;
+  private onInput: (event: InputEvent) => void;
+
+  constructor(onInput: (event: InputEvent) => void) {
+    this.onInput = onInput;
+    this.setupEventListeners();
+  }
+
+  private setupEventListeners(): void {
+    // Keyboard events
+    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    window.addEventListener('keyup', this.handleKeyUp.bind(this));
+
+    // Mouse events
+    window.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    window.addEventListener('mousedown', this.handleMouseDown.bind(this));
+    window.addEventListener('mouseup', this.handleMouseUp.bind(this));
+    window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
+
+    // Pointer lock changes
+    document.addEventListener('pointerlockchange', this.handlePointerLockChange.bind(this));
+
+    // Clipboard
+    window.addEventListener('paste', this.handlePaste.bind(this));
+  }
+
+  private handleKeyDown(e: KeyboardEvent): void {
+    e.preventDefault();
+    
+    // Check for paste shortcut (Ctrl+V / Cmd+V)
+    if (this.isPasteShortcut(e)) {
+      return; // Let paste event handle it
+    }
+
+    this.onInput({
+      type: InputEventType.KeyDown,
+      timestamp: performance.now() * 1000,
+      data: {
+        keycode: this.normalizeKeyCode(e.code),
+        scancode: e.keyCode,
+        modifiers: this.getModifiers(e)
+      }
+    });
+  }
+
+  private handleMouseMove(e: MouseEvent): void {
+    if (!this.isPointerLocked) return;
+
+    // Apply mouse sensitivity scaling (exclusive feature)
+    const dx = Math.round(e.movementX * this.sensitivity);
+    const dy = Math.round(e.movementY * this.sensitivity);
+
+    if (dx !== 0 || dy !== 0) {
+      this.onInput({
+        type: InputEventType.MouseMove,
+        timestamp: performance.now() * 1000,
+        data: { dx, dy }
+      });
+    }
+  }
+
+  setSensitivity(value: number): void {
+    this.sensitivity = Math.max(0.1, Math.min(5.0, value));
+  }
+
+  requestPointerLock(): void {
+    const videoElement = document.getElementById('stream-video');
+    if (videoElement) {
+      videoElement.requestPointerLock();
+    }
+  }
+
+  exitPointerLock(): void {
+    document.exitPointerLock();
+  }
+
+  private normalizeKeyCode(code: string): number {
+    // Map DOM key codes to Windows virtual key codes
+    const keyMap: Record<string, number> = {
+      'KeyA': 0x41, 'KeyB': 0x42, 'KeyC': 0x43, // ... etc
+      'ArrowUp': 0x26, 'ArrowDown': 0x28,
+      'Space': 0x20, 'Enter': 0x0D, 'Escape': 0x1B,
+    };
+    return keyMap[code] || e.keyCode;
+  }
+
+  private getModifiers(e: KeyboardEvent | MouseEvent): number {
+    let mods = 0;
+    if (e.shiftKey) mods |= 0x01;
+    if (e.ctrlKey) mods |= 0x02;
+    if (e.altKey) mods |= 0x04;
+    if (e.metaKey) mods |= 0x08;
+    return mods;
+  }
 }
 ```
 
-### Benefits
+## WebRTC Data Channel Transmission
 
-- **Reduces bandwidth**: Instead of 1000+ events/sec, sends ~500 events/sec
-- **Maintains responsiveness**: 2ms latency is imperceptible
-- **Proper ordering**: Flush before button events ensures move→click sequence
+```typescript
+// renderer/src/webrtc/InputChannel.ts
 
-## Local Cursor
+export class InputChannel {
+  private dataChannel: RTCDataChannel | null = null;
+  private protocol: InputProtocol;
+  private queue: Uint8Array[] = [];
+  private maxQueueDepth: number = 8;
 
-The `LocalCursor` provides instant visual feedback independent of network latency:
+  constructor(private peerConnection: RTCPeerConnection) {
+    this.protocol = new InputProtocol();
+    this.setupChannel();
+  }
 
-```rust
-pub struct LocalCursor {
-    x: AtomicI32,
-    y: AtomicI32,
-    stream_width: AtomicI32,
-    stream_height: AtomicI32,
-    active: AtomicBool,
+  private setupChannel(): void {
+    this.dataChannel = this.peerConnection.createDataChannel('input', {
+      ordered: false,
+      maxRetransmits: 0  // Unreliable for mouse
+    });
+
+    this.dataChannel.onopen = () => {
+      this.flushQueue();
+    };
+  }
+
+  send(event: InputEvent): void {
+    if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
+      if (this.queue.length < this.maxQueueDepth) {
+        this.queue.push(this.encodeEvent(event));
+      }
+      return;
+    }
+
+    const data = this.encodeEvent(event);
+    
+    // Throttle if queue is getting deep
+    if (this.queue.length > 0) {
+      this.queue.push(data);
+      return;
+    }
+
+    try {
+      this.dataChannel.send(data);
+    } catch (e) {
+      console.error('Failed to send input:', e);
+    }
+  }
+
+  private encodeEvent(event: InputEvent): Uint8Array {
+    switch (event.type) {
+      case InputEventType.KeyDown:
+      case InputEventType.KeyUp:
+        return this.protocol.encodeKeyEvent(event.type, event.data as KeyEventData);
+      case InputEventType.MouseMove:
+        const mouseData = event.data as MouseEventData;
+        return this.protocol.encodeMouseMove(mouseData.dx || 0, mouseData.dy || 0);
+      case InputEventType.GamepadState:
+        return this.protocol.encodeGamepad(event.data as GamepadEventData);
+      default:
+        return new Uint8Array();
+    }
+  }
+
+  private flushQueue(): void {
+    while (this.queue.length > 0 && this.dataChannel?.readyState === 'open') {
+      const data = this.queue.shift();
+      if (data) this.dataChannel.send(data);
+    }
+  }
 }
 ```
 
-### Methods
+## Mouse Sensitivity Adjustment
 
-| Method | Description |
-|--------|-------------|
-| `apply_delta(dx, dy)` | Update position with clamping |
-| `position()` | Get (x, y) in screen coordinates |
-| `position_normalized()` | Get (x, y) as 0.0-1.0 |
-| `set_dimensions(w, h)` | Set stream bounds |
-| `center()` | Move to center of stream |
+Mouse sensitivity is an exclusive feature that scales relative mouse movements before transmission:
 
-The local cursor is updated immediately on raw input, then drawn over the video frame before the remote cursor position catches up.
+```typescript
+// renderer/src/input/MouseSensitivity.ts
 
-## Input Handler
+export class MouseSensitivity {
+  private sensitivity: number = 1.0;
+  private acceleration: boolean = false;
 
-The `InputHandler` is the main interface for input processing:
+  /**
+   * Set mouse sensitivity multiplier
+   * @param value Sensitivity value (0.1 to 5.0, default 1.0)
+   */
+  setSensitivity(value: number): void {
+    this.sensitivity = Math.max(0.1, Math.min(5.0, value));
+  }
 
-```rust
-pub struct InputHandler {
-    event_tx: Mutex<Option<mpsc::Sender<InputEvent>>>,
-    encoder: Mutex<InputEncoder>,
-    cursor_captured: AtomicBool,
-    pressed_keys: Mutex<HashSet<u16>>,
-    mouse_coalescer: MouseCoalescer,
-    local_cursor: LocalCursor,
-    queue_depth: AtomicU64,
-}
-```
+  /**
+   * Apply sensitivity to raw mouse delta
+   */
+  apply(dx: number, dy: number): { dx: number; dy: number } {
+    if (this.acceleration) {
+      // Simple acceleration curve
+      const magnitude = Math.sqrt(dx * dx + dy * dy);
+      const factor = 1 + (magnitude / 100) * 0.5;
+      return {
+        dx: Math.round(dx * this.sensitivity * factor),
+        dy: Math.round(dy * this.sensitivity * factor)
+      };
+    }
 
-### Key Methods
-
-| Method | Description |
-|--------|-------------|
-| `handle_mouse_button(button, state)` | Process mouse click (flushes pending movement first) |
-| `handle_mouse_delta(dx, dy)` | Process relative mouse movement with coalescing |
-| `handle_key(keycode, pressed, modifiers)` | Process keyboard event with key tracking |
-| `handle_wheel(delta)` | Process scroll wheel |
-| `handle_clipboard_paste()` | Read clipboard and send as key events |
-| `release_all_keys()` | Release stuck keys on focus loss |
-| `flush_mouse_events()` | Flush pending coalesced events |
-
-### Key State Tracking
-
-Keys are tracked to prevent duplicate events and enable proper release:
-
-```rust
-// On key down: only send if not already pressed
-if pressed && !pressed_keys.insert(keycode) {
-    return;  // Skip duplicate
+    return {
+      dx: Math.round(dx * this.sensitivity),
+      dy: Math.round(dy * this.sensitivity)
+    };
+  }
 }
 
-// On focus loss: release all tracked keys
-for keycode in pressed_keys.drain() {
-    send_event(InputEvent::KeyUp { keycode, ... });
-}
-```
+// React component for sensitivity control
+// renderer/src/components/MouseSettings.tsx
 
-## Session Timing
+export const MouseSettings: React.FC = () => {
+  const [sensitivity, setSensitivity] = useState(1.0);
 
-Input timestamps are relative to session start for proper server-side processing:
-
-```rust
-/// Initialize at streaming start
-pub fn init_session_timing();
-
-/// Get timestamp (Unix base + relative offset)
-pub fn get_timestamp_us() -> u64;
-
-/// Get time since session start (for coalescing)
-pub fn session_elapsed_us() -> u64;
-```
-
-## Modifier Flags
-
-```rust
-const SHIFT: u16 = 0x01;
-const CTRL:  u16 = 0x02;
-const ALT:   u16 = 0x04;
-const SUPER: u16 = 0x08;  // Windows/Command key
+  return (
+    <div className="mouse-settings">
+      <label>Mouse Sensitivity: {sensitivity.toFixed(2)}x</label>
+      <input
+        type="range"
+        min="0.1"
+        max="5.0"
+        step="0.1"
+        value={sensitivity}
+        onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+      />
+    </div>
+  );
+};
 ```
 
 ## Gamepad Support
 
-Gamepads are handled by `ControllerManager` using the gilrs library:
+Up to 4 simultaneous gamepads are supported via the Gamepad API:
 
-```rust
-pub struct ControllerManager {
-    gilrs: Gilrs,
-    event_tx: Option<mpsc::Sender<InputEvent>>,
+```typescript
+// renderer/src/input/GamepadManager.ts
+
+const GAMEPAD_BUTTONS = [
+  'A', 'B', 'X', 'Y',
+  'LB', 'RB',
+  'LT', 'RT',
+  'Back', 'Start',
+  'L3', 'R3',
+  'DPadUp', 'DPadDown', 'DPadLeft', 'DPadRight',
+  'Xbox', // Guide button
+];
+
+export class GamepadManager {
+  private gamepads: (Gamepad | null)[] = new Array(4).fill(null);
+  private onStateChange: (data: GamepadEventData) => void;
+  private pollingId: number | null = null;
+  private lastStates = new Map<number, GamepadEventData>();
+
+  constructor(onStateChange: (data: GamepadEventData) => void) {
+    this.onStateChange = onStateChange;
+    window.addEventListener('gamepadconnected', this.handleConnect.bind(this));
+    window.addEventListener('gamepaddisconnected', this.handleDisconnect.bind(this));
+  }
+
+  startPolling(): void {
+    const poll = () => {
+      this.updateGamepads();
+      this.pollingId = requestAnimationFrame(poll);
+    };
+    this.pollingId = requestAnimationFrame(poll);
+  }
+
+  stopPolling(): void {
+    if (this.pollingId) {
+      cancelAnimationFrame(this.pollingId);
+      this.pollingId = null;
+    }
+  }
+
+  private updateGamepads(): void {
+    const gamepads = navigator.getGamepads();
+    
+    for (let i = 0; i < 4; i++) {
+      const gamepad = gamepads[i];
+      if (!gamepad) continue;
+
+      const state = this.encodeGamepadState(i, gamepad);
+      const lastState = this.lastStates.get(i);
+
+      // Only send if state changed
+      if (!lastState || !this.statesEqual(state, lastState)) {
+        this.onStateChange(state);
+        this.lastStates.set(i, state);
+      }
+    }
+  }
+
+  private encodeGamepadState(id: number, gp: Gamepad): GamepadEventData {
+    let buttons = 0;
+    gp.buttons.forEach((btn, idx) => {
+      if (btn.pressed && idx < 32) {
+        buttons |= (1 << idx);
+      }
+    });
+
+    return {
+      controllerId: id,
+      buttons,
+      leftStickX: this.normalizeAxis(gp.axes[0]),
+      leftStickY: this.normalizeAxis(gp.axes[1]),
+      rightStickX: this.normalizeAxis(gp.axes[2]),
+      rightStickY: this.normalizeAxis(gp.axes[3]),
+      leftTrigger: Math.floor(gp.buttons[6]?.value * 255) || 0,
+      rightTrigger: Math.floor(gp.buttons[7]?.value * 255) || 0,
+    };
+  }
+
+  private normalizeAxis(value: number): number {
+    // Apply deadzone
+    if (Math.abs(value) < 0.1) return 0;
+    // Scale to -32768 to 32767
+    return Math.round(value * 32767);
+  }
+
+  private statesEqual(a: GamepadEventData, b: GamepadEventData): boolean {
+    return a.buttons === b.buttons &&
+           a.leftStickX === b.leftStickX &&
+           a.leftStickY === b.leftStickY &&
+           a.rightStickX === b.rightStickX &&
+           a.rightStickY === b.rightStickY &&
+           a.leftTrigger === b.leftTrigger &&
+           a.rightTrigger === b.rightTrigger;
+  }
 }
 ```
 
-### Features
+## Controller Navigation
 
-- **Automatic detection** of connected controllers
-- **Rumble/vibration** support via `queue_rumble()`
-- **Button mapping** to GFN format
-- **Analog stick** deadzone handling
+Controller navigation allows using a gamepad to navigate the UI:
 
-### Rumble
+**File**: `renderer/src/input/controllerNavigation.ts`
 
-```rust
-pub struct RumbleEffect {
-    controller_id: u8,
-    left_motor: u16,    // Low frequency
-    right_motor: u16,   // High frequency
-    duration_ms: u32,
-}
+```typescript
+export class ControllerNavigation {
+  private focusedElement: HTMLElement | null = null;
+  private gamepadIndex: number = 0;
+  private navigationMode: boolean = false;
 
-controller_manager.queue_rumble(id, left, right, duration);
-```
+  enable(): void {
+    this.navigationMode = true;
+    window.addEventListener('gamepadconnected', (e) => {
+      if (this.navigationMode && e.gamepad.index === this.gamepadIndex) {
+        this.setupNavigationListeners();
+      }
+    });
+  }
 
-## Racing Wheel Support
+  private setupNavigationListeners(): void {
+    const checkNavigation = () => {
+      const gamepads = navigator.getGamepads();
+      const gp = gamepads[this.gamepadIndex];
+      if (!gp) return;
 
-Racing wheels are handled by `WheelManager` using Windows.Gaming.Input:
+      // D-pad navigation
+      if (gp.buttons[12]?.pressed) this.navigate('up');
+      if (gp.buttons[13]?.pressed) this.navigate('down');
+      if (gp.buttons[14]?.pressed) this.navigate('left');
+      if (gp.buttons[15]?.pressed) this.navigate('right');
 
-```rust
-pub struct WheelManager {
-    // Detects dedicated racing wheels (G29, G920, etc.)
-    // Provides proper axis separation: wheel, throttle, brake, clutch
-}
-```
+      // A button = click
+      if (gp.buttons[0]?.pressed) this.activate();
+      // B button = back
+      if (gp.buttons[1]?.pressed) this.goBack();
 
-### Force Feedback
+      requestAnimationFrame(checkNavigation);
+    };
+    
+    requestAnimationFrame(checkNavigation);
+  }
 
-```rust
-pub enum FfbEffectType {
-    ConstantForce,
-    Spring,
-    Damper,
-    Friction,
+  private navigate(direction: 'up' | 'down' | 'left' | 'right'): void {
+    const focusable = document.querySelectorAll('[tabindex]:not([tabindex="-1"])');
+    const current = document.activeElement as HTMLElement;
+    // Simple spatial navigation logic
     // ...
+  }
+
+  private activate(): void {
+    const active = document.activeElement as HTMLElement;
+    if (active) {
+      active.click();
+    }
+  }
+
+  private goBack(): void {
+    window.history.back();
+  }
 }
-
-wheel_manager.apply_force_feedback(wheel_id, effect_type, magnitude, duration);
 ```
 
-### G29 HID Support
+## Clipboard Paste Support
 
-For Logitech G29 wheels in PS3 mode (not detected by Windows.Gaming.Input):
+Clipboard paste sends text content as input events:
 
-```rust
-pub struct G29FfbManager {
-    // Direct HID communication for force feedback
+```typescript
+// renderer/src/input/ClipboardHandler.ts
+
+const MAX_CLIPBOARD_SIZE = 65536;  // 64KB, matching official GFN
+
+export class ClipboardHandler {
+  private onPaste: (text: string) => void;
+
+  constructor(onPaste: (text: string) => void) {
+    this.onPaste = onPaste;
+    this.setupPasteListener();
+  }
+
+  private setupPasteListener(): void {
+    window.addEventListener('paste', async (e) => {
+      e.preventDefault();
+      
+      const text = e.clipboardData?.getData('text');
+      if (!text) return;
+
+      if (text.length > MAX_CLIPBOARD_SIZE) {
+        console.warn('Clipboard content too large, truncating');
+      }
+
+      const truncated = text.slice(0, MAX_CLIPBOARD_SIZE);
+      this.onPaste(truncated);
+    });
+  }
+
+  /**
+   * Convert text to key events (fallback for platforms without native paste)
+   */
+  static textToKeyEvents(text: string): InputEvent[] {
+    const events: InputEvent[] = [];
+    
+    for (const char of text) {
+      const keycode = char.charCodeAt(0);
+      
+      events.push({
+        type: InputEventType.KeyDown,
+        timestamp: performance.now() * 1000,
+        data: { keycode, scancode: 0, modifiers: 0 }
+      });
+      
+      events.push({
+        type: InputEventType.KeyUp,
+        timestamp: performance.now() * 1000,
+        data: { keycode, scancode: 0, modifiers: 0 }
+      });
+    }
+    
+    return events;
+  }
 }
-
-g29_ffb.apply_constant_force(magnitude);  // -1.0 to 1.0
 ```
 
-## Platform-Specific Input
+## Configuration Constants
 
-### Windows
+```typescript
+// renderer/src/input/constants.ts
 
-- **WM_INPUT** for raw mouse input
-- Bypasses mouse acceleration
-- High-precision delta values
+export const INPUT_CONSTANTS = {
+  // Mouse sensitivity range (exclusive feature)
+  MIN_SENSITIVITY: 0.1,
+  MAX_SENSITIVITY: 5.0,
+  DEFAULT_SENSITIVITY: 1.0,
 
-```rust
-pub fn start_raw_input(hwnd: HWND);
-pub fn get_raw_mouse_delta() -> (i32, i32);
-pub fn update_raw_input_center(x: i32, y: i32);
+  // Gamepad polling rate (250Hz = 4ms)
+  GAMEPAD_POLL_INTERVAL_MS: 4,
+
+  // Maximum input queue depth before throttling
+  MAX_INPUT_QUEUE_DEPTH: 8,
+
+  // Maximum clipboard paste size
+  MAX_CLIPBOARD_PASTE_SIZE: 65536,
+
+  // Deadzone for analog sticks (0.0 - 1.0)
+  ANALOG_STICK_DEADZONE: 0.1,
+
+  // Trigger activation threshold
+  TRIGGER_THRESHOLD: 0.1,
+} as const;
 ```
 
-### macOS
+## Modifier Flags
 
-- **CGEvent** tap for raw input
-- Requires accessibility permissions
-- Supports high-DPI displays
+```typescript
+export const Modifiers = {
+  SHIFT: 0x01,
+  CTRL: 0x02,
+  ALT: 0x04,
+  META: 0x08,  // Windows/Command key
+} as const;
+```
 
-### Linux
+## Usage Example
 
-- **evdev** for raw input
-- X11/Wayland support
-- May require elevated permissions
+```typescript
+// renderer/src/hooks/useInput.ts
+
+import { useEffect, useRef } from 'react';
+import { InputCapture } from '../input/InputCapture';
+import { InputChannel } from '../webrtc/InputChannel';
+import { GamepadManager } from '../input/GamepadManager';
+import { ClipboardHandler } from '../input/ClipboardHandler';
+
+export function useInput(peerConnection: RTCPeerConnection) {
+  const inputCaptureRef = useRef<InputCapture | null>(null);
+  const inputChannelRef = useRef<InputChannel | null>(null);
+  const gamepadManagerRef = useRef<GamepadManager | null>(null);
+
+  useEffect(() => {
+    inputChannelRef.current = new InputChannel(peerConnection);
+
+    inputCaptureRef.current = new InputCapture((event) => {
+      inputChannelRef.current?.send(event);
+    });
+
+    gamepadManagerRef.current = new GamepadManager((data) => {
+      inputChannelRef.current?.send({
+        type: InputEventType.GamepadState,
+        timestamp: performance.now() * 1000,
+        data
+      });
+    });
+
+    new ClipboardHandler((text) => {
+      inputChannelRef.current?.send({
+        type: InputEventType.ClipboardPaste,
+        timestamp: performance.now() * 1000,
+        data: { text }
+      });
+    });
+
+    gamepadManagerRef.current.startPolling();
+
+    return () => {
+      gamepadManagerRef.current?.stopPolling();
+    };
+  }, [peerConnection]);
+
+  return {
+    requestPointerLock: () => inputCaptureRef.current?.requestPointerLock(),
+    exitPointerLock: () => inputCaptureRef.current?.exitPointerLock(),
+    setMouseSensitivity: (value: number) => 
+      inputCaptureRef.current?.setSensitivity(value),
+  };
+}
+```
+
+## Key State Tracking
+
+```typescript
+export class KeyStateTracker {
+  private pressedKeys = new Set<number>();
+
+  isKeyPressed(keycode: number): boolean {
+    return this.pressedKeys.has(keycode);
+  }
+
+  pressKey(keycode: number): boolean {
+    if (this.pressedKeys.has(keycode)) {
+      return false;  // Already pressed, don't duplicate
+    }
+    this.pressedKeys.add(keycode);
+    return true;
+  }
+
+  releaseKey(keycode: number): void {
+    this.pressedKeys.delete(keycode);
+  }
+
+  releaseAll(): number[] {
+    const keys = Array.from(this.pressedKeys);
+    this.pressedKeys.clear();
+    return keys;
+  }
+}
+```
 
 ## Input Channels
 
-Mouse and keyboard/gamepad use different WebRTC channels:
+Different input types use different WebRTC data channel configurations:
 
-| Input Type | Channel | Reliability | Purpose |
-|------------|---------|-------------|---------|
-| Keyboard | `input_channel_v1` | Reliable, ordered | No dropped keys |
-| Gamepad | `input_channel_v1` | Reliable, ordered | Button/stick state |
-| Mouse | `partially_reliable` | Unreliable, 8ms lifetime | Low latency |
+| Input Type | Channel Config | Reliability | Purpose |
+|------------|---------------|-------------|---------|
+| Keyboard | `ordered: true, maxRetransmits: 3` | Reliable | No dropped keys |
+| Gamepad | `ordered: true, maxRetransmits: 3` | Reliable | Accurate button state |
+| Mouse | `ordered: false, maxRetransmits: 0` | Unreliable | Lowest latency |
+| Clipboard | `ordered: true, maxRetransmits: 3` | Reliable | Complete delivery |
 
-## Clipboard Paste
+## Performance Considerations
 
-Clipboard paste sends text as synthetic key events:
-
-```rust
-// Ctrl+V triggers clipboard paste
-if InputHandler::is_paste_shortcut(keycode, modifiers) {
-    input_handler.handle_clipboard_paste();
-}
-
-// Text is converted to Unicode key events
-InputEvent::ClipboardPaste { text } → [KeyDown(char), KeyUp(char), ...]
-```
-
-Maximum paste size: 64KB (matches official GFN client).
-
-## Queue Depth Management
-
-Input events are throttled if the queue becomes too deep:
-
-```rust
-// Check queue depth before sending mouse events
-let depth = self.queue_depth.load(Ordering::Acquire);
-if depth > MAX_INPUT_QUEUE_DEPTH {
-    // Still accumulate but may decimate
-    self.mouse_coalescer.accumulate(dx, dy);
-    return;
-}
-```
-
-This prevents buffer bloat and maintains low latency under high input rates.
+- **Coalescing**: Mouse events are naturally coalesced by the browser during `requestAnimationFrame`
+- **Throttling**: Queue depth monitoring prevents buffer bloat
+- **Binary encoding**: Reduces packet size by ~80% compared to JSON
+- **Dead reckoning**: Gamepad state only sent on changes
+- **Polling rate**: Gamepad polling at 250Hz balances responsiveness and CPU usage

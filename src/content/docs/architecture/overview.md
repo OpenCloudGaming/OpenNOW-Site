@@ -1,243 +1,682 @@
 ---
 title: Architecture Overview
-description: High-level architecture of OpenNow Streamer
+description: High-level architecture of OpenNow Electron Client
 ---
 
-OpenNow Streamer is organized into several modules that handle different aspects of the streaming client. This document provides an overview of the architecture and how components interact.
+OpenNow is built on Electron's multi-process architecture, leveraging the security and performance characteristics of the Chromium runtime. This document describes the three-process model and how components interact across process boundaries.
 
-## Module Structure
+## Process Architecture
+
+Electron applications run across three distinct process types, each with specific responsibilities and security privileges:
 
 ```
-src/
-├── main.rs          # Application entry point and event loop
-├── lib.rs           # Library exports
-├── api/             # GFN API clients (CloudMatch, Games, Queue)
-├── app/             # Application state and session management
-├── auth/            # OAuth authentication and token management
-├── gui/             # UI rendering with egui
-├── input/           # Cross-platform input handling
-├── media/           # Video/audio decoding and rendering
-├── utils/           # Logging and time utilities
-└── webrtc/          # WebRTC peer connection and signaling
+┌─────────────────────────────────────────────────────────────┐
+│                     Electron Application                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────────┐                                       │
+│  │  Main Process    │  (Node.js)                             │
+│  │  ─────────────   │                                       │
+│  │  • OAuth flows   │                                       │
+│  │  • HTTP APIs     │                                       │
+│  │  • WebSocket     │                                       │
+│  │    signaling     │                                       │
+│  │  • Session mgmt  │                                       │
+│  │  • Settings I/O  │                                       │
+│  └────────┬─────────┘                                       │
+│           │                                                 │
+│           │ IPC (contextBridge)                             │
+│           │                                                 │
+│  ┌────────▼─────────┐                                       │
+│  │  Preload Script  │  (Isolated Context)                    │
+│  │  ─────────────   │                                       │
+│  │  • Secure bridge │                                       │
+│  │  • API exposure  │                                       │
+│  │  • ContextIsolation│                                     │
+│  └────────┬─────────┘                                       │
+│           │                                                 │
+│           │ PostMessage / Custom Events                     │
+│           │                                                 │
+│  ┌────────▼─────────┐                                       │
+│  │  Renderer        │  (Chromium + React)                    │
+│  │  ─────────────   │                                       │
+│  │  • React UI      │                                       │
+│  │  • WebRTC peer   │                                       │
+│  │  • Input capture │                                       │
+│  │  • Media decode  │                                       │
+│  └──────────────────┘                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Core Components
+## Core Processes
 
-### Application Layer (`app/`)
+### Main Process (Node.js)
 
-The `App` struct is the central state machine that coordinates all components:
+The main process is the application's entry point and controls the lifecycle of all renderer processes. It has full Node.js and system access.
 
-```rust
-pub struct App {
-    pub state: AppState,           // Login, Games, Session, Streaming
-    pub settings: Settings,        // User configuration
-    pub auth_tokens: Option<AuthTokens>,
-    pub session: Option<SessionInfo>,
-    pub streaming_session: Option<Arc<Mutex<StreamingSession>>>,
-    pub input_handler: Option<Arc<InputHandler>>,
-    pub shared_frame: Option<Arc<SharedFrame>>,
-    pub stats: StreamStats,
-    // ... UI state fields
+**Responsibilities:**
+
+```typescript
+// Main process architecture
+interface MainProcessAPI {
+  // OAuth 2.0 with PKCE
+  auth: {
+    initiateOAuth(provider: string): Promise<AuthSession>;
+    handleCallback(url: string): Promise<Tokens>;
+    refreshToken(refreshToken: string): Promise<Tokens>;
+  };
+  
+  // HTTP API clients
+  api: {
+    cloudMatch: CloudMatchClient;    // Session creation/polling
+    games: GamesClient;              // GraphQL game library
+    queue: QueueClient;              // Queue time estimates
+  };
+  
+  // WebSocket signaling
+  signaling: {
+    connect(sessionId: string): WebSocket;
+    send(message: SignalingMessage): void;
+    onMessage(handler: (msg: SignalingMessage) => void): void;
+  };
+  
+  // Session management
+  session: {
+    create(gameId: string): Promise<Session>;
+    poll(sessionId: string): Promise<SessionStatus>;
+    terminate(sessionId: string): Promise<void>;
+  };
+  
+  // Persistent settings
+  settings: {
+    get(key: string): any;
+    set(key: string, value: any): void;
+    watch(key: string, handler: (value: any) => void): void;
+  };
 }
 ```
 
-**Application States:**
-- `Login` - User not authenticated
-- `Games` - Browsing game library
-- `Session` - Creating/polling a streaming session
-- `Streaming` - Active video/audio stream
+**Key Characteristics:**
+- Runs Node.js with unrestricted filesystem and network access
+- Manages BrowserWindow instances for UI
+- Handles OAuth flows via custom protocol handlers
+- Maintains persistent WebSocket connections to GFN servers
+- Stores encrypted credentials in OS keychain
 
-### Authentication (`auth/`)
+### Preload Script (Secure Bridge)
 
-Handles OAuth 2.0 with PKCE flow:
+The preload script runs in an isolated context before the renderer loads, establishing a secure communication channel between main and renderer.
 
-1. Generate PKCE verifier and challenge
-2. Open browser to `login.nvidia.com/authorize`
-3. Start local callback server on port 2259/6460/7119/8870/9096
-4. Exchange authorization code for tokens
-5. Support token refresh before expiration
+```typescript
+// Preload exposes safe APIs to renderer
+import { contextBridge, ipcRenderer } from 'electron';
 
-**Alliance Partners**: Supports multiple login providers via the `/v1/serviceUrls` API, enabling regional partners like au by KDDI, Taiwan Mobile, and bro.game.
-
-### API Layer (`api/`)
-
-HTTP clients for GFN services:
-
-| Module | Purpose |
-|--------|---------|
-| `cloudmatch.rs` | Session creation, polling, termination |
-| `games.rs` | Game library via GraphQL API |
-| `queue.rs` | Queue time estimates (PrintedWaste API) |
-| `error_codes.rs` | Session error code mapping |
-
-**Key Endpoints:**
-- `https://login.nvidia.com/` - OAuth authentication
-- `https://prod.cloudmatchbeta.nvidiagrid.net/v2/session` - Session management
-- `https://games.geforce.com/graphql` - Game library
-
-### WebRTC Layer (`webrtc/`)
-
-Manages the streaming connection:
-
-```
-┌─────────────┐     WebSocket      ┌─────────────┐
-│  Signaling  │◄──────────────────►│  GFN Server │
-└─────────────┘                    └─────────────┘
-       │                                  │
-       ▼                                  │
-┌─────────────┐     UDP/DTLS       ┌─────────────┐
-│  WebRTC     │◄──────────────────►│  Media      │
-│  Peer       │                    │  Server     │
-└─────────────┘                    └─────────────┘
-       │
-       ├── Video Track (H.264/H.265/AV1)
-       ├── Audio Track (Opus)
-       └── Data Channels (Input, Cursor, Control)
-```
-
-**Key Components:**
-- `signaling.rs` - WebSocket connection to `/nvst/sign_in`
-- `peer.rs` - WebRTC peer connection management
-- `sdp.rs` - SDP manipulation and nvstSdp generation
-- `datachannel.rs` - Input encoding and output decoding
-
-### Media Pipeline (`media/`)
-
-Video and audio processing:
-
-```
-RTP Packets
-    │
-    ▼
-┌─────────────────┐
-│ RTP Depacketizer │  (H.264/H.265/AV1 NAL assembly)
-└─────────────────┘
-    │
-    ▼
-┌─────────────────┐
-│ Video Decoder   │  (FFmpeg, DXVA, VideoToolbox, VAAPI)
-└─────────────────┘
-    │
-    ▼
-┌─────────────────┐
-│ SharedFrame     │  (Zero-copy frame holder)
-└─────────────────┘
-    │
-    ▼
-┌─────────────────┐
-│ GPU Renderer    │  (wgpu + YUV->RGB shader)
-└─────────────────┘
+contextBridge.exposeInMainWorld('electronAPI', {
+  // Auth
+  auth: {
+    login: (provider) => ipcRenderer.invoke('auth:login', provider),
+    logout: () => ipcRenderer.invoke('auth:logout'),
+    getTokens: () => ipcRenderer.invoke('auth:getTokens'),
+    onTokensUpdated: (callback) => 
+      ipcRenderer.on('auth:tokensUpdated', callback),
+  },
+  
+  // Session
+  session: {
+    create: (gameId) => ipcRenderer.invoke('session:create', gameId),
+    poll: (sessionId) => ipcRenderer.invoke('session:poll', sessionId),
+    terminate: (sessionId) => ipcRenderer.invoke('session:terminate', sessionId),
+    onStatusUpdate: (callback) => 
+      ipcRenderer.on('session:status', callback),
+  },
+  
+  // Signaling (WebSocket proxy)
+  signaling: {
+    connect: (sessionId) => ipcRenderer.send('signaling:connect', sessionId),
+    send: (message) => ipcRenderer.send('signaling:send', message),
+    onMessage: (callback) => 
+      ipcRenderer.on('signaling:message', callback),
+    disconnect: () => ipcRenderer.send('signaling:disconnect'),
+  },
+  
+  // Settings
+  settings: {
+    get: (key) => ipcRenderer.invoke('settings:get', key),
+    set: (key, value) => ipcRenderer.invoke('settings:set', key, value),
+  },
+  
+  // Stream control
+  stream: {
+    onVideoFrame: (callback) => 
+      ipcRenderer.on('stream:videoFrame', callback),
+    onAudioData: (callback) => 
+      ipcRenderer.on('stream:audioData', callback),
+    sendInput: (inputData) => ipcRenderer.send('stream:input', inputData),
+  },
+});
 ```
 
-**Decoder Backends:**
-- **FFmpeg** - Universal software/hardware decoding
-- **Native DXVA** - Windows hardware decoding (D3D11VA)
-- **VideoToolbox** - macOS hardware decoding
-- **VAAPI** - Linux AMD/Intel hardware decoding
-- **GStreamer** - Linux V4L2 (Raspberry Pi) and Windows D3D11
+**Security Model:**
+- Runs with `contextIsolation: true` and `nodeIntegration: false`
+- Only explicitly exposed APIs are available to renderer
+- Prevents arbitrary code execution in renderer
+- Validates all IPC messages before processing
 
-### Input System (`input/`)
+### Renderer Process (React + WebRTC)
 
-Cross-platform input with low-latency optimizations:
+The renderer process is a Chromium environment where the React UI runs. It has no direct Node.js or system access—all operations go through the preload bridge.
 
-```rust
-pub struct InputHandler {
-    event_tx: Mutex<Option<mpsc::Sender<InputEvent>>>,
-    mouse_coalescer: MouseCoalescer,   // 2ms batching
-    local_cursor: LocalCursor,          // Instant visual feedback
-    pressed_keys: Mutex<HashSet<u16>>,  // Key state tracking
+**Application Structure:**
+
+```
+src/renderer/
+├── components/
+│   ├── Auth/
+│   │   ├── LoginScreen.tsx       # OAuth provider selection
+│   │   └── AlliancePartners.tsx  # Regional providers
+│   ├── Library/
+│   │   ├── GameGrid.tsx          # Browse games
+│   │   ├── SearchBar.tsx         # Filter/search
+│   │   └── GameCard.tsx          # Individual game
+│   ├── Session/
+│   │   ├── QueueStatus.tsx       # Queue position
+│   │   ├── ConnectionProgress.tsx # Setup steps
+│   │   └── ErrorDisplay.tsx      # Session errors
+│   └── Stream/
+│       ├── VideoPlayer.tsx       # WebRTC video element
+│       ├── InputOverlay.tsx      # Mouse/keyboard capture
+│       ├── StatsPanel.tsx        # Performance overlay
+│       └── Sidebar.tsx           # In-stream controls
+├── hooks/
+│   ├── useAuth.ts                # Authentication state
+│   ├── useSession.ts             # Session lifecycle
+│   ├── useWebRTC.ts              # Peer connection management
+│   └── useInput.ts               # Input capture & encoding
+├── webrtc/
+│   ├── peerConnection.ts         # RTCPeerConnection wrapper
+│   ├── signaling.ts              # Signaling state machine
+│   ├── tracks.ts                 # Video/audio track handling
+│   └── datachannel.ts            # Input/data channels
+└── input/
+    ├── mouseCapture.ts           # Pointer lock & movement
+    ├── keyboardCapture.ts        # Key event interception
+    ├── gamepadCapture.ts         # Gamepad API wrapper
+    └── inputEncoder.ts           # Binary format encoding
+```
+
+**WebRTC Stack:**
+
+```
+┌─────────────────────────────────────────┐
+│         Renderer Process               │
+│  ┌─────────────────────────────────┐    │
+│  │      React Application          │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │    Video Player         │    │    │
+│  │  │  ┌─────────────────┐    │    │    │
+│  │  │  │  <video> Element │    │    │    │
+│  │  │  │  (WebRTC stream) │    │    │    │
+│  │  │  └─────────────────┘    │    │    │
+│  │  └─────────────────────────┘    │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │    Input Overlay        │    │    │
+│  │  │  (Pointer Lock Capture) │    │    │
+│  │  └─────────────────────────┘    │    │
+│  └─────────────────────────────────┘    │
+│                                         │
+│  ┌─────────────────────────────────┐    │
+│  │      WebRTC Stack               │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │   RTCPeerConnection     │    │    │
+│  │  │  • ICE gathering        │    │    │
+│  │  │  • DTLS transport       │    │    │
+│  │  │  • SDP negotiation      │    │    │
+│  │  └─────────────────────────┘    │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │   Media Streams         │    │    │
+│  │  │  • Video (H.264/AV1)    │    │    │
+│  │  │  • Audio (Opus)         │    │    │
+│  │  └─────────────────────────┘    │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │   Data Channels         │    │    │
+│  │  │  • input_channel_v1     │    │    │
+│  │  │  • cursor_channel       │    │    │
+│  │  │  • control_channel      │    │    │
+│  │  └─────────────────────────┘    │    │
+│  └─────────────────────────────────┘    │
+│                                         │
+│  ┌─────────────────────────────────┐    │
+│  │      Input System               │    │
+│  │  • Pointer lock API             │    │
+│  │  • Raw mouse movement           │    │
+│  │  • Keyboard interception        │    │
+│  │  • Gamepad API                  │    │
+│  └─────────────────────────────────┘    │
+└─────────────────────────────────────────┘
+```
+
+## Data Flows
+
+### 1. Authentication Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Renderer   │     │    Preload   │     │     Main     │     │  NVIDIA OAuth│
+│   (React)    │◄───►│   (Bridge)   │◄───►│   (Node.js)  │◄───►│   Server     │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────────────┘
+       │                    │                    │
+       │ 1. Click login     │                    │
+       │───────────────────►│                    │
+       │                    │ 2. auth:login      │
+       │                    │───────────────────►│
+       │                    │                    │ 3. Generate PKCE
+       │                    │                    │    (verifier + challenge)
+       │                    │                    │
+       │                    │                    │ 4. Open browser
+       │                    │                    │    (system.openExternal)
+       │                    │                    │──────► Browser opens
+       │                    │                    │        to login.nvidia.com
+       │                    │                    │
+       │                    │                    │ 5. User authenticates
+       │                    │                    │◄─────── Authorization code
+       │                    │                    │        via custom protocol
+       │                    │                    │        (opennow://callback)
+       │                    │                    │
+       │                    │                    │ 6. Exchange code
+       │                    │                    │    POST /token
+       │                    │                    │◄─────── Access + refresh
+       │                    │                    │        tokens
+       │                    │                    │
+       │                    │                    │ 7. Encrypt & store
+       │                    │                    │    in OS keychain
+       │                    │                    │
+       │                    │◄───────────────────│ 8. auth:tokensUpdated
+       │                    │   (IPC event)      │
+       │◄───────────────────│                    │
+       │ 9. Update UI       │                    │
+       │    (logged in)     │                    │
+```
+
+**Key Steps:**
+1. User clicks login button in React UI
+2. Renderer invokes `auth:login` through preload bridge
+3. Main generates PKCE verifier and challenge
+4. Main opens system browser to NVIDIA OAuth endpoint
+5. User completes authentication in browser
+6. Authorization code received via custom protocol handler
+7. Main exchanges code for tokens via HTTP POST
+8. Tokens encrypted and stored in OS keychain
+9. Tokens sent to renderer via IPC event
+10. React UI updates to show logged-in state
+
+### 2. Game Launch Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Renderer   │     │    Preload   │     │     Main     │     │    GFN API   │
+│   (React)    │◄───►│   (Bridge)   │◄───►│   (Node.js)  │◄───►│   Servers    │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────────────┘
+       │                    │                    │
+       │ 1. Select game     │                    │
+       │    & click play    │                    │
+       │───────────────────►│                    │
+       │                    │ 2. session:create  │
+       │                    │───────────────────►│
+       │                    │                    │ 3. POST /v2/session
+       │                    │                    │    (CloudMatch API)
+       │                    │                    │──────► Session created
+       │                    │                    │◄─────── Session ID + URL
+       │                    │                    │
+       │                    │                    │ 4. Start polling loop
+       │                    │                    │    (1-3 second intervals)
+       │                    │                    │
+       │                    │                    │ 5. Connect WebSocket
+       │                    │                    │    to /nvst/sign_in
+       │                    │                    │──────► Signaling ready
+       │                    │                    │
+       │                    │◄───────────────────│ 6. session:status event
+       │                    │   (polling updates)│    (queue position, etc.)
+       │◄───────────────────│                    │
+       │ 7. Show queue/     │                    │
+       │    progress UI     │                    │
+       │                    │                    │
+       │                    │                    │ 8. Receive SDP offer
+       │                    │                    │◄─────── via WebSocket
+       │                    │                    │
+       │                    │◄───────────────────│ 9. signaling:message event
+       │                    │   (SDP offer)      │
+       │◄───────────────────│                    │
+       │ 10. Create peer    │                    │
+       │     connection     │                    │
+       │     & set remote   │                    │
+       │     description    │                    │
+       │───────────────────►│                    │
+       │                    │ 11. Create answer  │
+       │                    │   + nvstSdp        │
+       │                    │───────────────────►│
+       │                    │                    │ 12. Send via WebSocket
+       │                    │                    │──────► Signaling complete
+       │                    │                    │
+       │                    │                    │ 13. ICE candidates
+       │                    │◄───────────────────│     (trickle ICE)
+       │                    │   (ICE exchange)   │
+       │◄───────────────────│                    │
+       │ 14. ICE gathering  │                    │
+       │     & connection   │                    │
+       │                    │                    │
+       │                    │                    │ 15. DTLS handshake
+       │                    │                    │◄──────► Complete
+       │                    │                    │
+       │                    │                    │ 16. Data channel ready
+       │                    │◄───────────────────│     (input_channel_v1)
+       │◄───────────────────│                    │
+       │ 17. Stream starts  │                    │
+       │     Video received │                    │
+```
+
+**Key Steps:**
+1. User selects game from library and clicks play
+2. Renderer invokes `session:create` through preload
+3. Main makes HTTP POST to CloudMatch API
+4. Main starts polling loop for session status
+5. Main establishes WebSocket signaling connection
+6. Polling updates sent to renderer for UI display
+7. Once ready, GFN server sends SDP offer via WebSocket
+8. Renderer receives SDP offer via IPC
+9. Renderer creates RTCPeerConnection and sets remote description
+10. Renderer generates SDP answer with nvstSdp extension
+11. Answer sent back to main via IPC
+12. Main sends answer via WebSocket signaling
+13. ICE candidates exchanged between peers
+14. DTLS handshake completes for secure transport
+15. Data channel established for input transmission
+16. Video/audio RTP packets begin arriving
+17. React video element displays decoded stream
+
+### 3. Input Transmission Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Renderer   │     │    Preload   │     │     Main     │     │    GFN       │
+│   (React)    │◄───►│   (Bridge)   │◄───►│   (Node.js)  │◄───►│    Server    │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────────────┘
+       │                    │                    │
+       │ 1. User moves      │                    │
+       │    mouse/clicks    │                    │
+       │                    │                    │
+  ┌────┴────────────────────┴────────────────────┴────┐
+  │         Input Capture (Renderer)                  │
+  │  • Pointer Lock API locks cursor                  │
+  │  • Raw mouse deltas via mousemove event           │
+  │  • Keyboard via keydown/keyup                     │
+  │  • Gamepad via requestAnimationFrame polling      │
+  └────┬────────────────────┬────────────────────┬────┘
+       │                    │                    │
+       │ 2. Input events    │                    │
+       │    captured by     │                    │
+       │    input hooks     │                    │
+       │                    │                    │
+  ┌────┴────────────────────┴────────────────────┴────┐
+  │         Input Processing (Renderer)               │
+  │  • Mouse deltas coalesced (2ms batches)           │
+  │  • Relative movement calculation                  │
+  │  • Key state tracking                             │
+  │  • Gamepad state snapshot                         │
+  └────┬────────────────────┬────────────────────┬────┘
+       │                    │                    │
+       │ 3. Encode to       │                    │
+       │    binary format   │                    │
+       │                    │                    │
+       │ 4. Send via        │                    │
+       │    data channel    │                    │
+       │    (RTCPeerConnection)                  │
+       │───────────────────►│                    │
+       │    (direct WebRTC, │                    │
+       │     not IPC)       │                    │
+       │                    │                    │
+       │                    │                    │ 5. UDP/DTLS transport
+       │                    │                    │──────► Server receives
+       │                    │                    │        input packets
+```
+
+**Key Characteristics:**
+1. **Pointer Lock API**: Cursor locked to game window, raw deltas captured
+2. **No IPC for input**: Input goes directly via WebRTC data channel (lowest latency)
+3. **Mouse coalescing**: Multiple movements within 2ms window combined
+4. **Channel types**:
+   - Mouse: `partially_reliable` channel (8ms packet lifetime, drops if delayed)
+   - Keyboard/Gamepad: `input_channel_v1` reliable ordered channel
+5. **Binary encoding**: Compact binary format for minimal overhead
+6. **Local feedback**: Cursor rendered locally for instant visual response
+
+```typescript
+// Input encoding (Renderer process)
+interface InputEncoder {
+  // Mouse input (unreliable channel - low latency priority)
+  encodeMouseMove(dx: number, dy: number): Uint8Array;
+  encodeMouseButton(button: number, pressed: boolean): Uint8Array;
+  encodeMouseWheel(deltaX: number, deltaY: number): Uint8Array;
+  
+  // Keyboard input (reliable channel)
+  encodeKeyDown(keyCode: number, modifiers: number): Uint8Array;
+  encodeKeyUp(keyCode: number): Uint8Array;
+  
+  // Gamepad input (reliable channel)
+  encodeGamepadState(
+    axes: number[],
+    buttons: number[],
+    timestamp: number
+  ): Uint8Array;
+}
+
+// Send via RTCDataChannel
+const inputChannel = peerConnection.createDataChannel('input_channel_v1', {
+  ordered: true,
+  maxRetransmits: 0, // For mouse: don't retransmit if delayed
+});
+
+inputChannel.send(encodedInput);
+```
+
+### 4. Stream Termination Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Renderer   │     │    Preload   │     │     Main     │     │    GFN       │
+│   (React)    │◄───►│   (Bridge)   │◄───►│   (Node.js)  │◄───►│    Server    │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────────────┘
+       │                    │                    │
+       │ 1. User clicks     │                    │
+       │    "End Session"   │                    │
+       │    or connection   │                    │
+       │    lost            │                    │
+       │───────────────────►│                    │
+       │                    │ 2. session:terminate│
+       │                    │    or stream:end   │
+       │                    │───────────────────►│
+       │                    │                    │
+  ┌────┴────────────────────┴────────────────────┴────┐
+  │         Cleanup Sequence                          │
+  └────┬────────────────────┬────────────────────┬────┘
+       │                    │                    │
+       │                    │                    │ 3. Close WebSocket
+       │                    │                    │    signaling connection
+       │                    │                    │──────► Disconnect
+       │                    │                    │
+       │                    │                    │ 4. Close RTCPeerConnection
+       │                    │                    │    (if not already closed)
+       │                    │                    │
+       │                    │                    │ 5. Send DELETE /v2/session
+       │                    │                    │──────► Session terminated
+       │                    │                    │        on server
+       │                    │                    │
+       │                    │                    │ 6. Stop polling loop
+       │                    │                    │
+       │                    │                    │ 7. Release session state
+       │                    │                    │
+       │                    │◄───────────────────│ 8. session:terminated event
+       │◄───────────────────│                    │
+       │ 9. Return to       │                    │
+       │    library view    │                    │
+       │    (React Router)  │                    │
+       │                    │                    │
+       │ 10. Cleanup        │                    │
+       │     renderer state │                    │
+       │     (WebRTC refs,  │                    │
+       │      input hooks)  │                    │
+```
+
+**Termination Scenarios:**
+
+1. **User-initiated**: User clicks "End Session" button
+2. **Session timeout**: Server disconnects due to inactivity
+3. **Network error**: Connection lost, ICE failure
+4. **Error condition**: Session error from GFN API
+
+**Cleanup Actions:**
+- Close WebSocket signaling connection
+- Close RTCPeerConnection and all tracks
+- Release pointer lock if active
+- Remove input event listeners
+- Clear video element source
+- Release decoder resources
+- Return to library view
+
+## Security Model
+
+### Process Isolation
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Security Boundaries                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────────┐                                       │
+│  │  Main Process    │  🔒 Trusted (Node.js, system access)   │
+│  │                  │                                       │
+│  │  • Can access OS │                                       │
+│  │  • Can make HTTP │                                       │
+│  │  • Stores secrets│                                       │
+│  └──────────────────┘                                       │
+│           ▲                                                 │
+│           │ IPC (validated)                                 │
+│           ▼                                                 │
+│  ┌──────────────────┐                                       │
+│  │  Preload Script  │  🔒 Bridge (isolated context)          │
+│  │                  │                                       │
+│  │  • Exposes APIs  │                                       │
+│  │  • Validates data│                                       │
+│  │  • No Node access│                                       │
+│  └──────────────────┘                                       │
+│           ▲                                                 │
+│           │ PostMessage                                     │
+│           ▼                                                 │
+│  ┌──────────────────┐                                       │
+│  │  Renderer        │  🔒 Untrusted (web content)            │
+│  │                  │                                       │
+│  │  • No Node access│                                       │
+│  │  • No file access│                                       │
+│  │  • Sandboxed     │                                       │
+│  └──────────────────┘                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Content Security Policy
+
+```javascript
+// Main process CSP configuration
+const mainWindow = new BrowserWindow({
+  webPreferences: {
+    contextIsolation: true,
+    nodeIntegration: false,
+    sandbox: true,
+    preload: path.join(__dirname, 'preload.js'),
+  },
+});
+
+// CSP headers prevent XSS
+mainWindow.webContents.session.webRequest.onHeadersReceived(
+  (details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self';" +
+          "script-src 'self' 'unsafe-inline';" +
+          "style-src 'self' 'unsafe-inline';" +
+          "connect-src 'self' https://*.nvidiagrid.net https://*.geforce.com;" +
+          "img-src 'self' https://*.geforce.com data:;"
+        ]
+      }
+    });
+  }
+);
+```
+
+### IPC Validation
+
+All IPC messages validated at preload boundary:
+
+```typescript
+// Preload script validation
+const validChannels = [
+  'auth:login', 'auth:logout', 'auth:getTokens', 'auth:tokensUpdated',
+  'session:create', 'session:poll', 'session:terminate', 'session:status',
+  'signaling:connect', 'signaling:send', 'signaling:message', 'signaling:disconnect',
+  'settings:get', 'settings:set',
+  'stream:input',
+];
+
+// Only allow whitelisted channels
+ipcRenderer.on('signaling:message', (event, ...args) => {
+  // Validate message structure
+  const message = args[0];
+  if (!isValidSignalingMessage(message)) {
+    console.error('Invalid signaling message received');
+    return;
+  }
+  // Forward to renderer
+});
+
+function isValidSignalingMessage(msg: any): boolean {
+  return msg && 
+         typeof msg.type === 'string' &&
+         ['offer', 'answer', 'candidate', 'error'].includes(msg.type);
 }
 ```
 
-**Features:**
-- Mouse coalescing (2ms interval, 500Hz effective rate)
-- Local cursor rendering (instant feedback)
-- Raw input on Windows/macOS (bypasses OS acceleration)
-- Gamepad support via gilrs
-- Racing wheel support via Windows.Gaming.Input
-- Force feedback / rumble handling
-
-### GUI Layer (`gui/`)
-
-Built with egui for immediate-mode UI:
-
-- **Login Screen** - Provider selection, OAuth button
-- **Games Screen** - Library browser with search
-- **Session Screen** - Queue status, connection progress
-- **Streaming Overlay** - Stats panel, sidebar controls
-
-**Renderer:**
-- wgpu backend (DX12/Metal/Vulkan)
-- YUV to RGB conversion via WGSL shaders
-- Supports exclusive fullscreen (Windows)
-- ProMotion 120Hz support (macOS)
-
-## Data Flow
-
-### Session Startup
+## Build Output
 
 ```
-1. User selects game
-2. POST /v2/session (CloudMatch API)
-3. Poll session status until ready
-4. Connect WebSocket signaling
-5. Receive SDP offer
-6. Create WebRTC peer connection
-7. Generate SDP answer with nvstSdp
-8. ICE candidate exchange
-9. DTLS handshake
-10. Data channel handshake (input ready)
-11. Begin receiving video/audio
+dist/
+├── main/
+│   └── index.js              # Bundled main process
+├── preload/
+│   └── index.js              # Bundled preload script
+└── renderer/
+    ├── index.html            # Entry HTML
+    ├── assets/
+    │   ├── index-*.js        # React bundle
+    │   ├── index-*.css       # Styles
+    │   └── *.woff2           # Fonts
+    └── images/               # Static assets
 ```
 
-### Frame Processing
+## Technology Stack
 
-```
-1. RTP packet received via WebRTC
-2. Depacketize to NAL units (H.264/H.265) or OBUs (AV1)
-3. Accumulate until marker bit (complete frame)
-4. Submit to async decoder thread
-5. Decoder writes to SharedFrame
-6. Renderer reads SharedFrame
-7. Upload YUV textures to GPU
-8. Run YUV->RGB shader
-9. Composite egui overlay
-10. Present to display
-```
+| Component | Technology |
+|-----------|------------|
+| **Main Process** | Node.js 20, Electron 28 |
+| **Renderer** | React 18, TypeScript 5 |
+| **State Management** | Zustand |
+| **Routing** | React Router 6 |
+| **Styling** | Tailwind CSS |
+| **WebRTC** | Native WebRTC API |
+| **Bundling** | Vite |
+| **Testing** | Vitest, Playwright |
 
-### Input Processing
+---
 
-```
-1. Raw input event (Windows WM_INPUT / macOS CGEvent)
-2. Update local cursor position (immediate)
-3. Accumulate in MouseCoalescer (2ms batches)
-4. Flush to InputEvent channel
-5. Input task encodes to binary format
-6. Send via data channel:
-   - Mouse → partially_reliable (8ms lifetime)
-   - Keyboard → input_channel_v1 (reliable)
-   - Gamepad → input_channel_v1 (reliable)
-```
-
-## Threading Model
-
-```
-Main Thread (winit event loop)
-├── GUI rendering (egui)
-├── Window events
-└── State updates
-
-Tokio Runtime (multi-threaded)
-├── Signaling WebSocket
-├── WebRTC peer events
-├── API requests
-└── Input event processing
-
-Decoder Thread (dedicated)
-├── Video decode (FFmpeg/Native)
-└── SharedFrame updates
-
-Audio Thread (dedicated)
-├── Opus decode
-└── cpal playback
-```
+*Last updated: Architecture documentation for Electron migration*

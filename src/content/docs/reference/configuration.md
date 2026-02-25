@@ -3,61 +3,44 @@ title: Configuration
 description: Settings and configuration options in OpenNow Streamer
 ---
 
-OpenNow Streamer stores user settings in a JSON file. This document covers all available configuration options.
+OpenNow Streamer stores user settings using electron-store. This document covers all available configuration options.
 
 ## Settings File Location
 
 | Platform | Path |
 |----------|------|
-| Windows | `%APPDATA%\opennow-streamer\settings.json` |
-| macOS | `~/Library/Application Support/opennow-streamer/settings.json` |
-| Linux | `~/.config/opennow-streamer/settings.json` |
+| Windows | `%APPDATA%\opennow-streamer\config.json` |
+| macOS | `~/Library/Application Support/opennow-streamer/config.json` |
+| Linux | `~/.config/opennow-streamer/config.json` |
 
 ## Settings Structure
 
-```rust
-pub struct Settings {
-    // Video
-    pub quality: StreamQuality,
-    pub resolution: String,
-    pub fps: u32,
-    pub codec: VideoCodec,
-    pub max_bitrate_mbps: u32,
-    pub decoder_backend: VideoDecoderBackend,
-    pub color_quality: ColorQuality,
-    pub hdr_enabled: bool,
+```typescript
+interface Settings {
+  // Video
+  quality: StreamQuality;
+  resolution: string;
+  fps: number;
+  codec: VideoCodec;
+  maxBitrateMbps: number;
+  colorQuality: ColorQuality;
+  hdrEnabled: boolean;
 
-    // Audio
-    pub audio_codec: AudioCodec,
-    pub surround: bool,
+  // Audio
+  audioCodec: AudioCodec;
+  audioVolume: number;
 
-    // Performance
-    pub vsync: bool,
-    pub low_latency_mode: bool,
-    pub nvidia_reflex: bool,
+  // Shortcuts
+  shortcuts: ShortcutConfig;
 
-    // Input
-    pub mouse_sensitivity: f32,
-    pub raw_input: bool,
-    pub clipboard_paste_enabled: bool,
+  // Gameplay
+  mouseSensitivity: number;
+  antiAfkEnabled: boolean;
 
-    // Display
-    pub fullscreen: bool,
-    pub borderless: bool,
-    pub window_width: u32,
-    pub window_height: u32,
-    pub show_stats: bool,
-    pub stats_position: StatsPosition,
-
-    // Game
-    pub game_language: GameLanguage,
-
-    // Network
-    pub preferred_region: Option<String>,
-    pub selected_server: Option<String>,
-    pub auto_server_selection: bool,
-    pub proxy: Option<String>,
-    pub disable_telemetry: bool,
+  // Display
+  fullscreen: boolean;
+  showStats: boolean;
+  statsPosition: StatsPosition;
 }
 ```
 
@@ -65,19 +48,17 @@ pub struct Settings {
 
 ### Stream Quality Presets
 
-```rust
-pub enum StreamQuality {
-    Auto,         // 1080p 60fps (auto-detect)
-    Low,          // 720p 30fps
-    Medium,       // 1080p 60fps
-    High,         // 1440p 60fps
-    Ultra,        // 4K 60fps
-    High120,      // 1080p 120fps
-    Ultra120,     // 1440p 120fps
-    Competitive,  // 1080p 240fps
-    Extreme,      // 1080p 360fps
-    Custom,       // Use manual resolution/fps
-}
+```typescript
+type StreamQuality = 
+  | 'auto'        // Auto-detect best quality
+  | 'low'         // 720p 30fps
+  | 'medium'      // 1080p 60fps
+  | 'high'        // 1440p 60fps
+  | 'ultra'       // 4K 60fps
+  | 'high120'     // 1080p 120fps
+  | 'ultra120'    // 1440p 120fps
+  | 'competitive' // 1080p 240fps
+  | 'custom';     // Use manual resolution/fps
 ```
 
 ### Resolution Options
@@ -94,18 +75,16 @@ pub enum StreamQuality {
 
 ### FPS Options
 
-```rust
-pub const FPS_OPTIONS: &[u32] = &[30, 60, 90, 120, 144, 165, 240, 360];
+Available FPS values: `30`, `60`, `120`, `144`, `240`
+
+```typescript
+const FPS_OPTIONS = [30, 60, 120, 144, 240];
 ```
 
 ### Video Codec
 
-```rust
-pub enum VideoCodec {
-    H264,  // Wide compatibility
-    H265,  // Better compression (default)
-    AV1,   // Best compression, modern GPUs
-}
+```typescript
+type VideoCodec = 'h264' | 'h265' | 'av1';
 ```
 
 | Codec | Compression | Compatibility | HDR |
@@ -114,251 +93,215 @@ pub enum VideoCodec {
 | H.265 | Better | Most GPUs | Yes |
 | AV1 | Best | RTX 40+, RX 7000+ | Yes |
 
-### Decoder Backend
-
-```rust
-pub enum VideoDecoderBackend {
-    Auto,          // Auto-select best
-    Cuvid,         // NVIDIA NVDEC
-    Qsv,           // Intel QuickSync
-    Vaapi,         // Linux VA-API
-    Dxva,          // Windows D3D11 (GStreamer)
-    NativeDxva,    // Windows D3D11 Native (H.265 only)
-    VideoToolbox,  // macOS VideoToolbox
-    VulkanVideo,   // GStreamer hardware
-    Software,      // CPU decoding
-}
-```
-
-**Recommended per platform:**
-- **Windows**: `Dxva` (D3D11 GStreamer) or `Auto`
-- **macOS**: `VideoToolbox` or `Auto`
-- **Linux**: `VulkanVideo` (GStreamer) or `Vaapi`
-- **Raspberry Pi**: Auto-selects V4L2
-
 ### Color Quality
 
-```rust
-pub enum ColorQuality {
-    Bit8Yuv420,   // 8-bit, YUV 4:2:0 - Most compatible
-    Bit8Yuv444,   // 8-bit, YUV 4:4:4 - Better color (needs H.265)
-    Bit10Yuv420,  // 10-bit, YUV 4:2:0 - HDR ready (default)
-    Bit10Yuv444,  // 10-bit, YUV 4:4:4 - Best quality (needs H.265)
-}
+```typescript
+type ColorQuality = 
+  | '8bit-420'   // 8-bit, YUV 4:2:0 - Most compatible
+  | '8bit-444'   // 8-bit, YUV 4:4:4 - Better color (needs H.265)
+  | '10bit-420'  // 10-bit, YUV 4:2:0 - HDR ready (default)
+  | '10bit-444'; // 10-bit, YUV 4:4:4 - Best quality (needs H.265)
 ```
 
 | Setting | Bit Depth | Chroma | Bandwidth | Requires |
 |---------|-----------|--------|-----------|----------|
-| `Bit8Yuv420` | 8 | 4:2:0 | Low | Any codec |
-| `Bit8Yuv444` | 8 | 4:4:4 | Medium | H.265 |
-| `Bit10Yuv420` | 10 | 4:2:0 | Medium | H.265 |
-| `Bit10Yuv444` | 10 | 4:4:4 | High | H.265 |
+| `8bit-420` | 8 | 4:2:0 | Low | Any codec |
+| `8bit-444` | 8 | 4:4:4 | Medium | H.265 |
+| `10bit-420` | 10 | 4:2:0 | Medium | H.265 |
+| `10bit-444` | 10 | 4:4:4 | High | H.265 |
 
 ### Bitrate
 
-`max_bitrate_mbps` controls the maximum stream bitrate:
+`maxBitrateMbps` controls the maximum stream bitrate:
 
 | Value | Meaning |
 |-------|---------|
 | 50 | 50 Mbps (good for most connections) |
 | 100 | 100 Mbps (fast connections) |
-| 150 | 150 Mbps (default, very fast connections) |
-| 200 | Unlimited (server decides) |
+| 150 | 150 Mbps (very fast connections) |
+| 200 | 200 Mbps maximum |
 
 ## Audio Settings
 
 ### Audio Codec
 
-```rust
-pub enum AudioCodec {
-    Opus,        // Standard Opus (default)
-    OpusStereo,  // Opus with explicit stereo
-}
+```typescript
+type AudioCodec = 'opus' | 'opus-stereo';
 ```
+
+| Codec | Description |
+|-------|-------------|
+| `opus` | Standard Opus encoding |
+| `opus-stereo` | Opus with explicit stereo |
 
 Audio is always 48kHz stereo.
 
-### Surround Sound
+### Audio Volume
 
-`surround: bool` - Enable 5.1/7.1 surround output (if supported by game).
+`audioVolume` - Master volume level (0-100, default: 100)
 
-## Performance Settings
+## Shortcuts Configuration
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `vsync` | `false` | Enable VSync (may add latency) |
-| `low_latency_mode` | `true` | Reduce buffer sizes |
-| `nvidia_reflex` | `true` | Enable NVIDIA Reflex (auto for 120+ FPS) |
+Configure keyboard shortcuts for quick actions:
 
-## Input Settings
+```typescript
+interface ShortcutConfig {
+  toggleFullscreen: string;  // Default: F11
+  toggleStats: string;       // Default: F12
+  screenshot: string;        // Default: F9
+  increaseVolume: string;    // Default: Ctrl+Up
+  decreaseVolume: string;    // Default: Ctrl+Down
+  muteAudio: string;         // Default: Ctrl+M
+}
+```
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `mouse_sensitivity` | `1.0` | Mouse sensitivity multiplier |
-| `raw_input` | `true` | Use raw input (bypasses OS acceleration) |
-| `clipboard_paste_enabled` | `true` | Allow Ctrl+V clipboard paste |
+Shortcuts use standard Electron accelerator format:
+- Keys: `A-Z`, `0-9`, `F1-F24`, etc.
+- Modifiers: `Ctrl`, `Alt`, `Shift`, `Cmd` (macOS)
+- Combinations: `Ctrl+Shift+S`, `Cmd+Alt+F`, etc.
+
+## Gameplay Settings
+
+### Mouse Sensitivity
+
+`mouseSensitivity` - Mouse sensitivity multiplier (default: 1.0)
+
+Range: 0.1 to 5.0
+
+### Anti-AFK
+
+`antiAfkEnabled` - Automatically prevent AFK kick (default: false)
+
+When enabled, the application will simulate minimal activity to prevent being kicked for inactivity.
 
 ## Display Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `fullscreen` | `false` | Start in fullscreen |
-| `borderless` | `true` | Use borderless fullscreen |
-| `window_width` | `0` | Window width (0 = default) |
-| `window_height` | `0` | Window height (0 = default) |
-| `show_stats` | `true` | Show statistics panel |
-| `stats_position` | `BottomLeft` | Stats panel position |
+| `fullscreen` | `false` | Start in fullscreen mode |
+| `showStats` | `true` | Show performance statistics overlay |
+| `statsPosition` | `bottom-left` | Position of the stats panel |
 
 ### Stats Position
 
-```rust
-pub enum StatsPosition {
-    TopLeft,
-    TopRight,
-    BottomLeft,   // Default
-    BottomRight,
-}
+```typescript
+type StatsPosition = 
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'   // Default
+  | 'bottom-right';
 ```
-
-## Game Settings
-
-### Game Language
-
-Controls in-game language (menus, subtitles, audio):
-
-```rust
-pub enum GameLanguage {
-    EnglishUS,    // en_US (default)
-    EnglishGB,    // en_GB
-    German,       // de_DE
-    French,       // fr_FR
-    Spanish,      // es_ES
-    SpanishMX,    // es_MX
-    Italian,      // it_IT
-    Portuguese,   // pt_PT
-    PortugueseBR, // pt_BR
-    Russian,      // ru_RU
-    Polish,       // pl_PL
-    Turkish,      // tr_TR
-    Arabic,       // ar_SA
-    Japanese,     // ja_JP
-    Korean,       // ko_KR
-    ChineseSimplified,   // zh_CN
-    ChineseTraditional,  // zh_TW
-    Thai,         // th_TH
-    Vietnamese,   // vi_VN
-    Indonesian,   // id_ID
-    Czech,        // cs_CZ
-    Greek,        // el_GR
-    Hungarian,    // hu_HU
-    Romanian,     // ro_RO
-    Ukrainian,    // uk_UA
-    Dutch,        // nl_NL
-    Swedish,      // sv_SE
-    Danish,       // da_DK
-    Finnish,      // fi_FI
-    Norwegian,    // nb_NO
-}
-```
-
-## Network Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `preferred_region` | `None` | Preferred server region |
-| `selected_server` | `None` | Specific server zone ID |
-| `auto_server_selection` | `true` | Auto-select best ping server |
-| `proxy` | `None` | Proxy URL for connections |
-| `disable_telemetry` | `true` | Disable NVIDIA telemetry |
 
 ## Default Settings
 
-```rust
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            quality: StreamQuality::Auto,
-            resolution: "1920x1080".to_string(),
-            fps: 60,
-            codec: VideoCodec::H264,
-            max_bitrate_mbps: 150,
-            decoder_backend: VideoDecoderBackend::Auto,
-            color_quality: ColorQuality::Bit10Yuv420,
-            hdr_enabled: false,
-            audio_codec: AudioCodec::Opus,
-            surround: false,
-            vsync: false,
-            low_latency_mode: true,
-            nvidia_reflex: true,
-            mouse_sensitivity: 1.0,
-            raw_input: true,
-            clipboard_paste_enabled: true,
-            fullscreen: false,
-            borderless: true,
-            window_width: 0,
-            window_height: 0,
-            show_stats: true,
-            stats_position: StatsPosition::BottomLeft,
-            game_language: GameLanguage::EnglishUS,
-            preferred_region: None,
-            selected_server: None,
-            auto_server_selection: true,
-            proxy: None,
-            disable_telemetry: true,
-        }
-    }
-}
+```typescript
+const defaultSettings: Settings = {
+  // Video
+  quality: 'auto',
+  resolution: '1920x1080',
+  fps: 60,
+  codec: 'h265',
+  maxBitrateMbps: 150,
+  colorQuality: '10bit-420',
+  hdrEnabled: false,
+
+  // Audio
+  audioCodec: 'opus',
+  audioVolume: 100,
+
+  // Shortcuts
+  shortcuts: {
+    toggleFullscreen: 'F11',
+    toggleStats: 'F12',
+    screenshot: 'F9',
+    increaseVolume: 'Ctrl+Up',
+    decreaseVolume: 'Ctrl+Down',
+    muteAudio: 'Ctrl+M',
+  },
+
+  // Gameplay
+  mouseSensitivity: 1.0,
+  antiAfkEnabled: false,
+
+  // Display
+  fullscreen: false,
+  showStats: true,
+  statsPosition: 'bottom-left',
+};
 ```
 
-## Example settings.json
+## Example config.json
 
 ```json
 {
-  "quality": "custom",
-  "resolution": "2560x1440",
+  "quality": "high120",
+  "resolution": "1920x1080",
   "fps": 120,
   "codec": "h265",
-  "max_bitrate_mbps": 100,
-  "decoder_backend": "auto",
-  "color_quality": "bit_10_yuv_420",
-  "hdr_enabled": false,
-  "audio_codec": "opus",
-  "surround": false,
-  "vsync": false,
-  "low_latency_mode": true,
-  "nvidia_reflex": true,
-  "mouse_sensitivity": 1.0,
-  "raw_input": true,
-  "clipboard_paste_enabled": true,
+  "maxBitrateMbps": 100,
+  "colorQuality": "10bit-420",
+  "hdrEnabled": false,
+  "audioCodec": "opus",
+  "audioVolume": 85,
+  "shortcuts": {
+    "toggleFullscreen": "F11",
+    "toggleStats": "F12",
+    "screenshot": "F9",
+    "increaseVolume": "Ctrl+Up",
+    "decreaseVolume": "Ctrl+Down",
+    "muteAudio": "Ctrl+M"
+  },
+  "mouseSensitivity": 1.2,
+  "antiAfkEnabled": true,
   "fullscreen": false,
-  "borderless": true,
-  "window_width": 0,
-  "window_height": 0,
-  "show_stats": true,
-  "stats_position": "bottom-left",
-  "game_language": "english_us",
-  "preferred_region": null,
-  "selected_server": null,
-  "auto_server_selection": true,
-  "proxy": null,
-  "disable_telemetry": true
+  "showStats": true,
+  "statsPosition": "top-right"
 }
 ```
 
 ## Loading and Saving
 
-Settings are automatically loaded on startup and saved on changes:
+Settings are automatically managed by electron-store:
 
-```rust
-// Load settings (returns defaults if file doesn't exist)
-let settings = Settings::load()?;
+```typescript
+import { settings } from './main/settings';
 
-// Save settings
-settings.save()?;
+// Get a setting value
+const fps = settings.get('fps');
 
-// Get resolution as tuple
-let (width, height) = settings.resolution_tuple();
+// Set a setting value (auto-saves)
+settings.set('fps', 144);
 
-// Get bitrate in kbps
-let bitrate_kbps = settings.max_bitrate_kbps();
+// Reset to defaults
+settings.clear();
+
+// Get all settings
+const allSettings = settings.store;
+```
+
+## Programmatic API
+
+Access settings from the main process:
+
+```typescript
+import { ipcMain } from 'electron';
+import { settings } from './settings';
+
+// Handle settings requests from renderer
+ipcMain.handle('settings:get', (event, key) => {
+  return settings.get(key);
+});
+
+ipcMain.handle('settings:set', (event, key, value) => {
+  settings.set(key, value);
+  return true;
+});
+
+// Get typed resolution
+type Resolution = { width: number; height: number };
+
+function getResolution(): Resolution {
+  const [width, height] = settings.get('resolution').split('x').map(Number);
+  return { width, height };
+}
 ```

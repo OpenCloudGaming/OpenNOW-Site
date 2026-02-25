@@ -1,378 +1,417 @@
 ---
 title: Media Pipeline
-description: Video decoding, audio decoding, and rendering in OpenNow Streamer
+description: WebRTC media pipeline with hardware acceleration in OpenNow
 ---
 
-OpenNow Streamer implements a high-performance media pipeline for video and audio processing with support for hardware acceleration and HDR.
+OpenNow uses Chromium's built-in WebRTC media engine for video and audio processing, leveraging hardware acceleration through platform-specific APIs.
 
 ## Pipeline Overview
 
 ```
-RTP Packets (WebRTC)
-       │
-       ▼
+WebRTC Peer Connection
+        │
+        ▼
 ┌─────────────────────┐
-│  RTP Depacketizer   │  H.264/H.265 NAL assembly, AV1 OBU assembly
+│  RTP Depacketizer   │  Native WebRTC (libwebrtc)
+│  (libwebrtc)        │
 └─────────────────────┘
-       │
-       ▼
+        │
+        ▼
 ┌─────────────────────┐
-│  UnifiedVideoDecoder │  FFmpeg, GStreamer, or Native backends
+│  Video Decoder      │  Hardware-accelerated via:
+│  (libwebrtc)        │  • D3D11 (Windows)
+│                     │  • VA-API (Linux)
+│                     │  • VideoToolbox (macOS)
 └─────────────────────┘
-       │
-       ▼
+        │
+        ▼
 ┌─────────────────────┐
-│  SharedFrame        │  Zero-copy frame holder
+│  Video Frame        │  I420, NV12, P010 formats
+│  (VideoFrameBuffer) │  Shared GPU textures
 └─────────────────────┘
-       │
-       ▼
+        │
+        ▼
 ┌─────────────────────┐
-│  GPU Renderer       │  wgpu + YUV→RGB shader
+│  Chromium Renderer  │  GPU compositing
+│  (Electron)         │  YUV→RGB conversion
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Stats Collector    │  Frame timing, bitrate, latency
+│  (Custom overlay)   │  Rendered via HTML5 Canvas/WebGL
 └─────────────────────┘
 ```
 
-## RTP Depacketizer
+## WebRTC Media Engine
 
-The `RtpDepacketizer` handles codec-specific RTP depacketization:
+OpenNow relies on Chromium's native WebRTC implementation (`libwebrtc`) for all media processing:
 
-```rust
-pub enum DepacketizerCodec {
-    H264,   // H.264 NAL unit assembly
-    H265,   // H.265 NAL unit assembly
-    AV1,    // AV1 OBU assembly
-}
+### Supported Codecs
 
-pub struct RtpDepacketizer {
-    codec: DepacketizerCodec,
-    // NAL accumulator for H.264/H.265
-    // OBU accumulator for AV1
+**Video:**
+- **H.264** - Baseline, Main, High profiles (hardware accelerated)
+- **H.265/HEVC** - Main, Main 10 profiles (hardware accelerated where supported)
+- **AV1** - Main profile (software fallback, hardware on newer GPUs)
+
+**Audio:**
+- **Opus** - 48kHz, stereo (built into WebRTC, no external dependencies)
+
+### Platform Hardware Acceleration
+
+WebRTC automatically selects hardware decoders based on the platform:
+
+**Windows (D3D11):**
+```
+Decoder Selection:
+├── D3D11 Video Decoder (H.264, H.265)
+├── D3D11 AV1 Decoder (Windows 11+)
+└── Software fallback (libaom, openh264)
+```
+
+**macOS (VideoToolbox):**
+```
+Decoder Selection:
+├── VTDecompressionSession (H.264, H.265)
+├── AV1 decoder (macOS 14+)
+└── Software fallback
+```
+
+**Linux (VA-API):**
+```
+Decoder Selection:
+├── VA-API (H.264, H.265)
+├── VA-API AV1 (recent Mesa/drivers)
+└── Software fallback (FFmpeg built into Chromium)
+```
+
+## Video Frame Flow
+
+### Frame Lifecycle
+
+Decoded frames flow through the WebRTC pipeline as `VideoFrame` objects:
+
+```javascript
+// WebRTC VideoFrame structure (simplified)
+interface VideoFrame {
+  width: number;
+  height: number;
+  timestamp: number;
+  videoFrameBuffer: VideoFrameBuffer;
+  colorSpace?: {
+    primaries: 'BT709' | 'BT2020';
+    transfer: 'SRGB' | 'PQ' | 'HLG';
+    matrix: 'BT709' | 'BT2020_NCL';
+    range: 'LIMITED' | 'FULL';
+  };
 }
 ```
 
-### Processing Flow
+### Pixel Formats
 
-**H.264/H.265:**
-```rust
-// Process each RTP packet
-let nal_units = depacketizer.process(&payload);
+| Format | Bit Depth | Description | Platform |
+|--------|-----------|-------------|----------|
+| I420 | 8-bit | Planar YUV 4:2:0 | Universal |
+| NV12 | 8-bit | Semi-planar YUV 4:2:0 | Windows D3D11 |
+| P010 | 10-bit | HDR semi-planar | D3D11, VideoToolbox, VA-API |
 
-// Accumulate NAL units
-for nal in nal_units {
-    depacketizer.accumulate_nal(nal);
-}
-
-// On marker bit (end of frame), get complete Access Unit
-if marker {
-    let frame_data = depacketizer.take_nal_frame();
-    decoder.decode_async(&frame_data, receive_time)?;
-}
-```
-
-**AV1:**
-```rust
-// Process OBU data
-depacketizer.process_av1_raw(&payload);
-
-// On marker bit, flush pending OBU
-if marker {
-    depacketizer.flush_pending_obu();
-    let frame_data = depacketizer.take_accumulated_frame();
-    decoder.decode_async(&frame_data, receive_time)?;
-}
-```
-
-## Video Frame
-
-Decoded frames are stored in the `VideoFrame` struct:
-
-```rust
-pub struct VideoFrame {
-    pub frame_id: u64,           // Unique ID for deduplication
-    pub width: u32,
-    pub height: u32,
-    pub y_plane: Vec<u8>,        // Luma (full resolution)
-    pub u_plane: Vec<u8>,        // Cb chroma
-    pub v_plane: Vec<u8>,        // Cr chroma
-    pub y_stride: u32,
-    pub u_stride: u32,
-    pub v_stride: u32,
-    pub timestamp_us: u64,
-    pub format: PixelFormat,
-    pub color_range: ColorRange,
-    pub color_space: ColorSpace,
-    pub transfer_function: TransferFunction,
-    // Platform-specific GPU frame for zero-copy
-    pub gpu_frame: Option<Arc<PlatformGpuFrame>>,
-}
-```
-
-## Pixel Formats
-
-```rust
-pub enum PixelFormat {
-    YUV420P,  // Planar: Y, U, V separate planes
-    NV12,     // Semi-planar: Y + interleaved UV
-    P010,     // 10-bit HDR: 16-bit words, 10 bits used
-}
-```
-
-| Format | Bit Depth | Chroma | Use Case |
-|--------|-----------|--------|----------|
-| YUV420P | 8-bit | 4:2:0 planar | Software decode (FFmpeg) |
-| NV12 | 8-bit | 4:2:0 semi-planar | Hardware decode (DXVA, VideoToolbox) |
-| P010 | 10-bit | 4:2:0 semi-planar | HDR content |
-
-## Color Metadata
-
-### Color Range
-
-```rust
-pub enum ColorRange {
-    Limited,  // Y: 16-235, UV: 16-240 (TV/Video standard)
-    Full,     // Y: 0-255, UV: 0-255 (PC/JPEG standard)
-}
-```
-
-### Color Space
-
-```rust
-pub enum ColorSpace {
-    BT709,   // HDTV (default)
-    BT601,   // SDTV
-    BT2020,  // UHDTV/HDR
-}
-```
-
-### Transfer Function
-
-```rust
-pub enum TransferFunction {
-    SDR,  // Gamma ~2.4 (BT.709/BT.601)
-    PQ,   // HDR10 (SMPTE ST 2084)
-    HLG,  // Hybrid Log-Gamma (ARIB STD-B67)
-}
-```
-
-## Unified Video Decoder
-
-The `UnifiedVideoDecoder` provides a common interface for all decoder backends:
-
-```rust
-pub struct UnifiedVideoDecoder {
-    backend: DecoderBackend,
-    shared_frame: Arc<SharedFrame>,
-}
-
-impl UnifiedVideoDecoder {
-    pub fn new_async(
-        codec: VideoCodec,
-        backend: VideoDecoderBackend,
-        shared_frame: Arc<SharedFrame>,
-    ) -> Result<(Self, mpsc::Receiver<DecodeStats>)>;
-
-    pub fn decode_async(
-        &mut self,
-        data: &[u8],
-        receive_time: Instant,
-    ) -> Result<()>;
-}
-```
-
-### Decode Stats
-
-```rust
-pub struct DecodeStats {
-    pub frame_produced: bool,
-    pub decode_time_ms: f32,
-    pub needs_keyframe: bool,
-}
-```
-
-## Decoder Backends
-
-### Backend Selection
-
-```rust
-pub enum VideoDecoderBackend {
-    Auto,           // Auto-detect best decoder
-    Cuvid,          // NVIDIA NVDEC
-    Qsv,            // Intel QuickSync
-    Vaapi,          // Linux VA-API
-    Dxva,           // Windows D3D11 (GStreamer)
-    NativeDxva,     // Windows Native D3D11 (HEVC only)
-    VideoToolbox,   // macOS VideoToolbox
-    VulkanVideo,    // GStreamer hardware (Linux)
-    Software,       // CPU decoding
-}
-```
-
-### Platform-Specific Backends
-
-**Windows:**
-| Backend | Technology | Codecs | Zero-Copy |
-|---------|------------|--------|-----------|
-| Dxva | GStreamer D3D11 | H.264, H.265 | Yes |
-| NativeDxva | Native D3D11VA | H.265 only | Yes |
-| Cuvid | NVDEC (GStreamer) | H.264, H.265 | Yes |
-| Qsv | QuickSync (GStreamer) | H.264, H.265 | Yes |
-
-**macOS:**
-| Backend | Technology | Codecs | Zero-Copy |
-|---------|------------|--------|-----------|
-| VideoToolbox | FFmpeg + VT | H.264, H.265, AV1 | Yes (CVPixelBuffer) |
-
-**Linux:**
-| Backend | Technology | Codecs | Zero-Copy |
-|---------|------------|--------|-----------|
-| VulkanVideo | GStreamer VA/V4L2 | H.264, H.265 | Yes |
-| Vaapi | GStreamer VA-API | H.264, H.265 | Yes |
-| V4L2 | GStreamer V4L2 | H.264, H.265 | Yes (Raspberry Pi) |
-
-### Auto Selection Logic
-
-```rust
-// Windows: GStreamer D3D11 → NativeDxva → FFmpeg
-// macOS: FFmpeg + VideoToolbox
-// Linux: GStreamer VA → GStreamer V4L2 → FFmpeg
-// Raspberry Pi: GStreamer V4L2 (stateless)
-```
+**10-bit HDR Support:**
+- Enabled when receiving HDR content (PQ/HLG transfer function)
+- P010 format for HDR10 content
+- Automatic tone mapping to SDR for non-HDR displays
+- Full HDR passthrough on HDR-capable displays
 
 ## Audio Pipeline
 
-### Audio Decoder
+### Opus Decoder
 
-```rust
-pub struct AudioDecoder {
-    sample_rate: u32,  // 48000 Hz
-    channels: u16,     // 2 (stereo)
-    sample_tx: mpsc::Sender<Vec<f32>>,
-}
+WebRTC includes a native Opus decoder (no external dependencies):
 
-impl AudioDecoder {
-    pub fn new(sample_rate: u32, channels: u16) -> Result<Self>;
-    pub fn decode_async(&mut self, rtp_data: &[u8]);
-    pub fn take_sample_receiver(&mut self) -> Option<mpsc::Receiver<Vec<f32>>>;
+```javascript
+// Audio configuration
+const audioConfig = {
+  codec: 'opus',
+  sampleRate: 48000,
+  channels: 2,
+  // WebRTC handles jitter buffer internally
+  // Default: 50-500ms adaptive buffer
+};
+```
+
+### Audio Flow
+
+```
+RTP Audio Packets
+        │
+        ▼
+┌─────────────────────┐
+│  Opus Depacketizer  │  WebRTC native
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  NetEQ Jitter Buffer│  Adaptive buffer (50-500ms)
+│  (WebRTC)           │  Playout delay optimization
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Opus Decoder       │  libopus (built-in)
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Audio Device       │  WASAPI (Windows)
+│  Output             │  CoreAudio (macOS)
+│                     │  ALSA/PulseAudio (Linux)
+└─────────────────────┘
+```
+
+## Stats Collection
+
+OpenNow collects WebRTC statistics for overlay display:
+
+### Video Stats
+
+```javascript
+// Collected from peerConnection.getStats()
+interface VideoStats {
+  // Inbound RTP stats
+  framesDecoded: number;
+  framesDropped: number;
+  framesReceived: number;
+  frameWidth: number;
+  frameHeight: number;
+  framesPerSecond: number;
+  bitrate: number;           // bits per second
+  decoderImplementation: string; // 'ExternalDecoder' | 'libvpx' | etc
+  
+  // Codec info
+  codec: string;             // 'H264' | 'H265' | 'AV1'
+  
+  // Timing
+  currentPlayoutDelay: number;  // ms
+  jitterBufferDelay: number;    // ms
+  totalProcessingDelay: number; // ms
 }
 ```
 
-### Audio Player
+### Audio Stats
 
-```rust
-pub struct AudioPlayer {
-    stream: cpal::Stream,
-    buffer: Arc<Mutex<VecDeque<f32>>>,
-}
-
-impl AudioPlayer {
-    pub fn new(sample_rate: u32, channels: u16) -> Result<Self>;
-    pub fn push_samples(&self, samples: &[f32]);
-    pub fn buffer_available(&self) -> usize;
+```javascript
+interface AudioStats {
+  audioLevel: number;
+  totalSamplesReceived: number;
+  concealedSamples: number;
+  jitterBufferDelay: number;
 }
 ```
 
-Audio uses a jitter buffer (150ms) to handle network timing variations.
+### Network Stats
 
-## Stream Statistics
-
-```rust
-pub struct StreamStats {
-    pub resolution: String,
-    pub fps: f32,                  // Decoded FPS
-    pub render_fps: f32,           // Rendered FPS
-    pub target_fps: u32,
-    pub bitrate_mbps: f32,
-    pub latency_ms: f32,           // Network latency
-    pub decode_time_ms: f32,       // Per-frame decode time
-    pub render_time_ms: f32,       // Per-frame render time
-    pub input_latency_ms: f32,     // Input to transmission
-    pub codec: String,
-    pub gpu_type: String,
-    pub frames_received: u64,
-    pub frames_decoded: u64,
-    pub frames_dropped: u64,
-    pub frames_rendered: u64,
-    pub rtt_ms: f32,               // Network RTT
-    pub frame_delivery_ms: f32,    // RTP arrival to decode complete
-    pub estimated_e2e_ms: f32,     // End-to-end latency estimate
-    pub is_hdr: bool,
-    pub color_space: String,
+```javascript
+interface NetworkStats {
+  bytesReceived: number;
+  packetsReceived: number;
+  packetsLost: number;
+  jitter: number;
+  roundTripTime: number;     // RTT in ms
+  availableIncomingBitrate: number;
 }
 ```
 
-## Recording
+### Stats Overlay
 
-OpenNow supports session recording to MP4:
+Stats are rendered via the Electron overlay:
 
-```rust
-pub fn recording_set_config(config: RecordingConfig);
-pub fn recording_push_video_frame(frame: &VideoFrame);
-pub fn recording_push_audio(samples: &[f32]);
-pub fn recording_stop();
-pub fn recording_is_active() -> bool;
+```javascript
+// Stats collection interval (1 second)
+setInterval(async () => {
+  const stats = await peerConnection.getStats();
+  const videoStats = extractVideoStats(stats);
+  const audioStats = extractAudioStats(stats);
+  
+  // Send to overlay renderer
+  overlayWindow.webContents.send('stats-update', {
+    video: videoStats,
+    audio: audioStats,
+    network: networkStats
+  });
+}, 1000);
+```
 
-pub enum RecordingCodec {
-    H264,
-    H265,
-    // ...
+## Rendering Pipeline
+
+### Electron/Chromium Rendering
+
+Video frames are rendered through Electron's Chromium renderer:
+
+```
+VideoFrame (WebRTC)
+        │
+        ▼
+┌─────────────────────┐
+│  VideoFrameBuffer   │  Platform-specific:
+│  to Texture         │  • D3D11Texture2D (Windows)
+│                     │  • CVPixelBuffer (macOS)
+│                     │  • VASurface (Linux)
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Chromium Compositor│  GPU rasterization
+│  (Skia/Viz)         │  YUV→RGB conversion in shader
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Stats Overlay      │  HTML5 Canvas or WebGL
+│  (Electron overlay) │  60 FPS update
+└─────────────────────┘
+```
+
+### Color Space Handling
+
+Chromium automatically handles color space conversion:
+
+```javascript
+// Color space detection from VideoFrame
+colorSpace: {
+  primaries: 'BT709',        // BT.709 for SDR
+  transfer: 'SRGB',          // Gamma ~2.4
+  matrix: 'BT709',
+  range: 'LIMITED'           // TV range (16-235)
+}
+
+// HDR content
+colorSpace: {
+  primaries: 'BT2020',
+  transfer: 'PQ',            // SMPTE ST 2084
+  matrix: 'BT2020_NCL',
+  range: 'LIMITED'
 }
 ```
 
-## GPU Rendering
+## HDR Pipeline (Planned)
 
-### wgpu Renderer
+Future HDR support roadmap:
 
-The renderer uses wgpu for cross-platform GPU acceleration:
+1. **HDR Metadata Passthrough**
+   - HDR10 static metadata (MaxCLL, MaxFALL)
+   - HDR10+ dynamic metadata
 
-1. **Upload YUV textures** to GPU (3 textures: Y, U, V)
-2. **Run YUV→RGB shader** (WGSL compute or fragment shader)
-3. **Composite egui overlay** (stats, sidebar)
-4. **Present to swapchain**
+2. **Tone Mapping**
+   - Automatic tone mapping for SDR displays
+   - User-adjustable tone mapping curves
 
-### Color Conversion Shader
-
-The shader handles different color spaces and ranges:
-
-```wgsl
-// BT.709 YUV to RGB conversion (limited range)
-let y = (y_sample - 16.0/255.0) * (255.0/219.0);
-let u = u_sample - 0.5;
-let v = v_sample - 0.5;
-
-let r = y + 1.5748 * v;
-let g = y - 0.1873 * u - 0.4681 * v;
-let b = y + 1.8556 * u;
-```
-
-### HDR Support
-
-For HDR content (PQ transfer function):
-
-1. Detect HDR from `transfer_function == PQ`
-2. Use 10-bit P010 pixel format
-3. Apply PQ EOTF (Perceptual Quantizer)
-4. Tone map to display capabilities
+3. **Display Detection**
+   - HDR display capability detection via Electron APIs
+   - Automatic HDR/SDR mode switching
 
 ## Threading Model
 
+WebRTC's internal threading (transparent to application):
+
 ```
-Main Thread (winit event loop)
-├── GUI rendering (egui)
-├── Window events
-└── State updates
+Main Thread (Electron)
+├── UI rendering (React/Vue/HTML)
+├── Stats overlay updates
+└── User input handling
 
-Tokio Runtime (multi-threaded)
-├── Signaling WebSocket
-├── WebRTC peer events
-├── API requests
-└── Input event processing
-
-Decoder Thread (dedicated)
-├── Video decode (FFmpeg/Native/GStreamer)
-└── SharedFrame updates
+WebRTC Threads (libwebrtc internal)
+├── Network thread: RTP receive/send
+├── Worker thread: Decoding, encoding
+└── Signaling thread: SDP, ICE
 
 Audio Thread (dedicated)
+├── NetEQ jitter buffer
 ├── Opus decode
-└── cpal playback
+└── Audio device output
 ```
 
-The decoder runs on a dedicated thread to prevent blocking the main thread or Tokio runtime. Decoded frames are written to `SharedFrame` which is read by the renderer.
+All media processing occurs within WebRTC's thread pool. The Electron main process only handles:
+- Stats aggregation and display
+- User interface updates
+- Window management
+
+## Configuration
+
+### Codec Preferences
+
+```javascript
+// Set codec preferences via SDP
+const transceiver = peerConnection.getTransceivers()[0];
+transceiver.setCodecPreferences([
+  { mimeType: 'video/AV1' },
+  { mimeType: 'video/H265' },
+  { mimeType: 'video/H264' }
+]);
+```
+
+### Hardware Acceleration Flags
+
+Chromium flags for hardware acceleration (passed to Electron):
+
+```javascript
+// Electron main process
+app.commandLine.appendSwitch('enable-features', 
+  'PlatformHEVCDecoderSupport,HardwareSecureDecryption');
+
+// Windows: Enable HEVC D3D11 decoder
+app.commandLine.appendSwitch('enable-features',
+  'D3D11VideoDecoder,DXGIWaitableSwapChain');
+
+// Force hardware video decode
+app.commandLine.appendSwitch('disable-features', 
+  'DisableHardwareAcceleration');
+```
+
+## Performance Considerations
+
+### GPU Memory
+
+- Hardware decoded frames use GPU memory (not system RAM)
+- Zero-copy texture sharing where supported
+- Monitor GPU memory usage on high-resolution streams (4K+)
+
+### Decode Performance
+
+Typical decode latency (hardware acceleration):
+- 1080p60: ~2-4ms
+- 1440p60: ~3-6ms  
+- 4K60: ~5-10ms
+
+### Fallback Behavior
+
+If hardware decoding fails:
+1. WebRTC attempts software fallback automatically
+2. Higher CPU usage expected
+3. Stats show `decoderImplementation: 'libvpx'` or similar
+
+## Debugging
+
+### Enable WebRTC Logging
+
+```javascript
+// Enable verbose WebRTC logging
+app.commandLine.appendSwitch('vmodule', '*/webrtc/*=2');
+app.commandLine.appendSwitch('enable-logging', 'stderr');
+```
+
+### Chrome DevTools
+
+Use `chrome://webrtc-internals` in Electron DevTools to inspect:
+- Active peer connections
+- Codec negotiation
+- Real-time statistics graphs
+- ICE candidate pairs
+
+### Stats Verification
+
+```javascript
+// Verify hardware decoder is active
+const stats = await pc.getStats();
+const inbound = [...stats.values()].find(s => s.type === 'inbound-rtp');
+console.log('Decoder:', inbound.decoderImplementation);
+// Expected: 'ExternalDecoder' (hardware) or specific codec library
+```

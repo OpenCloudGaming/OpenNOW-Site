@@ -3,7 +3,7 @@ title: Getting Started
 description: How to download or build OpenNow Streamer
 ---
 
-OpenNow Streamer is a native GeForce NOW client built in Rust. This guide covers downloading pre-built releases and building from source.
+OpenNow Streamer is a native GeForce NOW client built with Electron, React, and TypeScript. This guide covers downloading pre-built releases and building from source.
 
 ## Download Pre-Built Releases
 
@@ -11,31 +11,25 @@ The easiest way to get started is to download a pre-built release from [GitHub R
 
 | Platform | Download | Notes |
 |----------|----------|-------|
-| **Windows x64** | `OpenNOW-windows-x64.zip` | Portable, GStreamer bundled |
-| **Windows ARM64** | `OpenNOW-windows-arm64.zip` | Surface Pro X, etc. GStreamer bundled |
-| **macOS (Apple Silicon)** | `OpenNOW-macos-arm64.zip` | M1/M2/M3 native, FFmpeg bundled. Intel Macs can use Rosetta 2 |
-| **Linux x64** | `OpenNOW-linux-x64.AppImage` | AppImage with GStreamer bundled |
-| **Linux ARM64** | `OpenNOW-linux-arm64.zip` | Requires system GStreamer (see below) |
+| **Windows x64** | `OpenNOW-Setup-1.0.0.exe` | NSIS installer, auto-updater enabled |
+| **Windows ARM64** | `OpenNOW-Setup-1.0.0-arm64.exe` | Surface Pro X, etc. |
+| **macOS (Apple Silicon)** | `OpenNOW-1.0.0-arm64.dmg` | M1/M2/M3 native, universal binary |
+| **macOS (Intel)** | `OpenNOW-1.0.0-x64.dmg` | Intel Mac native, universal binary |
+| **Linux x64** | `OpenNOW-1.0.0.AppImage` | AppImage portable |
+| **Linux ARM64** | `OpenNOW-1.0.0-arm64.AppImage` | ARM64 portable |
 
-### Linux ARM64 Setup
+### Installing
 
-Linux ARM64 users need to install GStreamer via their package manager:
+**Windows:** Run the `.exe` installer. The app will auto-update when new versions are released.
+
+**macOS:** Open the `.dmg` and drag OpenNOW to Applications.
+
+**Linux:** Make the AppImage executable and run:
 
 ```bash
-# Ubuntu/Debian
-sudo apt install gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-  gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav
-
-# Fedora/RHEL
-sudo dnf install gstreamer1-plugins-base gstreamer1-plugins-good \
-  gstreamer1-plugins-bad-free gstreamer1-plugins-ugly-free gstreamer1-libav
-
-# Arch
-sudo pacman -S gstreamer gst-plugins-base gst-plugins-good \
-  gst-plugins-bad gst-plugins-ugly gst-libav
+chmod +x OpenNOW-1.0.0.AppImage
+./OpenNOW-1.0.0.AppImage
 ```
-
-Then extract the zip and run with `./run.sh` (uses bundled libraries with system fallback).
 
 ---
 
@@ -43,65 +37,98 @@ Then extract the zip and run with `./run.sh` (uses bundled libraries with system
 
 If you want to build from source, you'll need the following prerequisites:
 
-### All Platforms
+### Prerequisites
 
-- **Rust** 1.75+ (install via [rustup](https://rustup.rs/))
+- **Node.js** 20+ (LTS recommended)
+- **npm** 10+ or **pnpm** 8+ (pnpm recommended)
 - **Git** for cloning the repository
 - A valid **GeForce NOW account** (Free, Priority, or Ultimate tier)
 
-### Windows
+### Platform-Specific Requirements
 
-- **Visual Studio 2022** Build Tools with C++ workload
-- **GStreamer** 1.20+ MSVC (install via Chocolatey: `choco install gstreamer gstreamer-devel`)
+**Windows:**
+- Visual Studio Build Tools (for native modules)
 
-### macOS
+**macOS:**
+- Xcode Command Line Tools (`xcode-select --install`)
 
-- **Xcode Command Line Tools** (`xcode-select --install`)
-- **FFmpeg** via Homebrew: `brew install ffmpeg pkg-config`
-
-### Linux
-
-- **Build essentials**: `sudo apt install build-essential pkg-config clang libclang-dev`
-- **GStreamer dev**: `sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev`
-- **GStreamer plugins**: `sudo apt install gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav`
-- **Audio/Input**: `sudo apt install libasound2-dev libx11-dev libxi-dev libudev-dev`
+**Linux:**
+- Build tools: `sudo apt install build-essential python3-dev`
+- For native modules: `sudo apt install libx11-dev libxkbfile-dev`
 
 ## Building
 
-Clone the repository and build with Cargo:
+Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/zortos293/opennow-streamer.git
-cd opennow-streamer
+git clone https://github.com/zortos293/OpenNOW.git
+cd OpenNOW
 
-# Debug build (faster compilation)
-cargo build
-
-# Release build (optimized, recommended for use)
-cargo build --release
+# Install dependencies
+npm install
+# or
+pnpm install
 ```
 
-### Build with Tracy Profiler
+### Development Mode
 
-For performance analysis, build with Tracy integration:
+Run the app in development mode with hot reload:
 
 ```bash
-cargo build --release --features tracy
+npm run dev
+# or
+pnpm dev
 ```
 
-Then connect with the [Tracy Profiler](https://github.com/wolfpld/tracy) application.
+This will start the Vite dev server and launch the Electron window. React components will auto-reload on changes.
+
+### Production Build
+
+Build the application for distribution:
+
+```bash
+# Build for all platforms (or specify one)
+npm run build
+
+# Build for specific platform
+npm run build:win
+npm run build:mac
+npm run build:linux
+
+# or with pnpm
+pnpm build
+pnpm build:win
+pnpm build:mac
+pnpm build:linux
+```
+
+Built artifacts will be in the `dist/` directory.
+
+### Packaging
+
+Create platform-specific installers:
+
+```bash
+# Package for current platform
+npm run dist
+
+# Package for all platforms
+npm run dist:all
+```
+
+This uses electron-builder to create `.exe`, `.dmg`, `.AppImage`, etc.
 
 ## Running
 
 ```bash
-# Debug mode
-cargo run
+# Development mode with hot reload
+npm run dev
 
-# Release mode (recommended)
-cargo run --release
+# Production preview (after build)
+npm run preview
 ```
 
-The application will open a window with the login screen.
+The application will open with the login screen.
 
 ## First Launch
 
@@ -113,13 +140,15 @@ The application will open a window with the login screen.
 
 ## Configuration
 
-Settings are stored in:
+OpenNow uses **electron-store** for settings storage. Settings are stored in:
 
 | Platform | Location |
 |----------|----------|
-| Windows | `%APPDATA%\opennow-streamer\settings.json` |
-| macOS | `~/Library/Application Support/opennow-streamer/settings.json` |
-| Linux | `~/.config/opennow-streamer/settings.json` |
+| Windows | `%APPDATA%/OpenNOW/config.json` |
+| macOS | `~/Library/Application Support/OpenNOW/config.json` |
+| Linux | `~/.config/OpenNOW/config.json` |
+
+Settings can also be accessed and modified via the app's Settings UI (accessible from the system tray or Settings menu).
 
 ### Key Settings
 
@@ -128,19 +157,40 @@ Settings are stored in:
 | `resolution` | `1920x1080` | Stream resolution |
 | `fps` | `60` | Target frame rate (60, 120, 240) |
 | `codec` | `H265` | Video codec (H264, H265, AV1) |
-| `max_bitrate_mbps` | `50` | Maximum bitrate in Mbps |
-| `decoder_backend` | `Auto` | Decoder selection (Auto, FFmpeg, Native, GStreamer) |
+| `maxBitrate` | `50` | Maximum bitrate in Mbps |
 | `fullscreen` | `false` | Start in fullscreen mode |
-| `borderless` | `false` | Use borderless fullscreen |
-| `low_latency_mode` | `true` | Enable low-latency optimizations |
+| `lowLatencyMode` | `true` | Enable low-latency optimizations |
+| `autoUpdate` | `true` | Enable automatic updates |
+
+### Advanced Configuration
+
+You can directly edit the `config.json` file for advanced options:
+
+```json
+{
+  "resolution": "1920x1080",
+  "fps": 60,
+  "codec": "H265",
+  "maxBitrate": 50,
+  "fullscreen": false,
+  "lowLatencyMode": true,
+  "windowState": {
+    "width": 1280,
+    "height": 720,
+    "x": 100,
+    "y": 100,
+    "maximized": false
+  }
+}
+```
 
 ## Troubleshooting
 
-### "Failed to create video decoder"
+### "App won't start"
 
-- Ensure FFmpeg libraries are installed
-- Try setting `decoder_backend` to `FFmpeg` in settings
-- On Linux, ensure GStreamer plugins are installed
+- Ensure Node.js 20+ is installed if building from source
+- Delete `%APPDATA%/OpenNOW` (Windows) or `~/.config/OpenNOW` (Linux) and restart
+- Check the log files in the config directory for errors
 
 ### "Signaling connection failed"
 
@@ -152,10 +202,16 @@ Settings are stored in:
 
 - Press `F8` to toggle mouse capture
 - Ensure the window is focused
-- On Linux, you may need to run with elevated permissions for raw input
+- Check if "Game Mode" is enabled in settings
 
 ### Black screen after connection
 
 - Press `F3` to show stats and verify frames are being received
 - Try requesting a keyframe by pressing `Ctrl+Shift+K`
 - Change the codec in settings (try H.264 if H.265 isn't working)
+
+### Update Issues
+
+- If auto-update fails, manually download the latest release
+- Check the logs in the config directory for update errors
+- Disable auto-update in settings if needed: `"autoUpdate": false`

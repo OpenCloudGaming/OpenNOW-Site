@@ -8,7 +8,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'OpenNOW',
-			description: 'Open source GeForce NOW client built in Native Rust',
+			description: 'Open source GeForce NOW client built with Electron + React + TypeScript',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/zortos293/OpenNOW' },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/8EJYaJcNfD' }
