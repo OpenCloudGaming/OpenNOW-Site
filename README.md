@@ -1,4 +1,4 @@
-<h1 align="center">OpenNOW Documentation</h1>
+<h1 align="center">OpenNOW Documentation (WIP) </h1>
 
 <p align="center">
   <strong>Documentation site for OpenNOW - the open source GeForce NOW client</strong>
