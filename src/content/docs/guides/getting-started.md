@@ -7,7 +7,7 @@ OpenNow Streamer is a native GeForce NOW client built with Electron, React, and 
 
 ## Download Pre-Built Releases
 
-The easiest way to get started is to download a pre-built release from [GitHub Releases](https://github.com/zortos293/OpenNOW/releases).
+The easiest way to get started is to download a pre-built release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
 
 | Platform | Download | Notes |
 |----------|----------|-------|
@@ -61,7 +61,7 @@ If you want to build from source, you'll need the following prerequisites:
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/zortos293/OpenNOW.git
+git clone https://github.com/OpenCloudGaming/OpenNOW.git
 cd OpenNOW
 
 # Install dependencies

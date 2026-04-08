@@ -10,13 +10,14 @@ export default defineConfig({
 			title: 'OpenNOW',
 			description: 'Open source GeForce NOW client built with Electron + React + TypeScript',
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/zortos293/OpenNOW' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/OpenCloudGaming/OpenNOW' },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/8EJYaJcNfD' }
 			],
 			sidebar: [
 				{
 					label: 'Guides',
 					items: [
+						{ label: 'Development Guide', slug: 'development' },
 						{ label: 'Getting Started', slug: 'guides/getting-started' },
 					],
 				},
@@ -24,6 +25,12 @@ export default defineConfig({
 					label: 'Architecture',
 					items: [
 						{ label: 'Overview', slug: 'architecture/overview' },
+					],
+				},
+				{
+					label: 'Advanced',
+					items: [
+						{ label: 'Streamer Investigation', slug: 'advanced/streamer-investigation' },
 					],
 				},
 				{
@@ -37,7 +44,6 @@ export default defineConfig({
 					],
 				},
 			],
-			customCss: [
 				// './src/styles/custom.css',
 			],
 		}),
