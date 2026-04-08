@@ -26,13 +26,13 @@ This repo hosts the public documentation website for [OpenNOW](https://github.co
 
 | Section | Description |
 |---------|-------------|
-| [Getting Started](/guides/getting-started/) | Download releases or build from source |
-| [Architecture](/architecture/overview/) | Electron main / preload / renderer split |
-| [Authentication](/reference/authentication/) | OAuth + PKCE login flow |
-| [WebRTC](/reference/webrtc/) | Signaling, SDP, and data channels |
-| [Media](/reference/media/) | Screenshots, recordings, and local storage |
-| [Input](/reference/input/) | Shortcuts, pointer lock, gamepad, microphone |
-| [Configuration](/reference/configuration/) | Settings model and defaults |
+| [Getting Started](https://opennow.zortos.me/guides/getting-started/) | Download releases or build from source |
+| [Architecture](https://opennow.zortos.me/architecture/overview/) | Electron main / preload / renderer split |
+| [Authentication](https://opennow.zortos.me/reference/authentication/) | OAuth + PKCE login flow |
+| [WebRTC](https://opennow.zortos.me/reference/webrtc/) | Signaling, SDP, and data channels |
+| [Media](https://opennow.zortos.me/reference/media/) | Screenshots, recordings, and local storage |
+| [Input](https://opennow.zortos.me/reference/input/) | Shortcuts, pointer lock, gamepad, microphone |
+| [Configuration](https://opennow.zortos.me/reference/configuration/) | Settings model and defaults |
 
 ## Local development
 
