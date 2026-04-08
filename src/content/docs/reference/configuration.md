@@ -1,307 +1,94 @@
 ---
 title: Configuration
-description: Settings and configuration options in OpenNow Streamer
+description: Settings model, defaults, and storage for the OpenNOW client
 ---
 
-OpenNow Streamer stores user settings using electron-store. This document covers all available configuration options.
-
-## Settings File Location
-
-| Platform | Path |
-|----------|------|
-| Windows | `%APPDATA%\opennow-streamer\config.json` |
-| macOS | `~/Library/Application Support/opennow-streamer/config.json` |
-| Linux | `~/.config/opennow-streamer/config.json` |
-
-## Settings Structure
-
-```typescript
-interface Settings {
-  // Video
-  quality: StreamQuality;
-  resolution: string;
-  fps: number;
-  codec: VideoCodec;
-  maxBitrateMbps: number;
-  colorQuality: ColorQuality;
-  hdrEnabled: boolean;
-
-  // Audio
-  audioCodec: AudioCodec;
-  audioVolume: number;
-
-  // Shortcuts
-  shortcuts: ShortcutConfig;
-
-  // Gameplay
-  mouseSensitivity: number;
-  antiAfkEnabled: boolean;
-
-  // Display
-  fullscreen: boolean;
-  showStats: boolean;
-  statsPosition: StatsPosition;
-}
-```
-
-## Video Settings
-
-### Stream Quality Presets
-
-```typescript
-type StreamQuality = 
-  | 'auto'        // Auto-detect best quality
-  | 'low'         // 720p 30fps
-  | 'medium'      // 1080p 60fps
-  | 'high'        // 1440p 60fps
-  | 'ultra'       // 4K 60fps
-  | 'high120'     // 1080p 120fps
-  | 'ultra120'    // 1440p 120fps
-  | 'competitive' // 1080p 240fps
-  | 'custom';     // Use manual resolution/fps
-```
-
-### Resolution Options
-
-| Resolution | Name |
-|------------|------|
-| `1280x720` | 720p |
-| `1920x1080` | 1080p |
-| `2560x1440` | 1440p |
-| `3840x2160` | 4K |
-| `2560x1080` | Ultrawide 1080p |
-| `3440x1440` | Ultrawide 1440p |
-| `5120x1440` | Super Ultrawide |
-
-### FPS Options
-
-Available FPS values: `30`, `60`, `120`, `144`, `240`
-
-```typescript
-const FPS_OPTIONS = [30, 60, 120, 144, 240];
-```
-
-### Video Codec
-
-```typescript
-type VideoCodec = 'h264' | 'h265' | 'av1';
-```
-
-| Codec | Compression | Compatibility | HDR |
-|-------|-------------|---------------|-----|
-| H.264 | Good | All GPUs | No |
-| H.265 | Better | Most GPUs | Yes |
-| AV1 | Best | RTX 40+, RX 7000+ | Yes |
-
-### Color Quality
-
-```typescript
-type ColorQuality = 
-  | '8bit-420'   // 8-bit, YUV 4:2:0 - Most compatible
-  | '8bit-444'   // 8-bit, YUV 4:4:4 - Better color (needs H.265)
-  | '10bit-420'  // 10-bit, YUV 4:2:0 - HDR ready (default)
-  | '10bit-444'; // 10-bit, YUV 4:4:4 - Best quality (needs H.265)
-```
-
-| Setting | Bit Depth | Chroma | Bandwidth | Requires |
-|---------|-----------|--------|-----------|----------|
-| `8bit-420` | 8 | 4:2:0 | Low | Any codec |
-| `8bit-444` | 8 | 4:4:4 | Medium | H.265 |
-| `10bit-420` | 10 | 4:2:0 | Medium | H.265 |
-| `10bit-444` | 10 | 4:4:4 | High | H.265 |
-
-### Bitrate
-
-`maxBitrateMbps` controls the maximum stream bitrate:
-
-| Value | Meaning |
-|-------|---------|
-| 50 | 50 Mbps (good for most connections) |
-| 100 | 100 Mbps (fast connections) |
-| 150 | 150 Mbps (very fast connections) |
-| 200 | 200 Mbps maximum |
-
-## Audio Settings
-
-### Audio Codec
-
-```typescript
-type AudioCodec = 'opus' | 'opus-stereo';
-```
-
-| Codec | Description |
-|-------|-------------|
-| `opus` | Standard Opus encoding |
-| `opus-stereo` | Opus with explicit stereo |
-
-Audio is always 48kHz stereo.
-
-### Audio Volume
-
-`audioVolume` - Master volume level (0-100, default: 100)
-
-## Shortcuts Configuration
-
-Configure keyboard shortcuts for quick actions:
-
-```typescript
-interface ShortcutConfig {
-  toggleFullscreen: string;  // Default: F11
-  toggleStats: string;       // Default: F12
-  screenshot: string;        // Default: F9
-  increaseVolume: string;    // Default: Ctrl+Up
-  decreaseVolume: string;    // Default: Ctrl+Down
-  muteAudio: string;         // Default: Ctrl+M
-}
-```
-
-Shortcuts use standard Electron accelerator format:
-- Keys: `A-Z`, `0-9`, `F1-F24`, etc.
-- Modifiers: `Ctrl`, `Alt`, `Shift`, `Cmd` (macOS)
-- Combinations: `Ctrl+Shift+S`, `Cmd+Alt+F`, etc.
-
-## Gameplay Settings
-
-### Mouse Sensitivity
-
-`mouseSensitivity` - Mouse sensitivity multiplier (default: 1.0)
-
-Range: 0.1 to 5.0
-
-### Anti-AFK
-
-`antiAfkEnabled` - Automatically prevent AFK kick (default: false)
-
-When enabled, the application will simulate minimal activity to prevent being kicked for inactivity.
-
-## Display Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `fullscreen` | `false` | Start in fullscreen mode |
-| `showStats` | `true` | Show performance statistics overlay |
-| `statsPosition` | `bottom-left` | Position of the stats panel |
-
-### Stats Position
-
-```typescript
-type StatsPosition = 
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-left'   // Default
-  | 'bottom-right';
-```
-
-## Default Settings
-
-```typescript
-const defaultSettings: Settings = {
-  // Video
-  quality: 'auto',
-  resolution: '1920x1080',
-  fps: 60,
-  codec: 'h265',
-  maxBitrateMbps: 150,
-  colorQuality: '10bit-420',
-  hdrEnabled: false,
-
-  // Audio
-  audioCodec: 'opus',
-  audioVolume: 100,
-
-  // Shortcuts
-  shortcuts: {
-    toggleFullscreen: 'F11',
-    toggleStats: 'F12',
-    screenshot: 'F9',
-    increaseVolume: 'Ctrl+Up',
-    decreaseVolume: 'Ctrl+Down',
-    muteAudio: 'Ctrl+M',
-  },
-
-  // Gameplay
-  mouseSensitivity: 1.0,
-  antiAfkEnabled: false,
-
-  // Display
-  fullscreen: false,
-  showStats: true,
-  statsPosition: 'bottom-left',
-};
-```
-
-## Example config.json
-
-```json
-{
-  "quality": "high120",
-  "resolution": "1920x1080",
-  "fps": 120,
-  "codec": "h265",
-  "maxBitrateMbps": 100,
-  "colorQuality": "10bit-420",
-  "hdrEnabled": false,
-  "audioCodec": "opus",
-  "audioVolume": 85,
-  "shortcuts": {
-    "toggleFullscreen": "F11",
-    "toggleStats": "F12",
-    "screenshot": "F9",
-    "increaseVolume": "Ctrl+Up",
-    "decreaseVolume": "Ctrl+Down",
-    "muteAudio": "Ctrl+M"
-  },
-  "mouseSensitivity": 1.2,
-  "antiAfkEnabled": true,
-  "fullscreen": false,
-  "showStats": true,
-  "statsPosition": "top-right"
-}
-```
-
-## Loading and Saving
-
-Settings are automatically managed by electron-store:
-
-```typescript
-import { settings } from './main/settings';
-
-// Get a setting value
-const fps = settings.get('fps');
-
-// Set a setting value (auto-saves)
-settings.set('fps', 144);
-
-// Reset to defaults
-settings.clear();
-
-// Get all settings
-const allSettings = settings.store;
-```
-
-## Programmatic API
-
-Access settings from the main process:
-
-```typescript
-import { ipcMain } from 'electron';
-import { settings } from './settings';
-
-// Handle settings requests from renderer
-ipcMain.handle('settings:get', (event, key) => {
-  return settings.get(key);
-});
-
-ipcMain.handle('settings:set', (event, key, value) => {
-  settings.set(key, value);
-  return true;
-});
-
-// Get typed resolution
-type Resolution = { width: number; height: number };
-
-function getResolution(): Resolution {
-  const [width, height] = settings.get('resolution').split('x').map(Number);
-  return { width, height };
-}
-```
+OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json`. The shared `Settings` type is defined in `opennow-stable/src/shared/gfn.ts` and used by both the main process and renderer.
+
+## File locations
+
+| Data | Path |
+|------|------|
+| Settings | `app.getPath("userData")/settings.json` |
+| Auth state | `app.getPath("userData")/auth-state.json` |
+| Thumbnail cache | `app.getPath("userData")/media-thumbs/` |
+| Screenshots | `app.getPath("pictures")/OpenNOW/Screenshots/` |
+| Recordings | `app.getPath("pictures")/OpenNOW/Recordings/` |
+
+## Settings reference
+
+### Video and streaming
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `resolution` | `string` | `"1920x1080"` | Stream resolution (e.g. `"2560x1440"`, `"3840x2160"`) |
+| `aspectRatio` | `AspectRatio` | `"16:9"` | `"16:9"`, `"16:10"`, `"21:9"`, or `"32:9"` |
+| `fps` | `number` | `60` | Target frame rate (30, 60, 90, 120, 144, 165, 240, 360) |
+| `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps (capped at 150) |
+| `codec` | `VideoCodec` | `"H264"` | `"H264"`, `"H265"`, or `"AV1"` |
+| `colorQuality` | `ColorQuality` | `"8bit_420"` | `"8bit_420"`, `"8bit_444"`, `"10bit_420"`, or `"10bit_444"` |
+| `region` | `string` | `""` | Preferred region URL; empty = auto-select |
+| `gameLanguage` | `GameLanguage` | `"en_US"` | In-game language sent to GFN servers |
+| `enableL4S` | `boolean` | `false` | Request Low Latency, Low Loss, Scalable throughput (experimental) |
+
+### Input and shortcuts
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `clipboardPaste` | `boolean` | `false` | Enable paste into the stream (max 64 KB) |
+| `mouseSensitivity` | `number` | `1` | Multiplier on relative mouse motion |
+| `mouseAcceleration` | `number` | `1` | Acceleration strength 1–150 (percentage slider) |
+| `shortcutToggleStats` | `string` | `"F3"` | Toggle stats overlay |
+| `shortcutTogglePointerLock` | `string` | `"F8"` | Toggle pointer lock |
+| `shortcutStopStream` | `string` | `"Ctrl+Shift+Q"` | Stop the current session |
+| `shortcutToggleAntiAfk` | `string` | `"Ctrl+Shift+K"` | Toggle anti-AFK |
+| `shortcutToggleMicrophone` | `string` | `"Ctrl+Shift+M"` | Toggle microphone mute |
+| `shortcutScreenshot` | `string` | `"F11"` | Take a screenshot |
+| `shortcutToggleRecording` | `string` | `"F12"` | Start/stop recording |
+
+### Microphone
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `microphoneMode` | `MicrophoneMode` | `"disabled"` | `"disabled"`, `"push-to-talk"`, or `"voice-activity"` |
+| `microphoneDeviceId` | `string` | `""` | Preferred mic device ID; empty = system default |
+
+### Stream UI
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `hideStreamButtons` | `boolean` | `false` | Hide the mic / fullscreen / end-session buttons during streaming |
+| `sessionClockShowEveryMinutes` | `number` | `60` | Re-show the session timer every N minutes |
+| `sessionClockShowDurationSeconds` | `number` | `30` | How long the session timer stays visible |
+
+### Controller mode
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `controllerMode` | `boolean` | `false` | Enable controller-first library layout |
+| `controllerUiSounds` | `boolean` | `false` | UI sounds in controller mode |
+| `controllerBackgroundAnimations` | `boolean` | `false` | Animated backgrounds in controller mode loading screens |
+| `autoLoadControllerLibrary` | `boolean` | `false` | Open controller library on startup when controller mode is enabled |
+| `autoFullScreen` | `boolean` | `false` | Auto-fullscreen when controller mode triggers it |
+
+### Window and misc
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `favoriteGameIds` | `string[]` | `[]` | Saved game favorites |
+| `windowWidth` | `number` | `1400` | Last saved window width |
+| `windowHeight` | `number` | `900` | Last saved window height |
+
+## Compatibility logic
+
+The settings manager (`opennow-stable/src/main/settings.ts`) applies these rules on load:
+
+- **Codec/color mismatch** — if `codec` is `"H264"` and `colorQuality` is anything other than `"8bit_420"`, color quality is reset to `"8bit_420"` (H.264 doesn't support 4:4:4 or 10-bit).
+- **Legacy shortcuts** — old macOS-style stop/anti-AFK shortcuts (e.g. `Meta+Shift+Q`) are migrated to `Ctrl+Shift+Q` / `Ctrl+Shift+K`.
+- **Acceleration clamp** — `mouseAcceleration` is clamped to `[1, 150]`; legacy boolean values are converted to `100` (on) or `1` (off).
+
+## Source files
+
+- `opennow-stable/src/main/settings.ts` — `SettingsManager` class, defaults, load/save/migration
+- `opennow-stable/src/shared/gfn.ts` — `Settings` type, `VideoCodec`, `ColorQuality`, `MicrophoneMode`, `AspectRatio`, `GameLanguage`
+- `opennow-stable/src/renderer/src/components/SettingsPage.tsx` — Settings UI

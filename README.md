@@ -1,18 +1,18 @@
-<h1 align="center">OpenNOW Documentation (WIP) </h1>
+<h1 align="center">OpenNOW Docs</h1>
 
 <p align="center">
-  <strong>Documentation site for OpenNOW - the open source GeForce NOW client</strong>
+  <strong>Documentation site for <a href="https://github.com/OpenCloudGaming/OpenNOW">OpenCloudGaming/OpenNOW</a>, the open-source Electron-based GeForce NOW client.</strong>
 </p>
 
 <p align="center">
-  <a href="https://opennow.zortos.me">
-    <img src="https://img.shields.io/badge/Docs-opennow.zortos.me-blue?style=for-the-badge" alt="Documentation">
+  <a href="https://github.com/OpenCloudGaming/OpenNOW">
+    <img src="https://img.shields.io/badge/App_Repo-OpenCloudGaming%2FOpenNOW-brightgreen?style=for-the-badge&logo=github" alt="App Repository">
   </a>
-  <a href="https://github.com/zortos293/OpenNOW">
-    <img src="https://img.shields.io/badge/Main_Repo-OpenNOW-green?style=for-the-badge&logo=github" alt="Main Repository">
+  <a href="https://github.com/OpenCloudGaming/OpenNOW/releases">
+    <img src="https://img.shields.io/github/v/tag/OpenCloudGaming/OpenNOW?style=for-the-badge&label=Latest+Release" alt="Latest Release">
   </a>
   <a href="https://discord.gg/8EJYaJcNfD">
-    <img src="https://img.shields.io/badge/Discord-Join_Us-7289da?style=for-the-badge&logo=discord" alt="Discord">
+    <img src="https://img.shields.io/badge/Discord-Join_Us-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
   </a>
 </p>
 
@@ -20,58 +20,31 @@
 
 ## About
 
-This repository contains the documentation website for [OpenNOW](https://github.com/zortos293/OpenNOW), an open source native GeForce NOW client built in Rust.
+This repo hosts the public documentation website for [OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) — an open-source Electron desktop client for GeForce NOW. The app lives in `opennow-stable/` and uses Electron, React, and TypeScript.
 
-**Live Documentation:** [https://opennow.zortos.me](https://opennow.zortos.me)
+## Pages
 
-## Documentation Contents
+| Section | Description |
+|---------|-------------|
+| [Getting Started](/guides/getting-started/) | Download releases or build from source |
+| [Architecture](/architecture/overview/) | Electron main / preload / renderer split |
+| [Authentication](/reference/authentication/) | OAuth + PKCE login flow |
+| [WebRTC](/reference/webrtc/) | Signaling, SDP, and data channels |
+| [Media](/reference/media/) | Screenshots, recordings, and local storage |
+| [Input](/reference/input/) | Shortcuts, pointer lock, gamepad, microphone |
+| [Configuration](/reference/configuration/) | Settings model and defaults |
 
-- **Getting Started** - Download releases or build from source
-- **Architecture Overview** - How OpenNOW works internally
-- **Reference Documentation**
-  - Authentication (OAuth, PKCE, Alliance Partners)
-  - WebRTC (Signaling, SDP, Data Channels)
-  - Media Pipeline (Video/Audio decoding, Hardware acceleration)
-  - Input System (Mouse, Keyboard, Gamepad, Racing Wheels)
-  - Configuration (All settings and options)
+## Local development
 
-## Development
-
-This documentation site is built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build).
-
-### Local Development
+Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
 
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+npm run dev      # dev server
+npm run build    # production build
+npm run preview  # preview production build
 ```
 
-### Project Structure
+## Keeping docs current
 
-```
-src/
-├── assets/          # Images and static assets
-└── content/
-    └── docs/        # Documentation pages (Markdown/MDX)
-        ├── index.mdx
-        ├── guides/
-        ├── architecture/
-        └── reference/
-```
-
----
-
-<p align="center">
-  <a href="https://github.com/zortos293/OpenNOW">OpenNOW Main Repository</a> · 
-  <a href="https://opennow.zortos.me">Documentation</a> · 
-  <a href="https://discord.gg/8EJYaJcNfD">Discord</a>
-</p>
+These pages are anchored to the upstream repo's README, `docs/development.md`, and the Electron source under `opennow-stable/src/`. When the app changes, update docs to match.
