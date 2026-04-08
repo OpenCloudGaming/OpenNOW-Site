@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
+  site: 'https://opennow.zortos.me',
   integrations: [
     starlight({
       title: 'OpenNOW',
@@ -14,11 +15,18 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Guides',
-          items: [{ label: 'Getting Started', slug: 'guides/getting-started' }],
+          items: [
+            { label: 'Development Guide', slug: 'development' },
+            { label: 'Getting Started', slug: 'guides/getting-started' },
+          ],
         },
         {
           label: 'Architecture',
           items: [{ label: 'Overview', slug: 'architecture/overview' }],
+        },
+        {
+          label: 'Advanced',
+          items: [{ label: 'Streamer Investigation', slug: 'advanced/streamer-investigation' }],
         },
         {
           label: 'Reference',
