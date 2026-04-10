@@ -2,51 +2,43 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-// https://astro.build/config
 export default defineConfig({
-	site: 'https://opennow.zortos.me',
-	integrations: [
-		starlight({
-			title: 'OpenNOW',
-			description: 'Open source GeForce NOW client built with Electron + React + TypeScript',
-			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/OpenCloudGaming/OpenNOW' },
-				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/8EJYaJcNfD' }
-			],
-			sidebar: [
-				{
-					label: 'Guides',
-					items: [
-						{ label: 'Development Guide', slug: 'development' },
-						{ label: 'Getting Started', slug: 'guides/getting-started' },
-					],
-				},
-				{
-					label: 'Architecture',
-					items: [
-						{ label: 'Overview', slug: 'architecture/overview' },
-					],
-				},
-				{
-					label: 'Advanced',
-					items: [
-						{ label: 'Streamer Investigation', slug: 'advanced/streamer-investigation' },
-					],
-				},
-				{
-					label: 'Reference',
-					items: [
-						{ label: 'Authentication', slug: 'reference/authentication' },
-						{ label: 'WebRTC', slug: 'reference/webrtc' },
-						{ label: 'Media Pipeline', slug: 'reference/media' },
-						{ label: 'Input System', slug: 'reference/input' },
-						{ label: 'Configuration', slug: 'reference/configuration' },
-					],
-				},
-			],
-			customCss: [
-				// './src/styles/custom.css',
-			],
-		}),
-	],
+  site: 'https://opennow.zortos.me',
+  integrations: [
+    starlight({
+      title: 'OpenNOW',
+      description: 'Documentation for the OpenCloudGaming/OpenNOW Electron client',
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/OpenCloudGaming/OpenNOW' },
+        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/8EJYaJcNfD' },
+      ],
+      sidebar: [
+        {
+          label: 'Guides',
+          items: [
+            { label: 'Development Guide', slug: 'development' },
+            { label: 'Getting Started', slug: 'guides/getting-started' },
+          ],
+        },
+        {
+          label: 'Architecture',
+          items: [{ label: 'Overview', slug: 'architecture/overview' }],
+        },
+        {
+          label: 'Advanced',
+          items: [{ label: 'Streamer Investigation', slug: 'advanced/streamer-investigation' }],
+        },
+        {
+          label: 'Reference',
+          items: [
+            { label: 'Authentication', slug: 'reference/authentication' },
+            { label: 'WebRTC', slug: 'reference/webrtc' },
+            { label: 'Media', slug: 'reference/media' },
+            { label: 'Input', slug: 'reference/input' },
+            { label: 'Configuration', slug: 'reference/configuration' },
+          ],
+        },
+      ],
+    }),
+  ],
 });

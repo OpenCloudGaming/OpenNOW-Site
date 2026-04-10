@@ -1,9 +1,9 @@
 ---
 title: OpenNOW
-description: High-performance GeForce NOW client built with Electron and React
+description: Open-source GeForce NOW desktop client — browse, stream, capture
 template: splash
 hero:
-  tagline: Open source GeForce NOW client v0.3.2 — built with Electron 40, React 19, and TypeScript
+  tagline: An open-source desktop client for GeForce NOW. Browse the catalog, tune your stream, and play — all from a community-built Electron app.
   image:
     file: ../../assets/houston.webp
   actions:
@@ -21,46 +21,43 @@ hero:
 
 import { Card, CardGrid, Aside, LinkCard, Steps, Badge } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Early Development">
-OpenNOW is under **active development**. Expect bugs and performance issues. 
-Check [Known Issues](#known-issues) for current limitations.
-</Aside>
-
 ## Why OpenNOW?
 
 <CardGrid>
-	<Card title="Modern Stack" icon="rocket">
-		Built with Electron 40, React 19, and TypeScript 5.7 for a polished, responsive experience.
-	</Card>
-	<Card title="Uncapped Potential" icon="open-book">
-		No artificial limits on FPS, resolution, or bitrate. Stream up to 5K at 240+ FPS if your connection supports it.
-	</Card>
-	<Card title="Privacy Focused" icon="approve-check">
-		Zero telemetry. No data collection. Your gaming stays private.
-	</Card>
-	<Card title="Cross-Platform" icon="laptop">
-		Native builds for Windows, macOS (Apple Silicon + Intel), and Linux (x64 + ARM64 including Raspberry Pi).
-	</Card>
+  <Card title="Open source" icon="open-book">
+    Fully open-source Electron + React + TypeScript client. No telemetry, no hidden parts.
+  </Card>
+  <Card title="Stream your way" icon="setting">
+    Choose your codec (H.264 / H.265 / AV1), resolution, FPS, bitrate, aspect ratio, color depth, and region.
+  </Card>
+  <Card title="Built-in capture" icon="seti:video">
+    Take screenshots and record clips directly from the stream. Manage them in the app or reveal on disk.
+  </Card>
+  <Card title="Controller-friendly" icon="seti:salesforce">
+    Full keyboard, mouse, and gamepad input — plus a dedicated controller-first browsing mode.
+  </Card>
 </CardGrid>
 
-## Quick Start
+---
+
+## Quick start
 
 <Steps>
-1. **Download** the latest release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases)
+1. **Download** the latest release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
 
-2. **Install** the application
-   - Windows: Run the installer or extract portable version
-   - macOS: Mount DMG and drag to Applications
-   - Linux: Install .deb/.rpm or use AppImage
+2. **Install** the package for your platform:
+   - **Windows** — NSIS installer or portable `.exe`
+   - **macOS** — `.dmg` or `.zip` (Apple Silicon + Intel)
+   - **Linux** — `.AppImage` or `.deb` (x64 + ARM64)
 
-3. **Login** with your NVIDIA GeForce NOW account
+3. **Sign in** with your NVIDIA GeForce NOW account.
 
-4. **Play** — Browse games and start streaming!
+4. **Play** — browse games, launch a session, and tweak stream settings as you go.
 </Steps>
 
 <LinkCard
-  title="Full Setup Guide"
-  description="Detailed instructions for all platforms, including building from source"
+  title="Full setup guide"
+  description="Download, install, or build from source"
   href="/guides/getting-started/"
 />
 
@@ -68,117 +65,63 @@ Check [Known Issues](#known-issues) for current limitations.
 
 ## Features
 
-### Implemented
-
-| Feature | Status | Description |
-|---------|:------:|-------------|
-| Authentication | <Badge text="Working" variant="success" /> | OAuth login with NVIDIA accounts |
-| Game Library | <Badge text="Working" variant="success" /> | Browse and search games via CloudMatch |
-| WebRTC Streaming | <Badge text="Working" variant="success" /> | Low-latency video streaming |
-| Hardware Decoding | <Badge text="Working" variant="success" /> | H.264, HEVC, and AV1 codec support |
-| Up to 5K@240fps | <Badge text="Working" variant="success" /> | Stream at high resolutions and frame rates |
-| Mouse & Keyboard | <Badge text="Working" variant="success" /> | Full input capture on all platforms |
-| Gamepad Support | <Badge text="Working" variant="success" /> | Controller support with customizable bindings |
-| Audio Playback | <Badge text="Working" variant="success" /> | Low-latency Opus audio |
-| Stats Overlay | <Badge text="Working" variant="success" /> | Real-time FPS, bitrate, and latency monitoring |
-| Anti-AFK | <Badge text="Working" variant="success" /> | Prevent session timeout during gameplay |
-| Adjustable Shortcuts | <Badge text="Working" variant="success" /> | Customize keyboard shortcuts to your preference |
-| Alliance Partners | <Badge text="Working" variant="success" /> | au, Taiwan Mobile, bro.game |
-| Clipboard Paste | <Badge text="Working" variant="success" /> | Paste text to remote session |
-| AV1 Codec | <Badge text="Working" variant="success" /> | Modern codec for better quality |
-
-### Coming Soon
-
-| Feature | Status | Description |
-|---------|:------:|-------------|
-| Microphone | <Badge text="Planned" variant="note" /> | Voice chat support |
-| Instant Replay | <Badge text="Planned" variant="note" /> | NVIDIA-style instant replay |
-| Screenshots | <Badge text="Planned" variant="note" /> | Quick capture |
-| Plugin System | <Badge text="Planned" variant="note" /> | Custom scripts and extensions |
-| Theming | <Badge text="Planned" variant="note" /> | UI customization |
+| Category | What's included |
+|----------|----------------|
+| **Streaming** | WebRTC playback with codec selection (H.264, H.265, AV1), resolution up to 4K, FPS up to 360, bitrate cap, color quality modes, region preference, L4S support |
+| **Authentication** | Browser-based OAuth + PKCE with persistent session state and automatic token refresh |
+| **Game library** | Browse main catalog, personal library, and public game listings with search |
+| **Input** | Pointer lock, keyboard, mouse (sensitivity + acceleration tuning), gamepad (up to 4), clipboard paste |
+| **Microphone** | Disabled / push-to-talk / voice-activity modes with device selection and in-stream toggle |
+| **Capture** | Screenshots (PNG/JPG/WebP) and video recording (MP4/WebM) saved locally with in-app gallery |
+| **Diagnostics** | Live stats overlay — RTT, bitrate, packet loss, decode/render timing, input pressure, lag reason |
+| **Shortcuts** | Fully configurable hotkeys for stats, pointer lock, stop session, anti-AFK, mic toggle, screenshot, and recording |
+| **Controller mode** | Controller-first library UI with animated backgrounds, UI sounds, and auto-fullscreen options |
+| **Cross-platform** | Windows (x64, ARM64), macOS (Apple Silicon, Intel), Linux (x64, ARM64) |
 
 ---
 
-## Platform Support
+## Architecture at a glance
 
-| Platform | Status | Notes |
-|----------|:------:|-------|
-| Windows x64 | <Badge text="Working" variant="success" /> | Full hardware decoding support |
-| Windows ARM64 | <Badge text="Working" variant="success" /> | Native ARM64 builds available |
-| macOS ARM64 | <Badge text="Working" variant="success" /> | Apple Silicon (M1/M2/M3/M4) |
-| macOS Intel | <Badge text="Working" variant="success" /> | Intel x64 support |
-| Linux x64 | <Badge text="Working" variant="success" /> | Ubuntu, Fedora, Arch, and more |
-| Linux ARM64 | <Badge text="Working" variant="success" /> | Including Raspberry Pi support |
+OpenNOW is an Electron app split into three process layers:
 
----
+| Layer | Responsibility |
+|-------|---------------|
+| **Main** (Node.js) | OAuth, CloudMatch sessions, WebSocket signaling, settings, media storage |
+| **Preload** | Typed `window.openNow` IPC bridge via `contextBridge` |
+| **Renderer** (React) | UI, WebRTC peer connection, input capture, stats overlay, capture controls |
 
-## Known Issues
+The active source lives in `opennow-stable/src/`. Shared types in `src/shared/gfn.ts` keep both sides in sync.
 
-<Aside type="danger" title="Performance Notice">
-The app is being actively optimized. Report any issues on GitHub.
-</Aside>
-
-| Issue | Workaround |
-|-------|------------|
-| **High CPU usage** | Lower FPS/resolution. Optimization ongoing. |
-| **Green screen flashes** | Switch to H.264 codec in settings. |
-| **Audio stuttering** | Restart stream. Buffer improvements planned. |
-| **Laggy input feeling** | Enable low-latency mode in settings. |
-
----
-
-## Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `F2` | Toggle sidebar |
-| `F3` | Toggle stats overlay |
-| `F8` | Toggle mouse capture |
-| `F9` | Start/stop recording |
-| `F11` | Toggle fullscreen |
-| `Ctrl+Shift+Q` | Quit session |
-| `Ctrl+Shift+F10` | Toggle anti-AFK |
+<LinkCard title="Architecture deep-dive" href="/architecture/overview/" />
 
 ---
 
 ## Documentation
 
 <CardGrid>
-  <LinkCard title="Getting Started" href="/guides/getting-started/" description="Download, install, and run OpenNOW" />
-  <LinkCard title="Architecture" href="/architecture/overview/" description="How OpenNOW works internally" />
-  <LinkCard title="Configuration" href="/reference/configuration/" description="All settings and options" />
-  <LinkCard title="WebRTC Reference" href="/reference/webrtc/" description="Streaming protocol details" />
+  <LinkCard title="Getting Started" href="/guides/getting-started/" description="Download, install, or build from source" />
+  <LinkCard title="Configuration" href="/reference/configuration/" description="Every setting, its default, and where it's stored" />
+  <LinkCard title="Authentication" href="/reference/authentication/" description="OAuth + PKCE flow and token lifecycle" />
+  <LinkCard title="WebRTC" href="/reference/webrtc/" description="Signaling, SDP negotiation, and data channels" />
+  <LinkCard title="Media" href="/reference/media/" description="Screenshots, recordings, and local storage" />
+  <LinkCard title="Input" href="/reference/input/" description="Shortcuts, pointer lock, gamepad, clipboard, microphone" />
 </CardGrid>
 
 ---
-
-## Support
 
 <CardGrid>
-  <LinkCard 
-    title="Discord Community" 
-    href="https://discord.gg/8EJYaJcNfD" 
-    description="Get help and chat with other users"
+  <LinkCard
+    title="Discord"
+    href="https://discord.gg/8EJYaJcNfD"
+    description="Chat with other users and contributors"
   />
-  <LinkCard 
-    title="GitHub Issues" 
-    href="https://github.com/OpenCloudGaming/OpenNOW/issues" 
+  <LinkCard
+    title="GitHub Issues"
+    href="https://github.com/OpenCloudGaming/OpenNOW/issues"
     description="Report bugs or request features"
-  />
-  <LinkCard 
-    title="Sponsor Development" 
-    href="https://github.com/sponsors/OpenCloudGaming" 
-    description="Support continued development"
   />
 </CardGrid>
 
----
-
-<Aside type="tip" title="Open Source">
-OpenNOW is MIT licensed and open source. Contribute on [GitHub](https://github.com/OpenCloudGaming/OpenNOW).
-</Aside>
-
-<Aside type="tip" title="Not affiliated with NVIDIA">
-OpenNOW is an independent project not affiliated with NVIDIA Corporation. 
-GeForce NOW is a trademark of NVIDIA. Use at your own risk.
+<Aside type="caution" title="Not affiliated with NVIDIA">
+OpenNOW is an independent community project. NVIDIA and GeForce NOW are trademarks of NVIDIA Corporation.
 </Aside>
