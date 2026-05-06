@@ -1,89 +1,90 @@
 ---
 title: Input
-description: Keyboard, mouse, gamepad, clipboard, and microphone controls in OpenNOW
+description: Keyboard, mouse, gamepad, clipboard, microphone, shortcuts, and native input behavior in OpenNOW
 ---
 
-OpenNOW captures input in the renderer and sends it to the GFN server over WebRTC data channels. All shortcuts are user-configurable in settings.
+OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In native mode the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback on platforms without native OS-level capture.
 
 ## Default shortcuts
 
 | Shortcut | Action |
-|----------|--------|
+| --- | --- |
 | `F3` | Toggle stats overlay |
 | `F8` | Toggle pointer lock |
+| `F10` | Toggle fullscreen |
 | `F11` | Take screenshot |
 | `F12` | Start/stop recording |
 | `Ctrl+Shift+Q` | Stop session |
 | `Ctrl+Shift+K` | Toggle anti-AFK |
 | `Ctrl+Shift+M` | Toggle microphone |
 
-All shortcuts can be changed in the Settings page. On macOS, `Ctrl` is displayed as `Cmd` but the underlying binding uses the same key names.
+All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as `Cmd`, while the stored binding uses the same setting string.
 
-## Pointer lock and mouse
-
-- **Pointer lock** captures the cursor inside the stream view. Toggle with `F8` (default) or release by holding Escape.
-- **`mouseSensitivity`** — multiplier applied to raw mouse deltas (default `1`).
-- **`mouseAcceleration`** — software acceleration strength from 1 to 150 (percentage slider, default `1`).
-
-Mouse events are sent over the `input_channel_partially_reliable` data channel for lowest latency.
+`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage.
 
 ## Keyboard
 
-Keyboard events are captured and translated to virtual key codes + scan codes matching the Windows input model. They are sent over the `input_channel_v1` (reliable) data channel.
+Keyboard events are translated to Windows-style virtual key codes and scan codes. The `keyboardLayout` setting controls the layout used for that mapping. Web mode sends keyboard packets over `input_channel_v1`; native mode sends equivalent packets through the native child when its input channel is ready.
+
+## Pointer lock and mouse
+
+- Pointer lock captures the cursor inside the stream view. Toggle with `F8` by default.
+- `mouseSensitivity` defaults to `1` and scales relative movement.
+- `mouseAcceleration` defaults to `1` and is clamped to 1–150.
+- Latency-sensitive mouse deltas use `input_channel_partially_reliable`.
 
 ## Gamepad
 
-- Up to **4 controllers** are tracked via the browser Gamepad API.
-- Button presses and analog stick/trigger values are polled each frame and sent over the partially reliable channel.
-- A controller badge appears in the stream UI when a gamepad is connected.
+OpenNOW tracks up to four controllers through the browser Gamepad API. Button and analog state is polled and sent over the partially reliable input channel. Controller badges/loading states can appear while the app is waiting for a controller-focused library or launch flow to become ready.
+
+## Native input caveat
+
+Native OS-level input capture is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the native streamer keeps the GFN data channels active but Electron input forwarding remains the supported path. If native input readiness is not reported, the app should not assume the child can receive input packets.
 
 ## Clipboard paste
 
-When `clipboardPaste` is enabled, the app intercepts paste events and types the clipboard text into the stream as synthetic keystrokes. Clipboard payloads are limited to **64 KB**.
+When `clipboardPaste` is enabled, paste events are converted into synthetic keystrokes and sent to the stream. Clipboard payloads are limited to 64 KB.
 
 ## Microphone
 
-Microphone support has three modes controlled by `microphoneMode`:
-
 | Mode | Behavior |
-|------|----------|
-| `disabled` | No mic capture (default) |
-| `push-to-talk` | Hold the mic shortcut to transmit |
-| `voice-activity` | Always listening when enabled |
+| --- | --- |
+| `disabled` | No microphone capture |
+| `push-to-talk` | Hold/toggle the configured microphone shortcut to transmit |
+| `voice-activity` | Keep microphone capture active when enabled |
 
 Additional settings:
 
 | Setting | Purpose |
-|---------|---------|
-| `microphoneDeviceId` | Select a specific input device |
-| `shortcutToggleMicrophone` | Mute/unmute shortcut (default `Ctrl+Shift+M`) |
-| `hideStreamButtons` | Hide the stream overlay buttons (mic, fullscreen, end session) |
+| --- | --- |
+| `microphoneDeviceId` | Preferred input device; empty means system default |
+| `shortcutToggleMicrophone` | Default `Ctrl+Shift+M` |
+| `hideStreamButtons` | Hide stream overlay controls including microphone/fullscreen/end-session buttons |
 
-The microphone audio track is added to the `RTCPeerConnection` via `MicrophoneManager`.
+In web mode, `MicrophoneManager` adds the microphone track to the renderer `RTCPeerConnection`.
 
-## Controller mode
+## Controller mode UI
 
-Controller mode is a UI layout option, not a different input protocol. When enabled, the library switches to a controller-friendly grid with directional navigation.
+Controller mode changes navigation and layout, not the underlying GFN input protocol.
 
 | Setting | Description |
-|---------|-------------|
+| --- | --- |
 | `controllerMode` | Enable controller-first library layout |
-| `controllerUiSounds` | Play UI sounds in controller mode |
-| `controllerBackgroundAnimations` | Animated backgrounds on loading screens |
-| `autoLoadControllerLibrary` | Open controller library on app startup |
+| `controllerUiSounds` | Play UI sounds |
+| `controllerBackgroundAnimations` | Enable animated loading/background effects |
+| `controllerThemeStyle` | Theme style, default `aurora` |
+| `controllerThemeColor` | RGB accent color, default `{ r: 124, g: 241, b: 177 }` |
+| `controllerLibraryGameBackdrop` | Show selected game backdrop in controller library |
+| `autoLoadControllerLibrary` | Open controller library at startup |
 | `autoFullScreen` | Auto-enter fullscreen when controller mode triggers it |
+
+Queue/server selection and wait-time screens still apply in controller mode; controller-friendly loading surfaces are UI wrappers around the same CloudMatch launch state.
 
 ## Data channels
 
 | Channel | Reliability | Traffic |
-|---------|-------------|---------|
-| `input_channel_v1` | ordered, reliable | Keyboard, control messages |
-| `input_channel_partially_reliable` | unordered, partially reliable | Mouse deltas, gamepad state |
+| --- | --- | --- |
+| `input_channel_v1` | ordered, reliable | Keyboard and control messages |
+| `input_channel_partially_reliable` | unordered, partially reliable | Mouse deltas and gamepad state |
 
-## Source files
-
-- `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` — input encoding, mic management
-- `opennow-stable/src/renderer/src/gfn/inputProtocol.ts` — key/button mapping
-- `opennow-stable/src/renderer/src/components/StreamView.tsx` — shortcut handling, capture UI
-- `opennow-stable/src/renderer/src/components/SettingsPage.tsx` — shortcut and input settings
-- `opennow-stable/src/shared/gfn.ts` — `Settings` type with all input-related fields
+See [WebRTC](/reference/webrtc/) for signaling/data-channel negotiation and [Native Streamer](/reference/native-streamer/) for native protocol input events.

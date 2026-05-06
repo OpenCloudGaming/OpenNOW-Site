@@ -3,7 +3,7 @@ title: OpenNOW
 description: Open-source GeForce NOW desktop client — browse, stream, capture
 template: splash
 hero:
-  tagline: An open-source desktop client for GeForce NOW. Browse the catalog, tune your stream, and play — all from a community-built Electron app.
+  tagline: An open-source desktop client for GeForce NOW. Browse the catalog, tune your stream, and play from a community-built Electron app.
   image:
     file: ../../assets/houston.webp
   actions:
@@ -19,22 +19,22 @@ hero:
       icon: github
 ---
 
-import { Card, CardGrid, Aside, LinkCard, Steps, Badge } from '@astrojs/starlight/components';
+import { Card, CardGrid, Aside, LinkCard, Steps } from '@astrojs/starlight/components';
 
 ## Why OpenNOW?
 
 <CardGrid>
   <Card title="Open source" icon="open-book">
-    Fully open-source Electron + React + TypeScript client. No telemetry, no hidden parts.
+    Electron, React, TypeScript, and an optional Rust native streamer. No telemetry or hidden client code.
   </Card>
   <Card title="Stream your way" icon="setting">
-    Choose your codec (H.264 / H.265 / AV1), resolution, FPS, bitrate, aspect ratio, color depth, and region.
+    Use Chromium WebRTC by default or the optional Rust/GStreamer native streamer. Tune codec, color quality, resolution, FPS, bitrate, region, and queue server selection.
   </Card>
   <Card title="Built-in capture" icon="seti:video">
-    Take screenshots and record clips directly from the stream. Manage them in the app or reveal on disk.
+    Take screenshots and record clips from the renderer stream path, then manage them in the local gallery.
   </Card>
   <Card title="Controller-friendly" icon="seti:salesforce">
-    Full keyboard, mouse, and gamepad input — plus a dedicated controller-first browsing mode.
+    Keyboard, mouse, gamepad input, controller-first browsing, themed controller UI, and game backdrops.
   </Card>
 </CardGrid>
 
@@ -46,51 +46,50 @@ import { Card, CardGrid, Aside, LinkCard, Steps, Badge } from '@astrojs/starligh
 1. **Download** the latest release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
 
 2. **Install** the package for your platform:
-   - **Windows** — NSIS installer or portable `.exe`
-   - **macOS** — `.dmg` or `.zip` (Apple Silicon + Intel)
-   - **Linux** — `.AppImage` or `.deb` (x64 + ARM64)
+   - **Windows x64** — NSIS installer or portable `.exe` with native GStreamer runtime bundled
+   - **Windows ARM64** — NSIS installer or portable `.exe`
+   - **macOS** — `.dmg` or `.zip` for Intel and Apple Silicon
+   - **Linux** — `.AppImage` or `.deb` for x64 and ARM64
+   - **iOS** — TestFlight/prototype availability is linked from the project README when active
 
 3. **Sign in** with your NVIDIA GeForce NOW account.
 
-4. **Play** — browse games, launch a session, and tweak stream settings as you go.
+4. **Play** — browse games, pick a queue/server when needed, launch a session, and adjust stream settings.
 </Steps>
 
-<LinkCard
-  title="Full setup guide"
-  description="Download, install, or build from source"
-  href="/guides/getting-started/"
-/>
+<LinkCard title="Full setup guide" description="Download, install, first launch, or build from source" href="/guides/getting-started/" />
 
 ---
 
 ## Features
 
 | Category | What's included |
-|----------|----------------|
-| **Streaming** | WebRTC playback with codec selection (H.264, H.265, AV1), resolution up to 4K, FPS up to 360, bitrate cap, color quality modes, region preference, L4S support |
-| **Authentication** | Browser-based OAuth + PKCE with persistent session state and automatic token refresh |
-| **Game library** | Browse main catalog, personal library, and public game listings with search |
-| **Input** | Pointer lock, keyboard, mouse (sensitivity + acceleration tuning), gamepad (up to 4), clipboard paste |
-| **Microphone** | Disabled / push-to-talk / voice-activity modes with device selection and in-stream toggle |
-| **Capture** | Screenshots (PNG/JPG/WebP) and video recording (MP4/WebM) saved locally with in-app gallery |
-| **Diagnostics** | Live stats overlay — RTT, bitrate, packet loss, decode/render timing, input pressure, lag reason |
-| **Shortcuts** | Fully configurable hotkeys for stats, pointer lock, stop session, anti-AFK, mic toggle, screenshot, and recording |
-| **Controller mode** | Controller-first library UI with animated backgrounds, UI sounds, and auto-fullscreen options |
-| **Cross-platform** | Windows (x64, ARM64), macOS (Apple Silicon, Intel), Linux (x64, ARM64) |
+| --- | --- |
+| **Streaming** | Chromium WebRTC renderer path plus optional Rust/GStreamer native streamer child process |
+| **Native video** | GStreamer `webrtcbin` backend with Windows D3D12/D3D11, macOS VideoToolbox, Linux VAAPI/V4L2, and software fallback paths |
+| **Stream quality** | H.264/H.265/AV1 preferences, color-quality normalization, resolution up to 4K, FPS up to 360, bitrate cap, region, L4S, Cloud G-Sync/VRR setting |
+| **Authentication** | Browser OAuth + PKCE with persistent local auth state and token refresh |
+| **Game library** | Personal library, public catalog, search, queue server selector, and displayed wait-time/session state |
+| **Input** | Pointer lock, keyboard layout setting, mouse sensitivity/acceleration, gamepad support, clipboard paste, native input status where available |
+| **Session UI** | Stats-on-launch option, anti-AFK indicator, session timer, fullscreen shortcuts, update checks, Discord Rich Presence |
+| **Capture** | Renderer screenshots and MediaRecorder video capture saved locally with thumbnails and in-app gallery |
+| **Controller mode** | Controller-first library, UI sounds, background animations, theme style/color, and game backdrops |
+| **Cross-platform** | Windows x64/ARM64, macOS x64/arm64, Linux x64/arm64, plus the separate iOS prototype/TestFlight link when available |
 
 ---
 
 ## Architecture at a glance
 
-OpenNOW is an Electron app split into three process layers:
+OpenNOW is an Electron app with an optional native child-process layer:
 
 | Layer | Responsibility |
-|-------|---------------|
-| **Main** (Node.js) | OAuth, CloudMatch sessions, WebSocket signaling, settings, media storage |
+| --- | --- |
+| **Main** (Node.js) | OAuth, CloudMatch sessions, queue/session state, WebSocket signaling, settings, updater, Discord RPC, media storage, native streamer lifecycle |
 | **Preload** | Typed `window.openNow` IPC bridge via `contextBridge` |
-| **Renderer** (React) | UI, WebRTC peer connection, input capture, stats overlay, capture controls |
+| **Renderer** (React) | UI, library/controller mode, WebRTC renderer client, input capture, stats overlay, capture controls |
+| **Native streamer** (Rust, optional) | JSON-lines protocol v2 child process; GStreamer offer/answer, ICE, data channels, decode/render, input readiness, and native diagnostics |
 
-The active source lives in `opennow-stable/src/`. Shared types in `src/shared/gfn.ts` keep both sides in sync.
+The active source lives in `opennow-stable/src/`, shared contracts in `opennow-stable/src/shared/`, and the Rust streamer in `native/opennow-streamer/`.
 
 <LinkCard title="Architecture deep-dive" href="/architecture/overview/" />
 
@@ -99,27 +98,19 @@ The active source lives in `opennow-stable/src/`. Shared types in `src/shared/gf
 ## Documentation
 
 <CardGrid>
-  <LinkCard title="Getting Started" href="/guides/getting-started/" description="Download, install, or build from source" />
-  <LinkCard title="Configuration" href="/reference/configuration/" description="Every setting, its default, and where it's stored" />
-  <LinkCard title="Authentication" href="/reference/authentication/" description="OAuth + PKCE flow and token lifecycle" />
-  <LinkCard title="WebRTC" href="/reference/webrtc/" description="Signaling, SDP negotiation, and data channels" />
-  <LinkCard title="Media" href="/reference/media/" description="Screenshots, recordings, and local storage" />
-  <LinkCard title="Input" href="/reference/input/" description="Shortcuts, pointer lock, gamepad, clipboard, microphone" />
+  <LinkCard title="Getting Started" href="/guides/getting-started/" description="Download, install, first launch, or build from source" />
+  <LinkCard title="Native Streamer" href="/reference/native-streamer/" description="Rust/GStreamer protocol, settings, lookup, dependencies, and fallback behavior" />
+  <LinkCard title="Configuration" href="/reference/configuration/" description="Every setting, its default, and compatibility normalization" />
+  <LinkCard title="Architecture" href="/architecture/overview/" description="Process layout and data flow" />
+  <LinkCard title="WebRTC" href="/reference/webrtc/" description="Signaling, SDP negotiation, NVST SDP, data channels, and Chromium flags" />
+  <LinkCard title="Input" href="/reference/input/" description="Shortcuts, keyboard layout, native input caveats, gamepad, clipboard, microphone" />
 </CardGrid>
 
 ---
 
 <CardGrid>
-  <LinkCard
-    title="Discord"
-    href="https://discord.gg/8EJYaJcNfD"
-    description="Chat with other users and contributors"
-  />
-  <LinkCard
-    title="GitHub Issues"
-    href="https://github.com/OpenCloudGaming/OpenNOW/issues"
-    description="Report bugs or request features"
-  />
+  <LinkCard title="Discord" href="https://discord.gg/8EJYaJcNfD" description="Chat with other users and contributors" />
+  <LinkCard title="GitHub Issues" href="https://github.com/OpenCloudGaming/OpenNOW/issues" description="Report bugs or request features" />
 </CardGrid>
 
 <Aside type="caution" title="Not affiliated with NVIDIA">
