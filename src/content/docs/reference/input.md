@@ -3,7 +3,7 @@ title: Input
 description: Keyboard, mouse, gamepad, clipboard, microphone, shortcuts, and native input behavior in OpenNOW
 ---
 
-OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In native mode the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback on platforms without native OS-level capture.
+OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In experimental native mode the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback on platforms without native OS-level capture.
 
 ## Default shortcuts
 
@@ -24,7 +24,7 @@ All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as 
 
 ## Keyboard
 
-Keyboard events are translated to Windows-style virtual key codes and scan codes. The `keyboardLayout` setting controls the layout used for that mapping. Web mode sends keyboard packets over `input_channel_v1`; native mode sends equivalent packets through the native child when its input channel is ready.
+Keyboard events are translated to Windows-style virtual key codes and scan codes. The `keyboardLayout` setting controls the layout used for that mapping. Web mode sends keyboard packets over `input_channel_v1`; experimental native mode sends equivalent packets through the native child when its input channel is ready.
 
 ## Pointer lock and mouse
 
@@ -39,7 +39,7 @@ OpenNOW tracks up to four controllers through the browser Gamepad API. Button an
 
 ## Native input caveat
 
-Native OS-level input capture is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the native streamer keeps the GFN data channels active but Electron input forwarding remains the supported path. If native input readiness is not reported, the app should not assume the child can receive input packets.
+Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the native streamer keeps the GFN data channels active but Electron input forwarding remains the supported path. If native input readiness is not reported, the app should not assume the child can receive input packets.
 
 ## Clipboard paste
 

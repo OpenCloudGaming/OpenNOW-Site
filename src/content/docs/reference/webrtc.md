@@ -6,7 +6,7 @@ description: Signaling, SDP negotiation, NVST SDP, data channels, diagnostics, a
 OpenNOW has two streaming clients that share Electron-owned session lifecycle and NVST signaling:
 
 - **Web mode** (`streamClientMode: "web"`, default): the renderer owns Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
-- **Native mode**: the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared.
+- **Native mode** (experimental): the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared, and OpenNOW may fall back to web mode for platform-specific capability gaps.
 
 ## Source files
 
@@ -47,7 +47,7 @@ In web mode, the renderer:
 
 ## Native answer path
 
-In native mode, the main process sends the server offer to the Rust child with an `offer` command. The GStreamer backend uses `webrtcbin` to create the local answer and emits local ICE as protocol events. Electron still sends the answer and ICE through the same NVST signaling WebSocket, so CloudMatch, signaling auth, and session teardown stay centralized.
+In experimental native mode, the main process sends the server offer to the Rust child with an `offer` command. The GStreamer backend uses `webrtcbin` to create the local answer and emits local ICE as protocol events. Electron still sends the answer and ICE through the same NVST signaling WebSocket, so CloudMatch, signaling auth, and session teardown stay centralized.
 
 ## NVST SDP
 
@@ -75,7 +75,7 @@ The partially reliable threshold is read from the negotiated `a=ri.partialReliab
 
 Renderer WebRTC diagnostics poll `RTCPeerConnection.getStats()` for connection state, codec, resolution, HDR/color, bitrate, RTT, jitter, packet loss, frame decode/render timing, data-channel pressure, lag classification, and microphone state.
 
-Native mode emits protocol events instead: `status`, `input-ready`, `video-stall`, `video-transition`, `stats`, `log`, and `error`. See [Native Streamer](/reference/native-streamer/) for event fields and fallback behavior.
+Native mode emits protocol events instead: `status`, `input-ready`, `video-stall`, `video-transition`, `stats`, `log`, and `error`. See [Native Streamer](/reference/native-streamer/) for experimental status, event fields, issue reporting, and fallback behavior.
 
 ## Chromium acceleration flags
 

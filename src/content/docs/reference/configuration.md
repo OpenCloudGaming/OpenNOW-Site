@@ -24,7 +24,7 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `posterSizeScale` | `number` | `1` | Library poster scaling |
 | `fps` | `number` | `60` | Target frame rate |
 | `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps |
-| `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; native mode starts the Rust streamer |
+| `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; experimental native mode starts the Rust streamer and may fall back on unsupported platforms |
 | `nativeStreamerBackend` | `NativeStreamerBackendPreference` | `"gstreamer"` | Compatibility currently forces `gstreamer` |
 | `nativeVideoBackend` | `NativeVideoBackendPreference` | `"auto"` | Normalized to `auto`, `d3d11`, or `d3d12` |
 | `nativeStreamerExecutablePath` | `string` | `""` | Optional explicit native streamer path |
@@ -42,6 +42,8 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `enableL4S` | `boolean` | `false` | Request L4S behavior where supported |
 | `enableCloudGsync` | `boolean` | `false` | User-facing Cloud G-Sync/VRR preference |
 | `nativeTransitionDiagnostics` | internal/optional | `undefined` | Native transition diagnostics state |
+
+Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
 
 ## Input and shortcuts
 

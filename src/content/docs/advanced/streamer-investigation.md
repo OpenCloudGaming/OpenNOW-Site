@@ -3,7 +3,7 @@ title: Native Streamer Architecture
 description: Advanced notes on the Rust/GStreamer native streamer path
 ---
 
-OpenNOW now ships an optional native streamer path. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron.
+OpenNOW now ships an optional experimental native streamer path. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 ## Shipped design
 
@@ -24,7 +24,7 @@ GFN signaling WebSocket ── main process ── JSONL protocol v2 ── open
 | --- | --- |
 | Electron main | CloudMatch, signaling WebSocket, native executable lookup, environment variables, protocol supervision, fallback decisions |
 | Renderer | App UI, session controls, surface updates, Electron input forwarding fallback, web streamer path |
-| Rust streamer | Offer/answer, local ICE, input data channels, GStreamer pipeline, platform decode/render, native diagnostics |
+| Rust streamer | Offer/answer, local ICE, input data channels, experimental GStreamer pipeline, platform decode/render, native diagnostics |
 
 ## GStreamer backend
 
