@@ -5,11 +5,15 @@ description: Settings, protocol, executable lookup, GStreamer dependencies, diag
 
 The native streamer is an optional Rust child process used when `streamClientMode` is set to native mode. It is supervised by Electron and communicates over JSON-lines protocol version `2`.
 
+:::caution[Native streaming is experimental]
+Native streaming is experimental and may have platform-specific bugs, missing media capabilities, or fallback behavior. OpenNOW defaults to the web streamer unless native mode is explicitly enabled. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+:::
+
 ## Settings
 
 | Setting | Default/effective behavior | Purpose |
 | --- | --- | --- |
-| `streamClientMode` | `"web"` | Default renderer WebRTC path; native mode opts into the child process |
+| `streamClientMode` | `"web"` | Default renderer WebRTC path; experimental native mode opts into the child process |
 | `nativeStreamerBackend` | `"gstreamer"`; compatibility forces this value | Backend requested through `OPENNOW_NATIVE_STREAMER_BACKEND` when needed |
 | `nativeVideoBackend` | `"auto"` | Normalized to `auto`, `d3d11`, or `d3d12` |
 | `nativeStreamerExecutablePath` | `""` | Optional user-selected executable path |

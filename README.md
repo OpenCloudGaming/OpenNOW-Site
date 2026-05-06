@@ -22,6 +22,8 @@
 
 This repo hosts the public documentation website for [OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) — an open-source Electron desktop client for GeForce NOW. The app lives in `opennow-stable/` and uses Electron, React, and TypeScript.
 
+The native streamer docs describe an experimental opt-in feature that may have platform-specific bugs or fallback behavior. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+
 ## Pages
 
 | Section | Description |
@@ -32,6 +34,7 @@ This repo hosts the public documentation website for [OpenNOW](https://github.co
 | [WebRTC](https://opennow.zortos.me/reference/webrtc/) | Signaling, SDP, and data channels |
 | [Media](https://opennow.zortos.me/reference/media/) | Screenshots, recordings, and local storage |
 | [Input](https://opennow.zortos.me/reference/input/) | Shortcuts, pointer lock, gamepad, microphone |
+| [Native Streamer](https://opennow.zortos.me/reference/native-streamer/) | Experimental Rust/GStreamer streaming path, diagnostics, and fallback behavior |
 | [Configuration](https://opennow.zortos.me/reference/configuration/) | Settings model and defaults |
 
 ## Local development
