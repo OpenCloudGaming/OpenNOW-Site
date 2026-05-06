@@ -26,13 +26,14 @@ export default defineConfig({
         },
         {
           label: 'Advanced',
-          items: [{ label: 'Streamer Investigation', slug: 'advanced/streamer-investigation' }],
+          items: [{ label: 'Native Streamer Architecture', slug: 'advanced/streamer-investigation' }],
         },
         {
           label: 'Reference',
           items: [
             { label: 'Authentication', slug: 'reference/authentication' },
             { label: 'WebRTC', slug: 'reference/webrtc' },
+            { label: 'Native Streamer', slug: 'reference/native-streamer' },
             { label: 'Media', slug: 'reference/media' },
             { label: 'Input', slug: 'reference/input' },
             { label: 'Configuration', slug: 'reference/configuration' },
