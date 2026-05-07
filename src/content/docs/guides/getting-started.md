@@ -25,7 +25,7 @@ Artifact names use the app version, platform, and architecture, such as `OpenNOW
 2. Choose a provider if prompted.
 3. Sign in through the browser-based NVIDIA OAuth flow.
 4. Browse your library or the public catalog.
-5. Open Settings to choose resolution, FPS, bitrate, codec, region, controller mode, and other preferences.
+5. Open Settings to choose resolution, FPS, bitrate, codec, region, app language, controller mode, and other preferences.
 6. Launch a game. Queue and server-selection screens appear when GFN requires them.
 
 By default OpenNOW streams through Chromium/WebRTC in the renderer. The optional native streamer mode is experimental and uses a Rust child process with a GStreamer backend for video decode/rendering while Electron still owns session lifecycle and signaling. Native mode may have platform-specific bugs or missing media capabilities; if the native executable, backend, protocol, or platform capability is unavailable, OpenNOW reports the reason and falls back to the web streamer path. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
@@ -70,6 +70,7 @@ Packaged output is written under `opennow-stable/dist-release/`.
 | --- | --- |
 | Settings | `app.getPath("userData")/settings.json` |
 | Auth state | `app.getPath("userData")/auth-state.json` |
+| App language | Browser localStorage key `opennow.locale` |
 | Thumbnail cache | `app.getPath("userData")/media-thumbs/` |
 | Screenshots | `app.getPath("pictures")/OpenNOW/Screenshots/` |
 | Recordings | `app.getPath("pictures")/OpenNOW/Recordings/` |

@@ -33,6 +33,9 @@ Root scripts proxy into `opennow-stable/`:
 | `npm run native:check` | Run `cargo check` for `native/opennow-streamer` |
 | `npm run native:build` | Build the release Rust streamer and copy it into `native/opennow-streamer/bin` |
 | `npm run typecheck` | Run Node and renderer TypeScript checks |
+| `npm run locales:check` | Validate renderer translation keys and locale JSON files |
+| `npm run crowdin:upload` | Upload `locales/en.json` source strings to Crowdin |
+| `npm run crowdin:download` | Download translated locale JSON files from Crowdin |
 | `npm run dist` | Build app + native streamer, then package unsigned artifacts |
 | `npm run dist:signed` | Build app + native streamer, then package with signing enabled |
 
@@ -47,6 +50,7 @@ Workspace scripts available inside `opennow-stable/`:
 | `npm run native:check` | Cargo check the native streamer crate |
 | `npm run native:build` | Run `scripts/build-native-streamer.mjs` |
 | `npm run typecheck` | Type-check main/preload and renderer projects |
+| `npm run locales:check` | Validate renderer translation keys and locale JSON files |
 | `npm run build` | Production build only |
 | `npm run dist` | Unsigned electron-builder packaging |
 | `npm run dist:signed` | Signed electron-builder packaging |
@@ -54,6 +58,8 @@ Workspace scripts available inside `opennow-stable/`:
 ## Source layout
 
 ```text
+locales/                         Source and translated renderer locale JSON files
+
 opennow-stable/
 ├── src/main/                 Electron main process
 │   ├── gfn/                  Auth, catalog, CloudMatch, signaling
@@ -65,10 +71,17 @@ opennow-stable/
 ├── src/renderer/src/         React UI, stream view, settings, controller mode
 ├── src/shared/               Shared IPC, Settings, protocol, and GFN types
 ├── scripts/build-native-streamer.mjs
+├── scripts/check-translations.mjs
 └── package.json
 
 native/opennow-streamer/       Rust native streamer process
 ```
+
+## Localization
+
+Renderer UI strings live in `locales/en.json` as the English source file. Crowdin maps that file to `locales/%two_letters_code%.json` for translated locale files; the current settings UI labels English, Spanish, and French. Run `npm run locales:check` before merging localization changes to verify renderer `t("...")` keys exist in English and that non-English locale JSON files parse cleanly.
+
+At runtime the renderer loads `locales/*.json`, normalizes locale codes such as `en-US` or `en_US` to `en`, stores the selected app language in browser localStorage as `opennow.locale`, and falls back to English for missing files or keys.
 
 ## Native streamer builds
 

@@ -11,6 +11,7 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | --- | --- |
 | Settings | `app.getPath("userData")/settings.json` |
 | Auth state | `app.getPath("userData")/auth-state.json` |
+| App language | Browser localStorage key `opennow.locale` |
 | Thumbnail cache | `app.getPath("userData")/media-thumbs/` |
 | Screenshots | `app.getPath("pictures")/OpenNOW/Screenshots/` |
 | Recordings | `app.getPath("pictures")/OpenNOW/Recordings/` |
@@ -94,6 +95,10 @@ Native streamer settings control an experimental opt-in path. Keep `streamClient
 | `windowHeight` | `number` | `900` | Last window height |
 | `discordRichPresence` | `boolean` | `false` | Enable Discord Rich Presence |
 | `autoCheckForUpdates` | `boolean` | `true` | Check for app updates automatically |
+
+## App language
+
+App language is selected in Settings, but it is renderer UI state rather than a `Settings` JSON field. The selected locale is stored in browser localStorage as `opennow.locale`; when unset or invalid, OpenNOW falls back to the browser locale and then English. Translation files are loaded from `locales/*.json`, with `locales/en.json` as the English source file.
 
 ## Compatibility rules
 
