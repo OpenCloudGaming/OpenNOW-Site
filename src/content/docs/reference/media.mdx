@@ -3,15 +3,13 @@ title: Media
 description: Screenshots, recordings, and local media storage in OpenNOW
 ---
 
+import LocalDataLocationsTable from '../../../components/docs/LocalDataLocationsTable.astro';
+
 OpenNOW captures screenshots and recordings from the renderer video stream and stores them locally. Media is managed through the preload API and surfaced in the app UI. Native external rendering uses a separate surface, so renderer canvas/MediaRecorder capture behavior applies to the web/embedded video path.
 
 ## Storage locations
 
-| Type | Directory | Format |
-|------|-----------|--------|
-| Screenshots | `app.getPath("pictures")/OpenNOW/Screenshots/` | PNG, JPG, or WebP |
-| Recordings | `app.getPath("pictures")/OpenNOW/Recordings/` | MP4 or WebM |
-| Thumbnails | `app.getPath("userData")/media-thumbs/` | JPEG |
+<LocalDataLocationsTable variant="media" />
 
 ## Screenshots
 

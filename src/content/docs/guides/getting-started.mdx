@@ -3,6 +3,8 @@ title: Getting Started
 description: Download, install, first launch, and source builds for OpenNOW
 ---
 
+import LocalDataLocationsTable from '../../../components/docs/LocalDataLocationsTable.astro';
+
 OpenNOW is an open-source desktop client for GeForce NOW. The current app is the Electron client in `opennow-stable/`.
 
 ## Download a release
@@ -66,13 +68,6 @@ Packaged output is written under `opennow-stable/dist-release/`.
 
 ## Local data
 
-| Data | Location |
-| --- | --- |
-| Settings | `app.getPath("userData")/settings.json` |
-| Auth state | `app.getPath("userData")/auth-state.json` |
-| App language | Browser localStorage key `opennow.locale` |
-| Thumbnail cache | `app.getPath("userData")/media-thumbs/` |
-| Screenshots | `app.getPath("pictures")/OpenNOW/Screenshots/` |
-| Recordings | `app.getPath("pictures")/OpenNOW/Recordings/` |
+<LocalDataLocationsTable />
 
 Close the app before deleting these files to reset local state.

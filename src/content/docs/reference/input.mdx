@@ -3,6 +3,8 @@ title: Input
 description: Keyboard, mouse, gamepad, clipboard, microphone, shortcuts, and native input behavior in OpenNOW
 ---
 
+import DataChannelsTable from '../../../components/docs/DataChannelsTable.astro';
+
 OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In experimental native mode the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback on platforms without native OS-level capture.
 
 ## Default shortcuts
@@ -82,9 +84,6 @@ Queue/server selection and wait-time screens still apply in controller mode; con
 
 ## Data channels
 
-| Channel | Reliability | Traffic |
-| --- | --- | --- |
-| `input_channel_v1` | ordered, reliable | Keyboard and control messages |
-| `input_channel_partially_reliable` | unordered, partially reliable | Mouse deltas and gamepad state |
+<DataChannelsTable />
 
 See [WebRTC](/reference/webrtc/) for signaling/data-channel negotiation and [Native Streamer](/reference/native-streamer/) for native protocol input events.

@@ -3,6 +3,9 @@ title: Native Streamer Architecture
 description: Advanced notes on the Rust/GStreamer native streamer path
 ---
 
+import NativeEnvironmentVariablesTable from '../../../components/docs/NativeEnvironmentVariablesTable.astro';
+import NativePlatformVideoPathsTable from '../../../components/docs/NativePlatformVideoPathsTable.astro';
+
 OpenNOW now ships an optional experimental native streamer path. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 ## Shipped design
@@ -36,12 +39,7 @@ If the binary was built without the `gstreamer` feature, or if an unknown/unavai
 
 The backend chooses a low-latency platform path when plugins and drivers are available:
 
-| Platform | Preferred paths |
-| --- | --- |
-| Windows | D3D12 for high-FPS sessions, otherwise D3D11, then software fallback |
-| macOS | VideoToolbox, then software fallback |
-| Linux x64 | VAAPI, then V4L2, then software fallback |
-| Linux ARM/Raspberry Pi | V4L2 stateless, then VAAPI, then software fallback |
+<NativePlatformVideoPathsTable variant="preferred" />
 
 `nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12` in settings. Diagnostic environment overrides can force broader paths while testing.
 
@@ -53,18 +51,7 @@ Windows x64 and macOS release jobs can bundle a private GStreamer runtime next t
 
 ## Environment variables
 
-| Variable | Purpose |
-| --- | --- |
-| `OPENNOW_NATIVE_STREAMER` | Override executable lookup |
-| `OPENNOW_NATIVE_STREAMER_PROTOCOL` | Protocol version expected by the child |
-| `OPENNOW_NATIVE_STREAMER_BACKEND` | Backend request; currently `gstreamer` or `stub` |
-| `OPENNOW_NATIVE_VIDEO_BACKEND` | User video backend preference, normalized by Electron settings |
-| `OPENNOW_NATIVE_VIDEO_API` | Diagnostic forced video API (`d3d12`, `d3d11`, `videotoolbox`, `vaapi`, `v4l2`, `software`) |
-| `OPENNOW_NATIVE_EXTERNAL_RENDERER` | Enable native external renderer path; compatibility currently forces this true |
-| `OPENNOW_NATIVE_CLOUD_GSYNC` | Native Cloud G-Sync/VRR mode |
-| `OPENNOW_NATIVE_D3D_FULLSCREEN` | Windows D3D fullscreen behavior |
-| `OPENNOW_NATIVE_PRESENT_MAX_FPS` | Diagnostic presentation limiter |
-| `OPENNOW_NATIVE_ZERO_COPY` | Diagnostic zero-copy mode control |
+<NativeEnvironmentVariablesTable variant="advanced" />
 
 Build-time variables include `OPENNOW_NATIVE_STREAMER_FEATURES`, `OPENNOW_NATIVE_STREAMER_TARGET`, `OPENNOW_NATIVE_STREAMER_PLATFORM_KEY`, and `OPENNOW_BUNDLE_GSTREAMER_RUNTIME`.
 

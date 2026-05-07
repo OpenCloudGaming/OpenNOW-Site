@@ -3,18 +3,13 @@ title: Configuration
 description: Settings model, defaults, compatibility normalization, and storage for OpenNOW
 ---
 
+import LocalDataLocationsTable from '../../../components/docs/LocalDataLocationsTable.astro';
+
 OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json`. The source model is `Settings` in `opennow-stable/src/shared/gfn.ts`; defaults and compatibility rules live in `opennow-stable/src/main/settings.ts`.
 
 ## File locations
 
-| Data | Path |
-| --- | --- |
-| Settings | `app.getPath("userData")/settings.json` |
-| Auth state | `app.getPath("userData")/auth-state.json` |
-| App language | Browser localStorage key `opennow.locale` |
-| Thumbnail cache | `app.getPath("userData")/media-thumbs/` |
-| Screenshots | `app.getPath("pictures")/OpenNOW/Screenshots/` |
-| Recordings | `app.getPath("pictures")/OpenNOW/Recordings/` |
+<LocalDataLocationsTable pathHeader="Path" />
 
 ## Video, stream, and native settings
 

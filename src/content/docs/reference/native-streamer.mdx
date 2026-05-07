@@ -3,6 +3,10 @@ title: Native Streamer
 description: Settings, protocol, executable lookup, GStreamer dependencies, diagnostics, and fallback behavior
 ---
 
+import GStreamerRuntimeStrategyTable from '../../../components/docs/GStreamerRuntimeStrategyTable.astro';
+import NativeEnvironmentVariablesTable from '../../../components/docs/NativeEnvironmentVariablesTable.astro';
+import NativePlatformVideoPathsTable from '../../../components/docs/NativePlatformVideoPathsTable.astro';
+
 The native streamer is an optional Rust child process used when `streamClientMode` is set to native mode. It is supervised by Electron and communicates over JSON-lines protocol version `2`.
 
 :::caution[Native streaming is experimental]
@@ -87,40 +91,19 @@ Packaged binaries are copied by `npm run native:build` into `native/opennow-stre
 
 Release packaging behavior:
 
-| Platform | Runtime strategy |
-| --- | --- |
-| Windows x64 | Bundle private GStreamer runtime next to `resources/native/opennow-streamer/win32-x64/opennow-streamer.exe` |
-| Windows ARM64 | Package app without native streamer build in the current release matrix |
-| macOS x64 / arm64 | Bundle private GStreamer runtime next to the platform streamer binary |
-| Linux x64 / arm64 | Use host distro GStreamer packages; `.deb` declares common dependencies |
+<GStreamerRuntimeStrategyTable />
 
 Linux users should install GStreamer base/good/bad/ugly/libav plugins plus hardware packages such as VAAPI, V4L2, GL, Vulkan, and distro driver packages where available.
 
 ## Platform video paths
 
-| Platform | Native backend paths |
-| --- | --- |
-| Windows | D3D12, D3D11, software fallback |
-| macOS | VideoToolbox, software fallback |
-| Linux x64 | VAAPI, V4L2, software fallback |
-| Linux ARM/Raspberry Pi | V4L2 stateless, VAAPI, software fallback |
+<NativePlatformVideoPathsTable />
 
 The backend logs selected decoder, renderer, memory mode, and fallback path at startup. D3D presentation limiting can be used to avoid stale-frame buildup when D3D11 is forced for high-FPS sessions.
 
 ## Environment variables
 
-| Variable | Set by | Purpose |
-| --- | --- | --- |
-| `OPENNOW_NATIVE_STREAMER` | User/dev | Override executable lookup |
-| `OPENNOW_NATIVE_STREAMER_PROTOCOL` | Electron | Expected protocol version |
-| `OPENNOW_NATIVE_STREAMER_BACKEND` | Electron/user | Backend request |
-| `OPENNOW_NATIVE_VIDEO_BACKEND` | Electron | User video backend preference |
-| `OPENNOW_NATIVE_EXTERNAL_RENDERER` | Electron | External native renderer flag |
-| `OPENNOW_NATIVE_CLOUD_GSYNC` | Electron | Cloud G-Sync/VRR mode |
-| `OPENNOW_NATIVE_D3D_FULLSCREEN` | Electron | Windows D3D fullscreen mode |
-| `OPENNOW_NATIVE_VIDEO_API` | User/dev | Force diagnostic video API |
-| `OPENNOW_NATIVE_PRESENT_MAX_FPS` | User/dev | Override presentation limiter |
-| `OPENNOW_NATIVE_ZERO_COPY` | User/dev | Diagnostic zero-copy setting |
+<NativeEnvironmentVariablesTable />
 
 Build variables: `OPENNOW_NATIVE_STREAMER_FEATURES`, `OPENNOW_NATIVE_STREAMER_TARGET`, `OPENNOW_NATIVE_STREAMER_PLATFORM_KEY`, and `OPENNOW_BUNDLE_GSTREAMER_RUNTIME`.
 
