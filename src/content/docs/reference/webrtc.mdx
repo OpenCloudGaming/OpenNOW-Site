@@ -3,6 +3,8 @@ title: WebRTC
 description: Signaling, SDP negotiation, NVST SDP, data channels, diagnostics, and Chromium acceleration in OpenNOW
 ---
 
+import DataChannelsTable from '../../../components/docs/DataChannelsTable.astro';
+
 OpenNOW has two streaming clients that share Electron-owned session lifecycle and NVST signaling:
 
 - **Web mode** (`streamClientMode: "web"`, default): the renderer owns Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
@@ -64,10 +66,7 @@ The NVST session describes these m-lines:
 
 ## Data channels
 
-| Channel | Reliability | Traffic |
-| --- | --- | --- |
-| `input_channel_v1` | ordered, reliable | Keyboard and control messages |
-| `input_channel_partially_reliable` | unordered, partially reliable | Mouse deltas and gamepad state |
+<DataChannelsTable />
 
 The partially reliable threshold is read from the negotiated `a=ri.partialReliableThresholdMs` SDP attribute. Native mode creates compatible data channels in the child process and reports `input-ready` before Electron sends native input packets.
 

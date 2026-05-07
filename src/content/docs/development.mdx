@@ -3,6 +3,8 @@ title: Development Guide
 description: Local setup, scripts, native streamer builds, CI, and release packaging
 ---
 
+import ReleasePackageMatrixTable from '../../components/docs/ReleasePackageMatrixTable.astro';
+
 OpenNOW's active desktop client lives in `opennow-stable/` in the [OpenCloudGaming/OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) repository. This site is the canonical public documentation for that codebase.
 
 ## Prerequisites
@@ -97,11 +99,6 @@ PRs and pushes that touch `native/**`, `opennow-stable/**`, or the CI workflow r
 
 The release workflow packages this matrix:
 
-| Target | Native/GStreamer behavior | Artifacts |
-| --- | --- | --- |
-| Windows x64 | Builds native streamer and bundles private GStreamer runtime | NSIS setup, portable exe, updater metadata |
-| Windows ARM64 | Packages app without native streamer build | NSIS setup, portable exe |
-| macOS x64 / arm64 | Builds native streamer and bundles private GStreamer runtime | `dmg`, `zip` |
-| Linux x64 / arm64 | Builds native streamer against host distro GStreamer packages | `AppImage`, `deb` |
+<ReleasePackageMatrixTable />
 
 Windows ARM64 artifacts are release downloads only; the Windows updater feed remains the x64 `latest.yml` channel. Manual releases can update `opennow-stable/package.json` and lockfile to the requested version before tagging so source archives match the app version.
