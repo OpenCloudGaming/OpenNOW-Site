@@ -64,24 +64,30 @@ locales/                         Source and translated renderer locale JSON file
 
 opennow-stable/
 ├── src/main/                 Electron main process
-│   ├── gfn/                  Auth, catalog, CloudMatch, signaling
-│   ├── nativeStreamer/       Rust child-process lifecycle and protocol bridge
+│   ├── gfn/                  Auth, service URLs, catalog, CloudMatch, NVST transport
+│   ├── ipc/                  Account/catalog/cache, session, and media IPC handlers
+│   ├── session/              Cloud G-Sync, session conflict, selection/lifecycle helpers
+│   ├── signaling/            Signaling IPC coordinator and native-streamer routing
+│   ├── media/                Screenshot/recording persistence and thumbnails
+│   ├── services/             Cache services, PrintedWaste queue metadata, region ping, timeouts
+│   ├── nativeStreamer/       Rust child-process lifecycle plus input/surface helpers
 │   ├── discordRpc.ts         Discord Rich Presence integration
 │   ├── updater.ts            electron-updater integration
-│   └── settings.ts           settings.json defaults and migration
+│   ├── settings.ts           settings.json defaults and migration
+│   └── index.ts              app bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring
 ├── src/preload/              contextBridge API
-├── src/renderer/src/         React UI, stream view, settings, controller mode
+├── src/renderer/src/         React UI, stream view, settings, hooks, controller mode
 ├── src/shared/               Shared IPC, Settings, protocol, and GFN types
 ├── scripts/build-native-streamer.mjs
 ├── scripts/check-translations.mjs
 └── package.json
 
-native/opennow-streamer/       Rust native streamer process
+native/opennow-streamer/       Rust native streamer process with modular GStreamer backend
 ```
 
 ## Localization
 
-Renderer UI strings live in `locales/en.json` as the English source file. Crowdin maps that file to `locales/%two_letters_code%.json` for translated locale files; the current settings UI labels English, Spanish, and French. Run `npm run locales:check` before merging localization changes to verify renderer `t("...")` keys exist in English and that non-English locale JSON files parse cleanly.
+Renderer UI strings live in `locales/en.json` as the English source file. Crowdin maps that file to `locales/%two_letters_code%.json` for translated locale files; current locale codes are `de`, `en`, `es`, `fr`, `ja`, `ko`, `nl`, `pl`, `ro`, `ru`, `tr`, and `zh`. The Settings UI friendly language names currently exist for English, Spanish, and French; other loaded locale codes fall back to uppercase codes. Run `npm run locales:check` before merging localization changes to verify renderer `t("...")` keys exist in English and that non-English locale JSON files parse cleanly.
 
 At runtime the renderer loads `locales/*.json`, normalizes locale codes such as `en-US` or `en_US` to `en`, stores the selected app language in browser localStorage as `opennow.locale`, and falls back to English for missing files or keys.
 

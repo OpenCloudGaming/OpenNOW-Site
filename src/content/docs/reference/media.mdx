@@ -50,7 +50,12 @@ Renderer                         Main process
 
 ## Source files
 
-- `opennow-stable/src/main/index.ts` — screenshot/recording IPC handlers
+- `opennow-stable/src/main/ipc/mediaHandlers.ts` — screenshot, recording, and media gallery IPC handlers
+- `opennow-stable/src/main/media/screenshots.ts` — screenshot persistence and listing
+- `opennow-stable/src/main/media/recordings.ts` — recording temp/final file lifecycle
+- `opennow-stable/src/main/media/thumbnails.ts` — thumbnail reads and regeneration
+- `opennow-stable/src/main/media/mediaFiles.ts` — filename and data URL validation helpers
+- `opennow-stable/src/main/mediaPaths.ts` — trusted OpenNOW media paths and playback URLs
 - `opennow-stable/src/preload/index.ts` — media API bridge
 - `opennow-stable/src/shared/gfn.ts` — `ScreenshotEntry`, `RecordingEntry`, `MediaListingResult` types
 - `opennow-stable/src/renderer/src/components/StreamView.tsx` — capture UI controls

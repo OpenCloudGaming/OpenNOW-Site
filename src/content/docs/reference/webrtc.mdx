@@ -14,11 +14,13 @@ OpenNOW has two streaming clients that share Electron-owned session lifecycle an
 
 | Role | File |
 | --- | --- |
-| WebSocket signaling | `opennow-stable/src/main/gfn/signaling.ts` |
+| WebSocket signaling transport | `opennow-stable/src/main/gfn/signaling.ts` |
+| Signaling IPC coordination + native bridge | `opennow-stable/src/main/signaling/signalingCoordinator.ts` |
 | Chromium startup flags | `opennow-stable/src/main/index.ts` |
 | Renderer peer connection + input | `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` |
 | SDP/NVST helpers | `opennow-stable/src/renderer/src/gfn/sdp.ts` |
-| Native protocol bridge | `opennow-stable/src/main/nativeStreamer/manager.ts` |
+| Native executable/protocol lifecycle | `opennow-stable/src/main/nativeStreamer/manager.ts` |
+| Native input/surface helpers | `opennow-stable/src/main/nativeStreamer/input.ts`, `opennow-stable/src/main/nativeStreamer/surface.ts` |
 | Native protocol/types | `opennow-stable/src/shared/nativeStreamer.ts`, `native/opennow-streamer/src/protocol.rs` |
 
 ## Signaling
@@ -35,6 +37,8 @@ wss://{signalingServer}/nvst/sign_in?peer_id={name}&version=2
 
 After the `peer_info` init message, incoming signaling messages are classified as SDP offers, ICE candidates, or peer messages that may need ACKs. Offers and ICE are routed to the active streaming client. Answers, NVST SDP, and local ICE candidates are sent back through the same main-process signaling client.
 
+Electron routes connect/disconnect, answer/ICE, native input, native render surface, native status, and Cloud G-Sync capability IPC through `SignalingCoordinator`. `GfnSignalingClient` remains the WebSocket transport; the coordinator decides whether incoming offers/ICE go to the renderer or native manager and sends answers/local ICE back through the client.
+
 ## Renderer peer connection
 
 In web mode, the renderer:
@@ -49,7 +53,7 @@ In web mode, the renderer:
 
 ## Native answer path
 
-In experimental native mode, the main process sends the server offer to the Rust child with an `offer` command. The GStreamer backend uses `webrtcbin` to create the local answer and emits local ICE as protocol events. Electron still sends the answer and ICE through the same NVST signaling WebSocket, so CloudMatch, signaling auth, and session teardown stay centralized.
+In experimental native mode, `SignalingCoordinator` sends the server offer to the Rust child through `NativeStreamerManager` with an `offer` command. The GStreamer backend uses `webrtcbin` to create the local answer and emits local ICE as protocol events. Electron still sends the answer and ICE through `GfnSignalingClient`, so CloudMatch, signaling auth, and session teardown stay centralized.
 
 ## NVST SDP
 

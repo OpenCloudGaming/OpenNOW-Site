@@ -10,20 +10,27 @@ OpenNOW is an Electron app with three always-present Electron layers and an opti
 ```text
 opennow-stable/src/
 ├── main/                    Electron main process
-│   ├── gfn/                 OAuth, service URLs, catalog, CloudMatch, signaling
-│   ├── nativeStreamer/      Rust child-process discovery, env setup, protocol bridge
+│   ├── gfn/                 OAuth, service URLs, catalog, CloudMatch, NVST transport
+│   ├── ipc/                 focused account/catalog, session, and media IPC handlers
+│   ├── session/             Cloud G-Sync preference, session conflict, selection/lifecycle helpers
+│   ├── signaling/           signaling IPC coordinator and native-streamer bridge
+│   ├── media/               screenshots, recordings, thumbnails, media file helpers
+│   ├── services/            PrintedWaste queue metadata, region ping, request timeout/cache services
+│   ├── nativeStreamer/      Rust child-process lifecycle plus input/surface helpers
+│   ├── mediaPaths.ts        trusted OpenNOW media URL protocol
 │   ├── discordRpc.ts        Discord Rich Presence lifecycle
 │   ├── updater.ts           update checks and electron-updater integration
 │   ├── settings.ts          settings defaults, migration, compatibility normalization
-│   └── index.ts             Chromium flags, windows, IPC, media handlers
+│   └── index.ts             app bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring
 ├── preload/                 typed contextBridge surface
 ├── renderer/src/
 │   ├── components/          app pages, StreamView, SettingsPage, queue server modal, controller library
 │   ├── gfn/                 renderer WebRTC client, SDP/NVST helpers, input protocol, microphone
+│   ├── hooks/               reusable runtime hooks, including queue ad playback/reporting
 │   └── utils/               diagnostics and UI helpers
 └── shared/                  IPC names, Settings, native streamer protocol/types, GFN models
 
-native/opennow-streamer/      Rust child process with stub and optional GStreamer backends
+native/opennow-streamer/      Rust child process with stub and modular GStreamer backend
 ```
 
 ## Process responsibilities
@@ -59,16 +66,26 @@ When experimental native mode is selected, the main process starts `opennow-stre
 
 | File | Purpose |
 | --- | --- |
-| `opennow-stable/src/main/index.ts` | App entry, Chromium/WebRTC flags, IPC, windows, media handlers |
+| `opennow-stable/src/main/index.ts` | App bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring |
+| `opennow-stable/src/main/ipc/accountCatalogHandlers.ts` | Auth/account/catalog/cache/community IPC |
+| `opennow-stable/src/main/ipc/sessionHandlers.ts` | Create/poll/claim/stop/session-ad IPC |
+| `opennow-stable/src/main/ipc/mediaHandlers.ts` | Screenshot, recording, and media gallery IPC |
+| `opennow-stable/src/main/signaling/signalingCoordinator.ts` | Signaling IPC coordination and native-streamer bridge |
+| `opennow-stable/src/main/session/*.ts` | Cloud G-Sync preference, active-session conflict handling, session selection/lifecycle helpers |
+| `opennow-stable/src/main/media/*.ts` | Screenshot/recording persistence, media file validation, thumbnail helpers |
+| `opennow-stable/src/main/mediaPaths.ts` | Trusted OpenNOW media path resolution and playback URL protocol |
+| `opennow-stable/src/main/services/*.ts` | PrintedWaste queue metadata, region ping, request timeout/cache services |
 | `opennow-stable/src/main/gfn/auth.ts` | OAuth + PKCE, token refresh, provider discovery |
 | `opennow-stable/src/main/gfn/cloudmatch.ts` | Session creation, queue polling, claim, stop |
 | `opennow-stable/src/main/gfn/signaling.ts` | NVST WebSocket signaling client |
 | `opennow-stable/src/main/nativeStreamer/manager.ts` | Native executable lookup, environment, protocol lifecycle, fallback |
+| `opennow-stable/src/main/nativeStreamer/input.ts`, `surface.ts` | Native input and render-surface normalization |
 | `opennow-stable/src/main/discordRpc.ts` | Discord Rich Presence updates |
 | `opennow-stable/src/main/updater.ts` | Automatic update checks |
 | `opennow-stable/src/main/settings.ts` | Settings defaults and compatibility normalization |
 | `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` | Renderer WebRTC peer connection, data channels, stats |
 | `opennow-stable/src/renderer/src/gfn/sdp.ts` | SDP and NVST SDP helpers |
+| `opennow-stable/src/renderer/src/hooks/useQueueAdRuntime.ts` | Queue ad playback/reporting watchdog runtime |
 | `opennow-stable/src/renderer/src/components/QueueServerSelectModal.tsx` | Queue server selection UI |
 | `opennow-stable/src/renderer/src/components/controllerMode/ControllerLibraryPage.tsx` | Controller-first library page |
 | `opennow-stable/src/renderer/src/components/controllerMode/controllerLibrary/ControllerLibraryLayout.tsx` | Controller library layout and navigation |
@@ -76,4 +93,6 @@ When experimental native mode is selected, the main process starts `opennow-stre
 | `opennow-stable/src/shared/nativeStreamer.ts` | TypeScript protocol v2 definitions |
 | `native/opennow-streamer/src/protocol.rs` | Rust protocol/session structs |
 | `native/opennow-streamer/src/backend.rs` | Backend selection and stub fallback |
-| `native/opennow-streamer/src/gstreamer_backend.rs` | GStreamer media backend and video diagnostics |
+| `native/opennow-streamer/src/gstreamer_backend.rs` | GStreamer backend orchestration |
+| `native/opennow-streamer/src/gstreamer_pipeline.rs` | GStreamer `webrtcbin` pipeline construction and negotiation |
+| `native/opennow-streamer/src/gstreamer_input.rs`, `gstreamer_liveness.rs`, `gstreamer_platform.rs`, `gstreamer_transitions.rs`, `gstreamer_config.rs` | Input channels, liveness diagnostics, platform paths, transition telemetry, backend configuration |
