@@ -31,7 +31,9 @@ GFN signaling WebSocket ── main process ── JSONL protocol v2 ── open
 
 ## GStreamer backend
 
-The `gstreamer` backend creates a `webrtcbin` pipeline, validates and adapts the remote SDP, negotiates the local answer, emits local ICE candidates, accepts remote ICE, opens the GFN input data channels, tracks input readiness, and shuts down the pipeline on stop.
+The `gstreamer` backend is split across focused Rust modules instead of a monolithic backend: `gstreamer_backend.rs` coordinates backend state, while `gstreamer_pipeline.rs`, `gstreamer_input.rs`, `gstreamer_liveness.rs`, `gstreamer_platform.rs`, `gstreamer_transitions.rs`, and `gstreamer_config.rs` own pipeline, input, diagnostics, platform, transition, and configuration details.
+
+Together, these modules create a `webrtcbin` pipeline, validate and adapt the remote SDP, negotiate the local answer, emit local ICE candidates, accept remote ICE, open the GFN input data channels, track input readiness, and shut down the pipeline on stop.
 
 If the binary was built without the `gstreamer` feature, or if an unknown/unavailable backend is requested, it reports `stub` capabilities with `requestedBackend` and `fallbackReason`. Electron uses that to fail the native attempt early and return to web mode instead of hanging.
 

@@ -39,6 +39,10 @@ The Rust binary reads `OPENNOW_NATIVE_STREAMER_BACKEND`. Valid runtime backend n
 
 When no backend is requested, the compiled default is `gstreamer` if the binary has the feature, otherwise `stub`. Unknown or unavailable backends return stub capabilities with `requestedBackend` and `fallbackReason`.
 
+## Source modules
+
+The Rust GStreamer path is split across focused source modules: `gstreamer_backend.rs` coordinates backend state, `gstreamer_pipeline.rs` builds and negotiates the `webrtcbin` pipeline, `gstreamer_input.rs` owns data channels/native input, `gstreamer_liveness.rs` emits stall diagnostics, `gstreamer_platform.rs` selects platform decode/render paths, `gstreamer_transitions.rs` tracks video path transitions, and `gstreamer_config.rs` normalizes backend configuration.
+
 ## Protocol v2
 
 Electron sends newline-delimited JSON commands on stdin and reads responses/events from stdout.
