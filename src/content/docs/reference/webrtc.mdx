@@ -8,7 +8,7 @@ import DataChannelsTable from '../../../components/docs/DataChannelsTable.astro'
 OpenNOW has two streaming clients that share Electron-owned session lifecycle and NVST signaling:
 
 - **Web mode** (`streamClientMode: "web"`, default): the renderer owns Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
-- **Native mode** (experimental): the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared, and OpenNOW may fall back to web mode for platform-specific capability gaps.
+- **Native mode** (experimental, currently Windows-only in the app): the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared, and OpenNOW may fall back to web mode for platform-specific capability gaps.
 
 ## Source files
 

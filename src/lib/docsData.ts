@@ -87,6 +87,12 @@ export const nativeStreamerEnvironmentVariables: NativeStreamerEnvironmentVariab
     diagnosticPurpose: 'Backend request; currently `gstreamer` or `stub`',
   },
   {
+    variable: 'OPENNOW_NATIVE_CODEC',
+    setBy: 'User/dev',
+    purpose: 'Override native offer codec during diagnostics',
+    diagnosticPurpose: 'Diagnostic codec override (`h264`, `h265`/`hevc`, or `av1`); otherwise the configured stream codec is used',
+  },
+  {
     variable: 'OPENNOW_NATIVE_VIDEO_BACKEND',
     setBy: 'Electron',
     purpose: 'User video backend preference',
@@ -94,7 +100,7 @@ export const nativeStreamerEnvironmentVariables: NativeStreamerEnvironmentVariab
   },
   {
     variable: 'OPENNOW_NATIVE_EXTERNAL_RENDERER',
-    setBy: 'Electron',
+    setBy: 'Electron on Windows',
     purpose: 'External native renderer flag',
     diagnosticPurpose: 'Enable native external renderer path; compatibility currently forces this true',
   },

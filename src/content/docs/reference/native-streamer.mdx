@@ -7,17 +7,21 @@ import GStreamerRuntimeStrategyTable from '../../../components/docs/GStreamerRun
 import NativeEnvironmentVariablesTable from '../../../components/docs/NativeEnvironmentVariablesTable.astro';
 import NativePlatformVideoPathsTable from '../../../components/docs/NativePlatformVideoPathsTable.astro';
 
-The native streamer is an optional Rust child process used when `streamClientMode` is set to native mode. It is supervised by Electron and communicates over JSON-lines protocol version `2`.
+The native streamer is an optional Rust child process used when `streamClientMode` is set to native mode on Windows. It is supervised by Electron and communicates over JSON-lines protocol version `2`.
 
 :::caution[Native streaming is experimental]
 Native streaming is experimental and may have platform-specific bugs, missing media capabilities, or fallback behavior. OpenNOW defaults to the web streamer unless native mode is explicitly enabled. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+:::
+
+:::note[Current platform gate]
+The app currently treats native streaming as a Windows-only experimental feature. On macOS and Linux, `streamClientMode: "native"` is normalized back to `"web"` and streamer status reports the Windows-only unsupported message. The Rust/GStreamer codebase still carries macOS/Linux backend paths and release tooling may build native binaries there, but those platforms are not exposed as supported native-streaming targets yet.
 :::
 
 ## Settings
 
 | Setting | Default/effective behavior | Purpose |
 | --- | --- | --- |
-| `streamClientMode` | `"web"` | Default renderer WebRTC path; experimental native mode opts into the child process |
+| `streamClientMode` | `"web"` | Default renderer WebRTC path; experimental native mode opts into the child process on Windows and is normalized back to web mode elsewhere |
 | `nativeStreamerBackend` | `"gstreamer"`; compatibility forces this value | Backend requested through `OPENNOW_NATIVE_STREAMER_BACKEND` when needed |
 | `nativeVideoBackend` | `"auto"` | Normalized to `auto`, `d3d11`, or `d3d12` |
 | `nativeStreamerExecutablePath` | `""` | Optional user-selected executable path |
@@ -78,7 +82,7 @@ Electron sends newline-delimited JSON commands on stdin and reads responses/even
 
 ## Executable lookup
 
-Electron starts the selected native executable and sets protocol/video environment variables for the child.
+Electron starts the selected native executable and sets protocol/video environment variables for the child on supported native-streaming platforms.
 
 Lookup order:
 
@@ -89,6 +93,8 @@ Lookup order:
 
 Packaged binaries are copied by `npm run native:build` into `native/opennow-streamer/bin`, including platform-specific directories such as `win32-x64`, `darwin-arm64`, `linux-x64`, or `linux-arm64`.
 
+On unsupported platforms, the manager returns the unsupported status before probing executable lookup or GStreamer runtime state.
+
 ## GStreamer dependencies and runtime layout
 
 `npm run native:build` builds a release Rust binary. By default it enables the `gstreamer` feature and verifies GStreamer capabilities. `OPENNOW_NATIVE_STREAMER_FEATURES=none` disables optional features.
@@ -97,7 +103,7 @@ Release packaging behavior:
 
 <GStreamerRuntimeStrategyTable />
 
-Linux users should install GStreamer base/good/bad/ugly/libav plugins plus hardware packages such as VAAPI, V4L2, GL, Vulkan, and distro driver packages where available.
+Linux package builds use distro GStreamer dependencies, but native streaming is still gated off in the app at runtime. Developers experimenting with the Rust backend on Linux should install GStreamer base/good/bad/ugly/libav plugins plus hardware packages such as VAAPI, V4L2, GL, Vulkan, and distro driver packages where available.
 
 ## Platform video paths
 
@@ -122,6 +128,7 @@ Fallback is expected and intentional when:
 - The binary reports `stub` because GStreamer was not compiled in.
 - A requested backend is unknown or unavailable.
 - Required GStreamer plugins or platform decoders are missing.
+- The app is running on a non-Windows platform, where native mode is currently normalized back to web mode.
 - Native streaming errors before a usable session is established.
 
 In those cases, OpenNOW returns to the web streamer path rather than leaving the user in a partial stream state.
