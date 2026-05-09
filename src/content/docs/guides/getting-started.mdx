@@ -13,10 +13,10 @@ Grab the latest build from [GitHub Releases](https://github.com/OpenCloudGaming/
 
 | Platform | Formats | Notes |
 | --- | --- | --- |
-| Windows x64 | NSIS installer, portable `.exe`, updater metadata | Native streamer builds include a bundled private GStreamer runtime |
+| Windows x64 | NSIS installer, portable `.exe`, updater metadata | Experimental native streamer is available and bundles a private GStreamer runtime |
 | Windows ARM64 | NSIS installer, portable `.exe` | Release download only; no native streamer build in the release matrix |
-| macOS x64 / arm64 | `.dmg`, `.zip` | Native streamer builds include a bundled private GStreamer runtime |
-| Linux x64 / arm64 | `.AppImage`, `.deb` | Native streamer expects distro GStreamer packages; `.deb` declares the common dependencies |
+| macOS x64 / arm64 | `.dmg`, `.zip` | App currently uses the web streamer path; native streaming is gated off at runtime |
+| Linux x64 / arm64 | `.AppImage`, `.deb` | App currently uses the web streamer path; `.deb` still declares common GStreamer dependencies for native backend work |
 | iOS | TestFlight/prototype links may be published from the project README | Separate prototype, not the desktop Electron app |
 
 Artifact names use the app version, platform, and architecture, such as `OpenNOW-v{version}-setup-x64.exe`, `OpenNOW-v{version}-mac-arm64.dmg`, or `OpenNOW-v{version}-linux-x64.AppImage`.
@@ -30,9 +30,9 @@ Artifact names use the app version, platform, and architecture, such as `OpenNOW
 5. Open Settings to choose resolution, FPS, bitrate, codec, region, app language, controller mode, and other preferences.
 6. Launch a game. Queue and server-selection screens appear when GFN requires them.
 
-By default OpenNOW streams through Chromium/WebRTC in the renderer. The optional native streamer mode is experimental and uses a Rust child process with a GStreamer backend for video decode/rendering while Electron still owns session lifecycle and signaling. Native mode may have platform-specific bugs or missing media capabilities; if the native executable, backend, protocol, or platform capability is unavailable, OpenNOW reports the reason and falls back to the web streamer path. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+By default OpenNOW streams through Chromium/WebRTC in the renderer. The optional native streamer mode is experimental, currently Windows-only in the app, and uses a Rust child process with a GStreamer backend for video decode/rendering while Electron still owns session lifecycle and signaling. Native mode may have platform-specific bugs or missing media capabilities; if the platform, native executable, backend, protocol, or media capability is unavailable, OpenNOW reports the reason and falls back to the web streamer path. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
-On Linux, native/AppImage use depends on system GStreamer libraries and plugins. Install base/good/bad/ugly/libav plugins plus VAAPI or V4L2 packages for hardware decode where your distro provides them.
+On Linux, runtime native streaming is not currently exposed by the app. Developers experimenting with the backend should use system GStreamer libraries and plugins: install base/good/bad/ugly/libav plugins plus VAAPI or V4L2 packages for hardware decode where your distro provides them.
 
 ## Build from source
 

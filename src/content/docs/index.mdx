@@ -28,7 +28,7 @@ import { Card, CardGrid, Aside, LinkCard, Steps } from '@astrojs/starlight/compo
     Electron, React, TypeScript, and an optional Rust native streamer. No telemetry or hidden client code.
   </Card>
   <Card title="Stream your way" icon="setting">
-    Use Chromium WebRTC by default or opt into the experimental Rust/GStreamer native streamer. Tune codec, color quality, resolution, FPS, bitrate, region, and queue server selection.
+    Use Chromium WebRTC by default or opt into the experimental Windows native Rust/GStreamer streamer. Tune codec, color quality, resolution, FPS, bitrate, region, and queue server selection.
   </Card>
   <Card title="Built-in capture" icon="seti:video">
     Take screenshots and record clips from the renderer stream path, then manage them in the local gallery.
@@ -60,7 +60,7 @@ import { Card, CardGrid, Aside, LinkCard, Steps } from '@astrojs/starlight/compo
 <LinkCard title="Full setup guide" description="Download, install, first launch, or build from source" href="/guides/getting-started/" />
 
 <Aside type="caution" title="Native streamer is experimental">
-OpenNOW defaults to Chromium/WebRTC. The Rust/GStreamer native streamer is opt-in, may hit platform-specific bugs or fallbacks, and should be enabled only if you are prepared to report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+OpenNOW defaults to Chromium/WebRTC. The Rust/GStreamer native streamer is opt-in on Windows, is currently gated off on macOS/Linux, may hit platform-specific bugs or fallbacks, and should be enabled only if you are prepared to report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 </Aside>
 
 ---
@@ -69,8 +69,8 @@ OpenNOW defaults to Chromium/WebRTC. The Rust/GStreamer native streamer is opt-i
 
 | Category | What's included |
 | --- | --- |
-| **Streaming** | Chromium WebRTC renderer path plus optional experimental Rust/GStreamer native streamer child process |
-| **Native video** | Experimental GStreamer `webrtcbin` backend with Windows D3D12/D3D11, macOS VideoToolbox, Linux VAAPI/V4L2, and software fallback paths |
+| **Streaming** | Chromium WebRTC renderer path plus optional experimental Rust/GStreamer native streamer child process on Windows |
+| **Native video** | Experimental GStreamer `webrtcbin` backend with Windows D3D12/D3D11; macOS/Linux backend paths exist in code but native mode is currently gated off in the app |
 | **Stream quality** | H.264/H.265/AV1 preferences, color-quality normalization, resolution up to 4K, FPS up to 360, bitrate cap, region, L4S, Cloud G-Sync/VRR setting |
 | **Authentication** | Browser OAuth + PKCE with persistent local auth state and token refresh |
 | **Game library** | Personal library, public catalog, search, queue server selector, and displayed wait-time/session state |

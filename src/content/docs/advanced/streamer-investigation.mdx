@@ -6,7 +6,7 @@ description: Advanced notes on the Rust/GStreamer native streamer path
 import NativeEnvironmentVariablesTable from '../../../components/docs/NativeEnvironmentVariablesTable.astro';
 import NativePlatformVideoPathsTable from '../../../components/docs/NativePlatformVideoPathsTable.astro';
 
-OpenNOW now ships an optional experimental native streamer path. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+OpenNOW now ships an optional experimental native streamer path on Windows. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 ## Shipped design
 
@@ -49,7 +49,7 @@ The backend chooses a low-latency platform path when plugins and drivers are ava
 
 Release builds use `npm run native:build`, which builds the Rust binary and copies it to `native/opennow-streamer/bin`. Packaged apps prefer `resources/native/opennow-streamer/<platformKey>/opennow-streamer(.exe)`.
 
-Windows x64 and macOS release jobs can bundle a private GStreamer runtime next to the selected streamer binary. The Electron manager detects that runtime and points only the child process at it. Linux packages rely on distro GStreamer packages; the `.deb` declares the common runtime dependencies.
+Windows x64 and macOS release jobs can bundle a private GStreamer runtime next to the selected streamer binary. The Electron manager detects that runtime and points only the child process at it on supported native-streaming platforms. Linux packages rely on distro GStreamer packages; the `.deb` declares the common runtime dependencies.
 
 ## Environment variables
 
@@ -72,8 +72,9 @@ These diagnostics are designed to make native fallback predictable under partial
 
 ## Known platform limitations
 
-- Native OS-level input capture is implemented on Windows. macOS and Linux keep the data channels active and rely on Electron input forwarding.
-- Linux native/AppImage usage depends on system GStreamer libraries and hardware-acceleration plugins.
+- Native streaming is currently gated on Windows in the app; macOS and Linux normalize native mode back to the renderer WebRTC path.
+- Native OS-level input capture is implemented on Windows.
+- Linux backend experiments depend on system GStreamer libraries and hardware-acceleration plugins.
 - Windows ARM64 release packaging currently does not build the native streamer.
 - Native external rendering is separate from the renderer `<video>` path, so renderer MediaRecorder/canvas capture features do not apply the same way.
 

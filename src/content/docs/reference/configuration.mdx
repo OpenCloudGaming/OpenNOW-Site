@@ -20,7 +20,7 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `posterSizeScale` | `number` | `1` | Library poster scaling |
 | `fps` | `number` | `60` | Target frame rate |
 | `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps |
-| `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; experimental native mode starts the Rust streamer and may fall back on unsupported platforms |
+| `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; experimental native mode starts the Rust streamer on Windows and is normalized back to web mode on unsupported platforms |
 | `nativeStreamerBackend` | `NativeStreamerBackendPreference` | `"gstreamer"` | Compatibility currently forces `gstreamer` |
 | `nativeVideoBackend` | `NativeVideoBackendPreference` | `"auto"` | Normalized to `auto`, `d3d11`, or `d3d12` |
 | `nativeStreamerExecutablePath` | `string` | `""` | Optional explicit native streamer path |
@@ -100,6 +100,7 @@ App language is selected in Settings, but it is renderer UI state rather than a 
 On load, OpenNOW merges saved settings with defaults, migrates legacy values, then saves the file if anything changed.
 
 - Codec/color combinations are normalized. `DEFAULT_STREAM_PREFERENCES` currently names H.264 + `10bit_420`, but H.264 does not support that effective combination in OpenNOW, so persisted/effective H.264 is normalized to `8bit_420`. Higher color qualities remain available only for codecs that support them.
+- `streamClientMode: "native"` is normalized back to `"web"` when the app is running on a non-Windows platform.
 - `nativeStreamerBackend` is forced to `gstreamer`.
 - `nativeExternalRenderer` is forced to `true`.
 - `nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12`.
