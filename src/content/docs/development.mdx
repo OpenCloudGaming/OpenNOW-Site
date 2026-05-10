@@ -72,6 +72,7 @@ opennow-stable/
 │   ├── services/             Cache services, PrintedWaste queue metadata, region ping, timeouts
 │   ├── nativeStreamer/       Rust child-process lifecycle plus input/surface helpers
 │   ├── discordRpc.ts         Discord Rich Presence integration
+│   ├── appBuildInfo.ts       packaged version/build metadata
 │   ├── updater.ts            electron-updater integration
 │   ├── settings.ts           settings.json defaults and migration
 │   └── index.ts              app bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring
@@ -101,7 +102,9 @@ See [Native Streamer](/reference/native-streamer/) for runtime behavior, environ
 
 ## CI and releases
 
-PRs and pushes that touch `native/**`, `opennow-stable/**`, or the CI workflow run the `auto-build.yml` validation job on Ubuntu 24.04 with Node.js 22. It installs workspace dependencies, then runs lint, typecheck, and tests.
+PRs and pushes run the `auto-build.yml` CI workflow. The `select-builds` job builds a platform matrix with official GitHub-hosted runners (`windows-2025`, `macos-15-intel`, `macos-15`, `ubuntu-24.04`, and `ubuntu-24.04-arm`). Pull requests that target `dev` validate the reduced Windows x64 and Linux x64 matrix; other events use the full Windows x64/ARM64, macOS x64/arm64, and Linux x64/arm64 matrix.
+
+Each matrix job installs the Electron workspace dependencies with Node.js 22, then runs lint, typecheck, and tests. The Node test harness discovers `src/**/*.test.ts`, runs them through `tsx --test`, and appends a GitHub step summary with discovered files, pass/fail counts, skipped/todo/cancelled counts, and runner startup errors when present. The CI workflow also writes a compact lint/typecheck/test summary to the job summary.
 
 The release workflow packages this matrix:
 
