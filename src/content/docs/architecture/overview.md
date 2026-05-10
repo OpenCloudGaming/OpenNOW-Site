@@ -19,6 +19,7 @@ opennow-stable/src/
 │   ├── nativeStreamer/      Rust child-process lifecycle plus input/surface helpers
 │   ├── mediaPaths.ts        trusted OpenNOW media URL protocol
 │   ├── discordRpc.ts        Discord Rich Presence lifecycle
+│   ├── appBuildInfo.ts      app version, embedded build number, and commit metadata
 │   ├── updater.ts           update checks and electron-updater integration
 │   ├── settings.ts          settings defaults, migration, compatibility normalization
 │   └── index.ts             app bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring
@@ -37,7 +38,7 @@ native/opennow-streamer/      Rust child process with stub and modular GStreamer
 
 | Layer | Responsibilities |
 | --- | --- |
-| Main process | OAuth/PKCE, provider discovery, CloudMatch create/poll/claim/stop, queue/server selection state, WebSocket signaling, settings, updater, Discord Rich Presence, media storage, native streamer process lifecycle |
+| Main process | OAuth/PKCE, provider discovery, CloudMatch create/poll/claim/stop, queue/server selection state, WebSocket signaling, settings, build metadata/updater, Discord Rich Presence, media storage, native streamer process lifecycle |
 | Preload | Narrow `window.openNow` API over IPC; isolates renderer from Node.js APIs |
 | Renderer | React app, login/library/settings, queue and launch UI, controller mode, shortcuts, renderer WebRTC playback, stats overlay, screenshots/recordings |
 | Native streamer (optional, experimental) | Windows-only Rust JSON-lines protocol v2 child process in the app; GStreamer `webrtcbin` offer/answer, local ICE, input data channels, video decode/render, stall/transition/stats diagnostics |
@@ -81,6 +82,7 @@ When experimental native mode is selected on Windows, the main process starts `o
 | `opennow-stable/src/main/nativeStreamer/manager.ts` | Native executable lookup, environment, protocol lifecycle, fallback |
 | `opennow-stable/src/main/nativeStreamer/input.ts`, `surface.ts` | Native input and render-surface normalization |
 | `opennow-stable/src/main/discordRpc.ts` | Discord Rich Presence updates |
+| `opennow-stable/src/main/appBuildInfo.ts` | App version, embedded build number, and commit metadata |
 | `opennow-stable/src/main/updater.ts` | Automatic update checks |
 | `opennow-stable/src/main/settings.ts` | Settings defaults and compatibility normalization |
 | `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` | Renderer WebRTC peer connection, data channels, stats |

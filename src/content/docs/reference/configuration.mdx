@@ -91,6 +91,12 @@ Native streamer settings control an experimental opt-in path. Keep `streamClient
 | `discordRichPresence` | `boolean` | `false` | Enable Discord Rich Presence |
 | `autoCheckForUpdates` | `boolean` | `true` | Check for app updates automatically |
 
+## Updates and build metadata
+
+The About settings page gets update state from `opennow-stable/src/main/updater.ts`. Packaged builds check GitHub Releases automatically 12 seconds after startup and then every 6 hours when `autoCheckForUpdates` is enabled; manual checks, downloads, and restart-to-install actions use the same updater controller. The updater does not auto-download or auto-install updates, allows prerelease updates only when the current app version is a prerelease, and can use `OPENNOW_GH_TOKEN` or `GH_TOKEN` for GitHub Releases requests.
+
+`opennow-stable/src/main/appBuildInfo.ts` combines `app.getVersion()` with build metadata embedded by `electron.vite.config.ts`. `OPENNOW_BUILD_NUMBER`, `BUILD_NUMBER`, or `GITHUB_RUN_NUMBER` becomes `currentBuildNumber`; `OPENNOW_BUILD_COMMIT` or `GITHUB_SHA` becomes the embedded commit. The Settings UI displays `currentDisplayVersion`, which is the package version plus ` (build N)` when a build number is available. In unpackaged development mode, updater state is disabled but still reports the same build-info fields.
+
 ## App language
 
 App language is selected in Settings, but it is renderer UI state rather than a `Settings` JSON field. The selected locale is stored in browser localStorage as `opennow.locale`; when unset or invalid, OpenNOW falls back to the browser locale and then English. Translation files are loaded from `locales/*.json`, with `locales/en.json` as the English source file.
