@@ -48,7 +48,7 @@ native/opennow-streamer/      Rust child process with stub and modular GStreamer
 | Flow | Main process | Renderer | Native streamer |
 | --- | --- | --- | --- |
 | Auth | Opens browser/callback server, exchanges and refreshes tokens | Starts login/logout, displays auth state | Not involved |
-| Launch | Creates session, polls queue, handles server selector, claims session | Shows launch/queue state | Receives session context only in native mode |
+| Launch | Creates session, polls queue, handles server selector, claims session, normalizes CloudMatch errors | Shows launch/queue state, including membership-upgrade errors from GFN playability responses | Receives session context only in native mode |
 | Signaling | Connects NVST WebSocket, receives offer/ICE, sends answers/candidates | Web mode: creates answer and local ICE | Native mode: receives offer command, returns answer and local ICE events |
 | Streaming | Chooses web vs experimental native mode on Windows; normalizes native mode back to web on unsupported platforms and falls back when native is unavailable | Web mode: Chromium `RTCPeerConnection`, `<video>/<audio>`, input channels, stats | Native mode: GStreamer `webrtcbin`, platform decode/render, input readiness, native stats/events |
 | Input | Provides IPC helpers and forwards native commands | Captures keyboard/mouse/gamepad/clipboard; web mode sends over data channels | Native mode sends encoded input after `input-ready`; non-Windows relies on Electron forwarding fallback |
