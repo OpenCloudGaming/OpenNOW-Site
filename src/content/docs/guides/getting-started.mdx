@@ -30,6 +30,8 @@ Artifact names use the app version, platform, and architecture, such as `OpenNOW
 5. Open Settings to choose resolution, FPS, bitrate, codec, region, app language, controller mode, and other preferences.
 6. Launch a game. Queue and server-selection screens appear when GFN requires them.
 
+Some GFN catalog entries require a specific membership tier. When NVIDIA reports `INSUFFICIENT_PLAYABILITY`, OpenNOW shows a membership-upgrade launch error instead of treating it as a duplicate-session conflict. If the catalog provides SKU-specific text or a minimum membership label, that text is used in the launch-error panel.
+
 By default OpenNOW streams through Chromium/WebRTC in the renderer. The optional native streamer mode is experimental, currently Windows-only in the app, and uses a Rust child process with a GStreamer backend for video decode/rendering while Electron still owns session lifecycle and signaling. Native mode may have platform-specific bugs or missing media capabilities; if the platform, native executable, backend, protocol, or media capability is unavailable, OpenNOW reports the reason and falls back to the web streamer path. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 On Linux, runtime native streaming is not currently exposed by the app. Developers experimenting with the backend should use system GStreamer libraries and plugins: install base/good/bad/ugly/libav plugins plus VAAPI or V4L2 packages for hardware decode where your distro provides them.

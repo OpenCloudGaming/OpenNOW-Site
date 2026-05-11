@@ -69,7 +69,14 @@ If refresh fails and the token is expired, the saved session is cleared and the 
 - Auth state is stored as plain JSON in the Electron `userData` directory — no OS keychain is used.
 - Requests use a GFN desktop user-agent string.
 
+## Launch and membership errors
+
+GFN can reject a launch with `INSUFFICIENT_PLAYABILITY` / `SessionInsufficientPlayabilityLevel (3237093718)` when the selected game requires a higher GeForce NOW membership tier. OpenNOW classifies that response as a membership-upgrade requirement, not a duplicate-session conflict. The launch UI prefers SKU-specific catalog copy from `catalogSkuStrings`, falls back to the game's `minimumMembershipTierLabel`, and otherwise uses the generic upgrade-required message.
+
 ## Source files
 
 - `opennow-stable/src/main/gfn/auth.ts`
+- `opennow-stable/src/main/gfn/errorCodes.ts`
+- `opennow-stable/src/main/gfn/games.ts`
+- `opennow-stable/src/renderer/src/lib/sessionState.ts`
 - `opennow-stable/src/shared/gfn.ts` (type definitions)
