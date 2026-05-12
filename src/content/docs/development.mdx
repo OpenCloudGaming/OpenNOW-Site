@@ -88,7 +88,7 @@ native/opennow-streamer/       Rust native streamer process with modular GStream
 
 ## Localization
 
-Renderer UI strings live in `locales/en.json` as the English source file. Crowdin maps that file to `locales/%two_letters_code%.json` for translated locale files; current locale codes are `de`, `en`, `es`, `fr`, `ja`, `ko`, `nl`, `pl`, `ro`, `ru`, `tr`, and `zh`. The Settings UI friendly language names currently exist for English, Spanish, and French; other loaded locale codes fall back to uppercase codes. Run `npm run locales:check` before merging localization changes to verify renderer `t("...")` keys exist in English and that non-English locale JSON files parse cleanly.
+Renderer UI strings live in `locales/en.json` as the English source file. Crowdin maps that file to `locales/%two_letters_code%.json` for translated locale files; current locale codes are `de`, `en`, `es`, `fr`, `ja`, `ko`, `nl`, `pl`, `ro`, `ru`, `tr`, and `zh`. The Settings UI defines friendly language names for every current locale code and falls back to uppercase codes for any newly loaded locale without a label. Run `npm run locales:check` before merging localization changes to verify renderer `t("...")` keys exist in English and that non-English locale JSON files parse cleanly.
 
 At runtime the renderer loads `locales/*.json`, normalizes locale codes such as `en-US` or `en_US` to `en`, stores the selected app language in browser localStorage as `opennow.locale`, and falls back to English for missing files or keys.
 
