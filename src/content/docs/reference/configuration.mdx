@@ -72,6 +72,7 @@ Native streamer settings control an experimental opt-in path. Keep `streamClient
 | `sessionCounterEnabled` | `boolean` | `false` | Enable session timer display behavior |
 | `sessionClockShowEveryMinutes` | `number` | `60` | Re-show the session timer every N minutes |
 | `sessionClockShowDurationSeconds` | `number` | `30` | Duration for each session timer display |
+| `appAccentColor` | `AppAccentColor` | `"green"` | Desktop UI accent preset: `green`, `blue`, `violet`, `amber`, or `rose` |
 
 ## Controller, window, and app behavior
 
@@ -112,6 +113,7 @@ On load, OpenNOW merges saved settings with defaults, migrates legacy values, th
 - `nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12`.
 - Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults.
 - `mouseAcceleration` is clamped to 1–150; legacy booleans become `100` or `1`.
+- `appAccentColor` is normalized to `green`, `blue`, `violet`, `amber`, or `rose`.
 - Controller theme style/color values are normalized to supported ranges.
 
 ## Related pages

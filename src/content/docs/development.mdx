@@ -102,7 +102,7 @@ See [Native Streamer](/reference/native-streamer/) for runtime behavior, environ
 
 ## CI and releases
 
-PRs and pushes run the `auto-build.yml` CI workflow. The `select-builds` job builds a platform matrix with official GitHub-hosted runners (`windows-2025`, `macos-15-intel`, `macos-15`, `ubuntu-24.04`, and `ubuntu-24.04-arm`). Pull requests that target `dev` validate the reduced Windows x64 and Linux x64 matrix; other events use the full Windows x64/ARM64, macOS x64/arm64, and Linux x64/arm64 matrix.
+PRs and pushes run the `auto-build.yml` CI workflow. The `select-builds` job builds a platform matrix on sponsored Blacksmith runners (`blacksmith-2vcpu-windows-2025`, `blacksmith-6vcpu-macos-15`, `blacksmith-2vcpu-ubuntu-2404`, and `blacksmith-2vcpu-ubuntu-2404-arm`). Pull requests that target `dev` validate the reduced Windows x64 and Linux x64 matrix; other events use the full Windows x64/ARM64, macOS x64/arm64, and Linux x64/arm64 matrix.
 
 Each matrix job installs the Electron workspace dependencies with Node.js 22, then runs lint, typecheck, and tests. The Node test harness discovers `src/**/*.test.ts`, runs them through `tsx --test`, and appends a GitHub step summary with discovered files, pass/fail counts, skipped/todo/cancelled counts, and runner startup errors when present. The CI workflow also writes a compact lint/typecheck/test summary to the job summary.
 
