@@ -27,8 +27,8 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `nativeCloudGsyncMode` | `NativeStreamerFeatureMode` | `"auto"` | Native Cloud G-Sync/VRR mode |
 | `nativeD3dFullscreenMode` | `NativeStreamerFeatureMode` | `"auto"` | Windows native fullscreen behavior |
 | `nativeExternalRenderer` | `boolean` | `true` | Compatibility currently forces `true` |
-| `codec` | `VideoCodec` | Source preference `H264` | Effective persisted H.264 uses `8bit_420` after compatibility normalization |
-| `colorQuality` | `ColorQuality` | Source preference `10bit_420` | Normalized to a supported combination; H.264 becomes `8bit_420` |
+| `codec` | `VideoCodec` | `"H264"` | Stream codec preference: `H264`, `H265`, or `AV1` |
+| `colorQuality` | `ColorQuality` | `"10bit_420"` | Bit-depth/chroma preference: `8bit_420`, `8bit_444`, `10bit_420`, or `10bit_444`; 10-bit color is treated separately from HDR |
 | `decoderPreference` | `string` | `"auto"` | Decoder preference hint |
 | `encoderPreference` | `string` | `"auto"` | Encoder preference hint sent with stream preferences |
 | `region` | `string` | `""` | Preferred region URL; empty means auto |
@@ -106,7 +106,7 @@ App language is selected in Settings, but it is renderer UI state rather than a 
 
 On load, OpenNOW merges saved settings with defaults, migrates legacy values, then saves the file if anything changed.
 
-- Codec/color combinations are normalized. `DEFAULT_STREAM_PREFERENCES` currently names H.264 + `10bit_420`, but H.264 does not support that effective combination in OpenNOW, so persisted/effective H.264 is normalized to `8bit_420`. Higher color qualities remain available only for codecs that support them.
+- Codec and color-quality values are normalized to the supported user-facing enum values. The default stream preference is H.264 + `10bit_420`; 10-bit color depth does not enable HDR, which is still hardcoded off until a separate HDR toggle exists.
 - `streamClientMode: "native"` is normalized back to `"web"` when the app is running on a non-Windows platform.
 - `nativeStreamerBackend` is forced to `gstreamer`.
 - `nativeExternalRenderer` is forced to `true`.
