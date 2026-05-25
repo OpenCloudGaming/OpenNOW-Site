@@ -43,6 +43,8 @@ OpenNOW tracks up to four controllers through the browser Gamepad API. Button an
 
 Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the app currently gates native streaming off and keeps the renderer WebRTC/input path. If native input readiness is not reported, the app should not assume the child can receive input packets.
 
+When the native streamer window has focus, OpenNOW's Electron shortcuts do not trigger inside that window. Use Alt+Tab to return focus to OpenNOW before using overlay, exit, fullscreen, stats, microphone, screenshot, or recording shortcuts.
+
 ## Clipboard paste
 
 When `clipboardPaste` is enabled, paste events are converted into synthetic keystrokes and sent to the stream. Clipboard payloads are limited to 64 KB.
