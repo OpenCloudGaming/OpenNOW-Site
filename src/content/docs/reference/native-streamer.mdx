@@ -28,11 +28,12 @@ The app currently treats native streaming as a Windows-only experimental feature
 | `nativeCloudGsyncMode` | `"auto"` | Forwarded to native child as Cloud G-Sync/VRR mode |
 | `nativeD3dFullscreenMode` | `"auto"` | Windows D3D fullscreen behavior |
 | `nativeExternalRenderer` | `true`; compatibility forces true | Use native external rendering |
+| `showNativeStreamerStats` | `false` | For native streaming, forwards the current render surface with `showStats: true` so the native renderer shows its own stats overlay |
 | `enableCloudGsync` | `false` | User-facing Cloud G-Sync/VRR preference |
 
 If native startup fails, protocol versions mismatch, the backend reports `stub`, or required platform media support is missing, OpenNOW falls back to the renderer WebRTC client with a diagnostic reason.
 
-Enabling native streaming from Settings opens an explicit experimental-feature confirmation before `streamClientMode` is changed to `"native"`. The setting only applies to new sessions. While the native streamer window has focus, OpenNOW's Electron shortcuts and overlay actions do not fire; Alt+Tab back to the OpenNOW window to stop the stream, toggle overlays, or use other app shortcuts.
+Enabling native streaming from Settings opens an explicit experimental-feature confirmation before `streamClientMode` is changed to `"native"`. The setting only applies to new sessions. The regular `F3` stats HUD is an Electron overlay and is hidden while the external native renderer is active; `showNativeStreamerStats` controls the native renderer's own diagnostics overlay instead. While the native streamer window has focus, OpenNOW's Electron shortcuts and overlay actions do not fire; Alt+Tab back to the OpenNOW window to stop the stream, toggle overlays, or use other app shortcuts.
 
 ## Backend selection
 
