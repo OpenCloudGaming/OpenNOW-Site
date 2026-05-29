@@ -26,7 +26,9 @@ All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as 
 
 ## Keyboard
 
-Keyboard events are translated to Windows-style virtual key codes and scan codes. The `keyboardLayout` setting controls the layout used for that mapping. Web mode sends keyboard packets over `input_channel_v1`; experimental native mode sends equivalent packets through the native child when its input channel is ready.
+Keyboard events are translated to Windows-style virtual key codes and sent with scancode `0`; the GFN server applies the session `keyboardLayout` to resolve regional layouts such as German, French, Spanish, and UK English. On macOS, English US/UK settings are mapped to GFN's `m-us` and `m-brit` layout identifiers when creating or claiming a session. Web mode sends keyboard packets over `input_channel_v1`; experimental native mode sends equivalent packets through the native child when its input channel is ready.
+
+When fullscreen keyboard lock is available, OpenNOW asks Chromium to lock Escape, F11, common browser/navigation keys, and common `Ctrl`/`Cmd` shortcut keys so those keys can reach the stream instead of the host browser.
 
 ## Pointer lock and mouse
 
