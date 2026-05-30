@@ -26,7 +26,9 @@ All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as 
 
 ## Keyboard
 
-Keyboard events are translated to Windows-style virtual key codes and scan codes. The `keyboardLayout` setting controls the layout used for that mapping. Web mode sends keyboard packets over `input_channel_v1`; experimental native mode sends equivalent packets through the native child when its input channel is ready.
+Keyboard events are translated to Windows-style virtual key codes and sent with scancode `0`, matching GeForce NOW's web client behavior so the server applies the selected layout instead of OpenNOW forcing a US physical-key mapping. The `keyboardLayout` setting controls the layout used by the remote session, which is important for regional layouts such as German where keys like `Y`, `Z`, and punctuation differ from US keyboards. Web mode sends keyboard packets over `input_channel_v1`; experimental native mode sends equivalent packets through the native child when its input channel is ready.
+
+When fullscreen is active, OpenNOW also makes a best-effort `navigator.keyboard.lock()` request for browser-reserved keys such as `Ctrl+T`, `Ctrl+N`, `F11`, Escape, Print Screen, and common browser/navigation keys so those shortcuts can reach the stream instead of the host browser when Chromium allows it.
 
 ## Pointer lock and mouse
 
