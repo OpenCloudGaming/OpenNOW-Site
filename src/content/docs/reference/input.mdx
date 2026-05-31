@@ -49,7 +49,7 @@ When the native streamer window has focus, OpenNOW's Electron shortcuts do not t
 
 ## Clipboard paste
 
-When `clipboardPaste` is enabled, paste events are converted into synthetic keystrokes and sent to the stream. Clipboard payloads are limited to 64 KB.
+While streaming, OpenNOW intercepts the host paste shortcut so local/browser paste behavior does not leak into the app UI. When `clipboardPaste` is enabled, OpenNOW reads text from the browser clipboard API and falls back to Electron's main-process clipboard bridge when needed, then converts up to 4096 mappable characters into synthetic keystrokes using the selected `keyboardLayout`. If clipboard text cannot be read, OpenNOW falls back to sending the remote paste shortcut.
 
 ## Microphone
 
@@ -76,12 +76,6 @@ Controller mode changes navigation and layout, not the underlying GFN input prot
 | Setting | Description |
 | --- | --- |
 | `controllerMode` | Enable controller-first library layout |
-| `controllerUiSounds` | Play UI sounds |
-| `controllerBackgroundAnimations` | Enable animated loading/background effects |
-| `controllerThemeStyle` | Theme style, default `aurora` |
-| `controllerThemeColor` | RGB accent color, default `{ r: 124, g: 241, b: 177 }` |
-| `controllerLibraryGameBackdrop` | Show selected game backdrop in controller library |
-| `autoLoadControllerLibrary` | Open controller library at startup |
 | `autoFullScreen` | Auto-enter fullscreen when controller mode triggers it |
 
 Queue/server selection and wait-time screens still apply in controller mode; controller-friendly loading surfaces are UI wrappers around the same CloudMatch launch state.
