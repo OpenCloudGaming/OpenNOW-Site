@@ -71,6 +71,7 @@ Native streamer settings control an experimental opt-in path. Keep `streamClient
 | `showStatsOnLaunch` | `boolean` | `false` | Open stats overlay when a session starts |
 | `hideServerSelector` | `boolean` | `false` | Skip/hide queue server selector UI where possible |
 | `sessionCounterEnabled` | `boolean` | `false` | Enable session timer display behavior |
+| `showSessionTimeRemainingInStatsOverlay` | `boolean` | `false` | Show the GFN session-limit countdown in the stats overlay |
 | `sessionClockShowEveryMinutes` | `number` | `60` | Re-show the session timer every N minutes |
 | `sessionClockShowDurationSeconds` | `number` | `30` | Duration for each session timer display |
 | `appAccentColor` | `AppAccentColor` | `"green"` | Desktop UI accent preset: `green`, `blue`, `violet`, `amber`, or `rose` |
@@ -80,12 +81,6 @@ Native streamer settings control an experimental opt-in path. Keep `streamClient
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
 | `controllerMode` | `boolean` | `false` | Controller-first library UI |
-| `controllerUiSounds` | `boolean` | `false` | UI sounds in controller mode |
-| `controllerBackgroundAnimations` | `boolean` | `false` | Animated backgrounds/loading screens |
-| `controllerThemeStyle` | `ControllerThemeStyle` | `"aurora"` | Controller UI theme style |
-| `controllerThemeColor` | RGB object | `{ r: 124, g: 241, b: 177 }` | Controller UI accent color |
-| `controllerLibraryGameBackdrop` | `boolean` | `true` | Show selected game backdrop in controller library |
-| `autoLoadControllerLibrary` | `boolean` | `false` | Open controller library on startup |
 | `autoFullScreen` | `boolean` | `false` | Auto-enter fullscreen when controller mode triggers it |
 | `favoriteGameIds` | `string[]` | `[]` | Saved favorites |
 | `windowWidth` | `number` | `1400` | Last window width |
@@ -115,7 +110,7 @@ On load, OpenNOW merges saved settings with defaults, migrates legacy values, th
 - Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults.
 - `mouseAcceleration` is clamped to 1–150; legacy booleans become `100` or `1`.
 - `appAccentColor` is normalized to `green`, `blue`, `violet`, `amber`, or `rose`.
-- Controller theme style/color values are normalized to supported ranges.
+- The short-lived legacy `sessionTimeRemainingDisplay: "stats" | "both"` value migrates to `showSessionTimeRemainingInStatsOverlay: true` and is removed from saved settings.
 
 ## Related pages
 
