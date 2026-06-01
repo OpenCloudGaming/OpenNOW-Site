@@ -29,6 +29,7 @@ export default defineConfig({
     }),
     react(),
     nitro({
+      preset: 'node-server',
       exportConditions: ['node', 'import', 'default'],
     }),
   ],
