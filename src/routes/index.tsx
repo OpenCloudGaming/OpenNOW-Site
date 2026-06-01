@@ -4,24 +4,17 @@ import {
   ArrowRight,
   BadgeCheck,
   Camera,
-  Cpu,
   Download,
   Gauge,
   Gamepad2,
   Code2,
   MonitorPlay,
-  Radio,
-  Settings2,
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
 
-export const Route = createFileRoute('/')({
-  component: Home,
-});
-
-const highlights = [
+const highlights: { title: string; description: string; icon: LucideIcon }[] = [
   {
     title: 'Stream tuning',
     description: 'Codec, bitrate, resolution, FPS, color depth, region, L4S, and Cloud G-Sync controls in one desktop UI.',
@@ -58,6 +51,14 @@ const stats = [
   ['Source', 'Electron · React · TypeScript'],
 ] as const;
 
+const buildCommands = [
+  'git clone https://github.com/OpenCloudGaming/OpenNOW.git',
+  'cd OpenNOW/opennow-stable',
+  'npm install',
+  'cd ..',
+  'npm run dev',
+] as const;
+
 function Home() {
   return (
     <HomeLayout {...baseOptions()}>
@@ -71,28 +72,28 @@ function Home() {
               Independent open-source GeForce NOW client
             </div>
             <h1 className="max-w-4xl text-balance text-5xl font-semibold tracking-[-0.04em] text-white sm:text-7xl">
-              Stream, tune, capture, and control GeForce NOW from an open desktop client.
+              Documentation for an open desktop GeForce NOW client.
             </h1>
             <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-slate-300">
-              OpenNOW documents the Electron app, the renderer WebRTC path, the settings model, capture tools, input handling, and the experimental native streamer without pretending the edge cases are cute.
+              OpenNOW documents the Electron app, the renderer WebRTC path, the settings model, capture tools, input handling, and the experimental native streamer — straight from the source, without pretending the edge cases are cute.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="https://github.com/OpenCloudGaming/OpenNOW/releases"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-emerald-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_18px_70px_rgba(52,211,153,0.3)] transition hover:bg-emerald-200"
-              >
-                <Download className="size-4" />
-                Download latest release
-                <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
-              </a>
               <Link
                 to="/docs/$"
                 params={{ _splat: '' }}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/7 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/12"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-emerald-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_18px_70px_rgba(52,211,153,0.3)] transition hover:bg-emerald-200"
               >
                 <MonitorPlay className="size-4" />
                 Read the docs
+                <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
               </Link>
+              <a
+                href="https://github.com/OpenCloudGaming/OpenNOW/releases"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/7 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/12"
+              >
+                <Download className="size-4" />
+                Download release
+              </a>
               <a
                 href="https://github.com/OpenCloudGaming/OpenNOW"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/8"
@@ -110,29 +111,30 @@ function Home() {
                 <span className="size-2 rounded-full bg-red-400" />
                 <span className="size-2 rounded-full bg-amber-300" />
                 <span className="size-2 rounded-full bg-emerald-300" />
-                <span className="ml-2 font-mono">OpenNOW session panel</span>
+                <span className="ml-2 font-mono">build from source</span>
               </div>
-              <div className="space-y-5 p-5">
-                <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/8 p-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-emerald-100/75">Active profile</p>
-                      <p className="mt-1 text-2xl font-semibold text-white">Balanced 1440p · AV1</p>
-                    </div>
-                    <Radio className="size-7 text-emerald-200" />
-                  </div>
-                  <div className="mt-5 grid grid-cols-3 gap-3 text-sm">
-                    <Metric label="FPS" value="120" />
-                    <Metric label="Bitrate" value="35 Mbps" />
-                    <Metric label="Latency" value="Stable" />
-                  </div>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Panel icon={Settings2} title="Settings" text="Codec, color, region, shortcuts, mic, capture." />
-                  <Panel icon={Cpu} title="Native path" text="Opt-in Rust/GStreamer backend for Windows testing." />
-                  <Panel icon={Gamepad2} title="Controller" text="Gamepad-first library mode and UI sounds." />
-                  <Panel icon={Camera} title="Capture" text="Screenshots, recordings, thumbnails, local gallery." />
-                </div>
+              <div className="p-5">
+                <pre className="overflow-x-auto font-mono text-sm leading-7 text-slate-200">
+                  <code>
+                    {buildCommands.map((command) => (
+                      <span key={command} className="block">
+                        <span className="select-none text-emerald-300">$ </span>
+                        {command}
+                      </span>
+                    ))}
+                  </code>
+                </pre>
+                <p className="mt-4 border-t border-white/10 pt-4 text-sm text-slate-400">
+                  Requires Node.js 22, npm, and Git. Packaged output lands in{' '}
+                  <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-emerald-100">opennow-stable/dist-release/</code>.
+                </p>
+                <Link
+                  to="/docs/$"
+                  params={{ _splat: 'guides/getting-started' }}
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-emerald-200 transition hover:text-emerald-100"
+                >
+                  Full install guide <ArrowRight className="size-4" />
+                </Link>
               </div>
             </div>
           </div>
@@ -145,6 +147,24 @@ function Home() {
               <p className="mt-2 text-sm font-medium text-white">{value}</p>
             </div>
           ))}
+        </section>
+
+        <section className="mx-auto w-full max-w-7xl px-6 pb-16">
+          <div className="mb-8">
+            <p className="text-sm font-medium text-emerald-200">What the client actually does</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Documented from the source.</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {highlights.map(({ title, description, icon: Icon }) => (
+              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur">
+                <span className="grid size-9 place-items-center rounded-xl border border-emerald-400/25 bg-emerald-400/10 text-emerald-200">
+                  <Icon className="size-5" />
+                </span>
+                <p className="mt-4 font-medium text-white">{title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="mx-auto w-full max-w-7xl px-6 pb-24">
@@ -179,29 +199,6 @@ function Home() {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-slate-950/50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
-    </div>
-  );
-}
-
-function Panel({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: LucideIcon;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-      <Icon className="size-5 text-emerald-200" />
-      <p className="mt-3 font-medium text-white">{title}</p>
-      <p className="mt-1 text-sm leading-5 text-slate-400">{text}</p>
-    </div>
-  );
-}
+export const Route = createFileRoute('/')({
+  component: Home,
+});
