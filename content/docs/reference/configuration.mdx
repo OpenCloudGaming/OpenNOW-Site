@@ -1,0 +1,119 @@
+---
+title: Configuration
+description: Settings model, defaults, compatibility normalization, and storage for OpenNOW
+---
+
+import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
+
+OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json`. The source model is `Settings` in `opennow-stable/src/shared/gfn.ts`; defaults and compatibility rules live in `opennow-stable/src/main/settings.ts`.
+
+## File locations
+
+<LocalDataLocationsTable pathHeader="Path" />
+
+## Video, stream, and native settings
+
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `resolution` | `string` | `"1920x1080"` | Stream resolution |
+| `aspectRatio` | `AspectRatio` | `"16:9"` | `16:9`, `16:10`, `21:9`, or `32:9` |
+| `posterSizeScale` | `number` | `1` | Library poster scaling |
+| `fps` | `number` | `60` | Target frame rate |
+| `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps |
+| `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; experimental native mode starts the Rust streamer on Windows and is normalized back to web mode on unsupported platforms |
+| `nativeStreamerBackend` | `NativeStreamerBackendPreference` | `"gstreamer"` | Compatibility currently forces `gstreamer` |
+| `nativeVideoBackend` | `NativeVideoBackendPreference` | `"auto"` | Normalized to `auto`, `d3d11`, or `d3d12` |
+| `nativeStreamerExecutablePath` | `string` | `""` | Optional explicit native streamer path |
+| `nativeCloudGsyncMode` | `NativeStreamerFeatureMode` | `"auto"` | Native Cloud G-Sync/VRR mode |
+| `nativeD3dFullscreenMode` | `NativeStreamerFeatureMode` | `"auto"` | Windows native fullscreen behavior |
+| `nativeExternalRenderer` | `boolean` | `true` | Compatibility currently forces `true` |
+| `showNativeStreamerStats` | `boolean` | `false` | Show the native streamer's own stats overlay during native streaming |
+| `codec` | `VideoCodec` | `"H264"` | Stream codec preference: `H264`, `H265`, or `AV1` |
+| `colorQuality` | `ColorQuality` | `"10bit_420"` | Bit-depth/chroma preference: `8bit_420`, `8bit_444`, `10bit_420`, or `10bit_444`; 10-bit color is treated separately from HDR |
+| `decoderPreference` | `string` | `"auto"` | Decoder preference hint |
+| `encoderPreference` | `string` | `"auto"` | Encoder preference hint sent with stream preferences |
+| `region` | `string` | `""` | Preferred region URL; empty means auto |
+| `sessionProxyEnabled` | `boolean` | `false` | Use an explicit proxy for session/signaling requests |
+| `sessionProxyUrl` | `string` | `""` | Proxy URL when enabled |
+| `gameLanguage` | `GameLanguage` | `"en_US"` | Game language sent to GFN |
+| `enableL4S` | `boolean` | `false` | Request L4S behavior where supported |
+| `enableCloudGsync` | `boolean` | `false` | User-facing Cloud G-Sync/VRR preference |
+| `nativeTransitionDiagnostics` | internal/optional | `undefined` | Native transition diagnostics state |
+
+Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
+
+## Input and shortcuts
+
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `clipboardPaste` | `boolean` | `false` | Paste clipboard text into the stream |
+| `mouseSensitivity` | `number` | `1` | Relative mouse delta multiplier |
+| `mouseAcceleration` | `number` | `1` | Acceleration strength clamped to 1–150 |
+| `shortcutToggleStats` | `string` | `"F3"` | Toggle stats overlay |
+| `shortcutTogglePointerLock` | `string` | `"F8"` | Toggle pointer lock |
+| `shortcutToggleFullscreen` | `string` | `"F10"` | Toggle fullscreen |
+| `shortcutStopStream` | `string` | `"Ctrl+Shift+Q"` | Stop session |
+| `shortcutToggleAntiAfk` | `string` | `"Ctrl+Shift+K"` | Toggle anti-AFK |
+| `shortcutToggleMicrophone` | `string` | `"Ctrl+Shift+M"` | Toggle microphone |
+| `shortcutScreenshot` | `string` | `"F11"` | Screenshot |
+| `shortcutToggleRecording` | `string` | `"F12"` | Start/stop recording |
+| `keyboardLayout` | `KeyboardLayout` | default keyboard layout | Keyboard scan-code layout used for input mapping |
+| `allowEscapeToExitFullscreen` | `boolean` | `false` | Let Escape exit fullscreen when enabled |
+
+## Microphone and stream UI
+
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `microphoneMode` | `MicrophoneMode` | `"disabled"` | Disabled, push-to-talk, or voice-activity |
+| `microphoneDeviceId` | `string` | `""` | Preferred input device ID |
+| `hideStreamButtons` | `boolean` | `false` | Hide stream overlay buttons |
+| `showAntiAfkIndicator` | `boolean` | `true` | Show anti-AFK status indicator |
+| `showStatsOnLaunch` | `boolean` | `false` | Open stats overlay when a session starts |
+| `hideServerSelector` | `boolean` | `false` | Skip/hide queue server selector UI where possible |
+| `sessionCounterEnabled` | `boolean` | `false` | Enable session timer display behavior |
+| `showSessionTimeRemainingInStatsOverlay` | `boolean` | `false` | Show the GFN session-limit countdown in the stats overlay |
+| `sessionClockShowEveryMinutes` | `number` | `60` | Re-show the session timer every N minutes |
+| `sessionClockShowDurationSeconds` | `number` | `30` | Duration for each session timer display |
+| `appAccentColor` | `AppAccentColor` | `"green"` | Desktop UI accent preset: `green`, `blue`, `violet`, `amber`, or `rose` |
+
+## Controller, window, and app behavior
+
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `controllerMode` | `boolean` | `false` | Controller-first library UI |
+| `autoFullScreen` | `boolean` | `false` | Auto-enter fullscreen when controller mode triggers it |
+| `favoriteGameIds` | `string[]` | `[]` | Saved favorites |
+| `windowWidth` | `number` | `1400` | Last window width |
+| `windowHeight` | `number` | `900` | Last window height |
+| `discordRichPresence` | `boolean` | `false` | Enable Discord Rich Presence |
+| `autoCheckForUpdates` | `boolean` | `true` | Check for app updates automatically |
+
+## Updates and build metadata
+
+The About settings page gets update state from `opennow-stable/src/main/updater.ts`. Packaged builds check GitHub Releases automatically 12 seconds after startup and then every 6 hours when `autoCheckForUpdates` is enabled; manual checks, downloads, and restart-to-install actions use the same updater controller. The updater does not auto-download or auto-install updates, allows prerelease updates only when the current app version is a prerelease, and can use `OPENNOW_GH_TOKEN` or `GH_TOKEN` for GitHub Releases requests.
+
+`opennow-stable/src/main/appBuildInfo.ts` combines `app.getVersion()` with build metadata embedded by `electron.vite.config.ts`. `OPENNOW_BUILD_NUMBER`, `BUILD_NUMBER`, or `GITHUB_RUN_NUMBER` becomes `currentBuildNumber`; `OPENNOW_BUILD_COMMIT` or `GITHUB_SHA` becomes the embedded commit. The Settings UI displays `currentDisplayVersion`, which is the package version plus ` (build N)` when a build number is available. In unpackaged development mode, updater state is disabled but still reports the same build-info fields.
+
+## App language
+
+App language is selected in Settings, but it is renderer UI state rather than a `Settings` JSON field. The selected locale is stored in browser localStorage as `opennow.locale`; when unset or invalid, OpenNOW falls back to the browser locale and then English. Translation files are loaded from `locales/*.json`, with `locales/en.json` as the English source file.
+
+## Compatibility rules
+
+On load, OpenNOW merges saved settings with defaults, migrates legacy values, then saves the file if anything changed.
+
+- Codec and color-quality values are normalized to the supported user-facing enum values. The default stream preference is H.264 + `10bit_420`; 10-bit color depth does not enable HDR, which is still hardcoded off until a separate HDR toggle exists.
+- `streamClientMode: "native"` is normalized back to `"web"` when the app is running on a non-Windows platform.
+- `nativeStreamerBackend` is forced to `gstreamer`.
+- `nativeExternalRenderer` is forced to `true`.
+- `nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12`.
+- Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults.
+- `mouseAcceleration` is clamped to 1–150; legacy booleans become `100` or `1`.
+- `appAccentColor` is normalized to `green`, `blue`, `violet`, `amber`, or `rose`.
+- The short-lived legacy `sessionTimeRemainingDisplay: "stats" | "both"` value migrates to `showSessionTimeRemainingInStatsOverlay: true` and is removed from saved settings.
+
+## Related pages
+
+- [Native Streamer](/docs/reference/native-streamer/)
+- [Input](/docs/reference/input/)
+- [WebRTC](/docs/reference/webrtc/)

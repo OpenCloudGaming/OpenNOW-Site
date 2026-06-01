@@ -1,0 +1,81 @@
+---
+title: Native Streamer Architecture
+description: Advanced notes on the Rust/GStreamer native streamer path
+---
+
+import NativeEnvironmentVariablesTable from '@/components/docs/NativeEnvironmentVariablesTable';
+import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
+
+OpenNOW now ships an optional experimental native streamer path on Windows. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+
+## Shipped design
+
+Electron still owns the GeForce NOW session lifecycle. The main process creates and claims the CloudMatch session, connects NVST signaling, receives the server offer, and forwards signaling payloads either to the renderer WebRTC client or to the native child process.
+
+The native process communicates over newline-delimited JSON on stdin/stdout. Protocol version is `2`. Electron sends commands and correlates responses by `id`; the native process also emits async events for logs, status, ICE, input readiness, video liveness, stats, and errors.
+
+```text
+GFN signaling WebSocket ── main process ── JSONL protocol v2 ── opennow-streamer
+        │                         │                                  │
+        │                         └─ fallback to renderer WebRTC      └─ GStreamer webrtcbin
+        └─ shared offer/ICE/answer flow
+```
+
+## Responsibilities
+
+| Component | Owns |
+| --- | --- |
+| Electron main | CloudMatch, signaling WebSocket, native executable lookup, environment variables, protocol supervision, fallback decisions |
+| Renderer | App UI, session controls, surface updates, Electron input forwarding fallback, web streamer path |
+| Rust streamer | Offer/answer, local ICE, input data channels, experimental GStreamer pipeline, platform decode/render, native diagnostics |
+
+## GStreamer backend
+
+The `gstreamer` backend is split across focused Rust modules instead of a monolithic backend: `gstreamer_backend.rs` coordinates backend state, while `gstreamer_pipeline.rs`, `gstreamer_input.rs`, `gstreamer_liveness.rs`, `gstreamer_platform.rs`, `gstreamer_transitions.rs`, and `gstreamer_config.rs` own pipeline, input, diagnostics, platform, transition, and configuration details.
+
+Together, these modules create a `webrtcbin` pipeline, validate and adapt the remote SDP, negotiate the local answer, emit local ICE candidates, accept remote ICE, open the GFN input data channels, track input readiness, and shut down the pipeline on stop.
+
+If the binary was built without the `gstreamer` feature, or if an unknown/unavailable backend is requested, it reports `stub` capabilities with `requestedBackend` and `fallbackReason`. Electron uses that to fail the native attempt early and return to web mode instead of hanging.
+
+## Platform decode/render selection
+
+The backend chooses a low-latency platform path when plugins and drivers are available:
+
+<NativePlatformVideoPathsTable variant="preferred" />
+
+`nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12` in settings. Diagnostic environment overrides can force broader paths while testing.
+
+## Runtime bundling
+
+Release builds use `npm run native:build`, which builds the Rust binary and copies it to `native/opennow-streamer/bin`. Packaged apps prefer `resources/native/opennow-streamer/<platformKey>/opennow-streamer(.exe)`.
+
+Windows x64 and macOS release jobs can bundle a private GStreamer runtime next to the selected streamer binary. The Electron manager detects that runtime and points only the child process at it on supported native-streaming platforms. Linux packages rely on distro GStreamer packages; the `.deb` declares the common runtime dependencies.
+
+## Environment variables
+
+<NativeEnvironmentVariablesTable variant="advanced" />
+
+Build-time variables include `OPENNOW_NATIVE_STREAMER_FEATURES`, `OPENNOW_NATIVE_STREAMER_TARGET`, `OPENNOW_NATIVE_STREAMER_PLATFORM_KEY`, and `OPENNOW_BUNDLE_GSTREAMER_RUNTIME`.
+
+## Diagnostics and liveness
+
+Native events include:
+
+- `status` for starting/ready/streaming/stopped state
+- `input-ready` when data channels are ready for input
+- `video-stall` with decoded/sink FPS, age, zero-copy flags, recovery attempt, and likely stage
+- `video-transition` for decoder/render path changes
+- `stats` for native stream telemetry
+- `error` for backend or protocol failures
+
+These diagnostics are designed to make native fallback predictable under partial failures.
+
+## Known platform limitations
+
+- Native streaming is currently gated on Windows in the app; macOS and Linux normalize native mode back to the renderer WebRTC path.
+- Native OS-level input capture is implemented on Windows.
+- Linux backend experiments depend on system GStreamer libraries and hardware-acceleration plugins.
+- Windows ARM64 release packaging currently does not build the native streamer.
+- Native external rendering is separate from the renderer `<video>` path, so renderer MediaRecorder/canvas capture features do not apply the same way.
+
+For the full reference, use [Native Streamer](/docs/reference/native-streamer/). For the shared signaling details, use [WebRTC](/docs/reference/webrtc/).
