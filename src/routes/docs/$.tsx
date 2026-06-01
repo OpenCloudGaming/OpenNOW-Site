@@ -15,6 +15,7 @@ import { baseOptions } from '@/lib/layout.shared';
 import { gitConfig } from '@/lib/shared';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { Code2, Download, MonitorPlay } from 'lucide-react';
 import { Suspense } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 
@@ -57,10 +58,16 @@ const clientLoader = browserCollections.docs.createClientLoader({
     },
   ) {
     return (
-      <DocsPage toc={toc}>
+      <DocsPage
+        toc={toc}
+        tableOfContent={{
+          style: 'clerk',
+          header: <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-fd-muted-foreground">On this page</p>,
+        }}
+      >
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+        <div className="-mt-3 mb-2 flex flex-wrap items-center gap-2 border-b pb-6">
           <MarkdownCopyButton markdownUrl={markdownUrl} />
           <ViewOptionsPopover
             markdownUrl={markdownUrl}
@@ -79,7 +86,40 @@ function Page() {
   const { pageTree, path, markdownUrl } = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout {...baseOptions()} tree={pageTree}>
+    <DocsLayout
+      {...baseOptions()}
+      tree={pageTree}
+      tabMode="top"
+      sidebar={{
+        collapsible: true,
+        banner: (
+          <a
+            href="https://github.com/OpenCloudGaming/OpenNOW/releases"
+            className="mb-3 flex items-center gap-3 rounded-xl border bg-fd-card p-3 text-sm transition hover:bg-fd-accent"
+          >
+            <span className="grid size-9 place-items-center rounded-lg bg-emerald-400/10 text-emerald-500">
+              <Download className="size-4" />
+            </span>
+            <span>
+              <span className="block font-medium">Latest release</span>
+              <span className="text-xs text-fd-muted-foreground">Grab desktop builds</span>
+            </span>
+          </a>
+        ),
+        footer: (
+          <div className="space-y-2 text-xs text-fd-muted-foreground">
+            <a className="flex items-center gap-2 transition hover:text-fd-foreground" href="https://github.com/OpenCloudGaming/OpenNOW">
+              <Code2 className="size-3.5" />
+              App repository
+            </a>
+            <a className="flex items-center gap-2 transition hover:text-fd-foreground" href="/">
+              <MonitorPlay className="size-3.5" />
+              OpenNOW home
+            </a>
+          </div>
+        ),
+      }}
+    >
       <Link to={markdownUrl} hidden />
       <Suspense>{clientLoader.useContent(path, { markdownUrl, path })}</Suspense>
     </DocsLayout>

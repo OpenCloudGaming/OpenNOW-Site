@@ -1,80 +1,106 @@
 ---
 title: OpenNOW
-description: Open-source GeForce NOW desktop client — browse, stream, capture
-icon: Gamepad2
+description: Product, setup, architecture, and troubleshooting docs for the open-source GeForce NOW desktop client
+icon: MonitorPlay
 ---
 
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Card, Cards } from 'fumadocs-ui/components/card';
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
 
-OpenNOW is an open-source desktop client for GeForce NOW. It keeps the GFN session lifecycle in Electron, streams through Chromium WebRTC by default, and includes an experimental Rust/GStreamer native streamer path for Windows testing.
+OpenNOW is an open-source desktop client for GeForce NOW. These docs cover the install path, the Electron app, the renderer WebRTC stream, settings, capture, input, and the experimental native streamer.
 
-<Cards>
-  <Card title="Download" href="https://github.com/OpenCloudGaming/OpenNOW/releases" description="Install the newest desktop release or grab portable artifacts." />
-  <Card title="Get started" href="/docs/guides/getting-started" description="Install, sign in, tune stream quality, and launch your first session." />
-  <Card title="GitHub" href="https://github.com/OpenCloudGaming/OpenNOW" description="Read the source, report bugs, and follow releases." />
-  <Card title="Discord" href="https://discord.gg/8EJYaJcNfD" description="Troubleshoot with other users and contributors." />
-</Cards>
-
-<Callout type="warning" title="Independent community project">
+<Callout type="info" title="Independent community project">
 OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of NVIDIA Corporation.
 </Callout>
 
-## Quick start
+<Cards>
+  <Card title="Install and play" icon={<Download />} href="/docs/guides/getting-started" description="Release packages, first launch, sign-in, app settings, and source builds." />
+  <Card title="Architecture map" icon={<Network />} href="/docs/architecture/overview" description="Main, preload, renderer, shared contracts, native process, and data ownership." />
+  <Card title="Configuration reference" icon={<SlidersHorizontal />} href="/docs/reference/configuration" description="Every setting, default, persisted key, and compatibility normalization rule." />
+  <Card title="WebRTC and signaling" icon={<Radio />} href="/docs/reference/webrtc" description="CloudMatch, SDP, ICE, NVST data channels, Chromium flags, and failure handling." />
+  <Card title="Native streamer" icon={<Cpu />} href="/docs/reference/native-streamer" description="Experimental Rust/GStreamer protocol, diagnostics, media caps, and fallback behavior." />
+  <Card title="Input and capture" icon={<Gamepad2 />} href="/docs/reference/input" description="Pointer lock, keyboard layout, gamepad, clipboard, microphone, screenshots, and recording." />
+</Cards>
+
+## Fast path
 
 <Steps>
   <Step>
-    **Download** the latest release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
+    **Download** the latest desktop release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
   </Step>
   <Step>
-    **Install** the package for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, or the iOS [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2).
+    **Install** the artifact for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, or the iOS TestFlight beta.
   </Step>
   <Step>
-    **Sign in** with your NVIDIA GeForce NOW account through the browser OAuth flow.
+    **Sign in** through the browser OAuth flow and let OpenNOW persist the session locally.
   </Step>
   <Step>
-    **Play** by browsing games, picking a queue/server when needed, launching a session, and adjusting stream settings.
+    **Tune** codec, resolution, FPS, bitrate, color quality, region, input, microphone, and capture settings from the app.
   </Step>
 </Steps>
 
-<Callout type="warning" title="Native streamer is experimental">
-OpenNOW defaults to Chromium/WebRTC. The Rust/GStreamer native streamer is opt-in on Windows, currently gated off on macOS/Linux, and can fall back to the web streamer when platform media support is missing.
-</Callout>
+## Choose your docs path
 
-## Features
+<Tabs items={['Users', 'Builders', 'Streaming internals']}>
+  <Tab>
+    - Start with [Getting Started](/docs/guides/getting-started).
+    - Keep [Configuration](/docs/reference/configuration) open when tuning quality, shortcuts, capture, and controller mode.
+    - Use [Media](/docs/reference/media) for screenshots, recordings, local storage, and gallery behavior.
+  </Tab>
+  <Tab>
+    - Read [Architecture](/docs/architecture/overview) before changing process-boundary code.
+    - Use [Development](/docs/development) for local scripts, checks, release packaging, and contribution workflow.
+    - Check [Authentication](/docs/reference/authentication) before touching provider, token, or session refresh logic.
+  </Tab>
+  <Tab>
+    - Read [WebRTC](/docs/reference/webrtc) for signaling, SDP negotiation, ICE, and NVST data channels.
+    - Use [Native Streamer](/docs/reference/native-streamer) for the Rust/GStreamer protocol and runtime gates.
+    - Use [Streamer Investigation](/docs/advanced/streamer-investigation) for backend strategy and diagnostics.
+  </Tab>
+</Tabs>
 
-| Category | What's included |
-| --- | --- |
-| **Streaming** | Chromium WebRTC renderer path plus optional experimental Rust/GStreamer native streamer child process on Windows |
-| **Native video** | Experimental GStreamer `webrtcbin` backend with Windows D3D12/D3D11; macOS/Linux backend paths exist in code but native mode is currently gated off in the app |
-| **Stream quality** | H.264/H.265/AV1 preferences, color-quality normalization, resolution up to 4K, FPS up to 360, bitrate cap, region, L4S, Cloud G-Sync/VRR setting |
-| **Authentication** | Browser OAuth + PKCE with persistent local auth state and token refresh |
-| **Game library** | Personal library, public catalog, search, queue server selector, displayed wait-time/session state, and membership-tier launch-error copy |
-| **Input** | Pointer lock, keyboard layout setting, mouse sensitivity/acceleration, gamepad support, clipboard paste, native input status where available |
-| **Session UI** | Stats-on-launch option, anti-AFK indicator, session timer, desktop accent color, app localization, fullscreen shortcuts, update checks, Discord Rich Presence |
-| **Capture** | Renderer screenshots and MediaRecorder video capture saved locally with thumbnails and in-app gallery |
-| **Controller mode** | Controller-first library, UI sounds, background animations, theme style/color, and game backdrops |
-| **Cross-platform** | Windows x64/ARM64, macOS x64/arm64, and Linux x64/arm64 desktop packages, plus an iOS TestFlight beta |
+## Repository map
 
-## Architecture at a glance
+<Files>
+  <Folder name="OpenNOW" defaultOpen>
+    <Folder name="opennow-stable" defaultOpen>
+      <Folder name="src/main" defaultOpen>
+        <File name="GFN auth, CloudMatch, settings, media, native process management" />
+      </Folder>
+      <Folder name="src/preload">
+        <File name="Typed IPC bridge exposed as window.openNow" />
+      </Folder>
+      <Folder name="src/renderer">
+        <File name="React UI, library, WebRTC playback, input, stats, capture" />
+      </Folder>
+      <Folder name="src/shared">
+        <File name="Serializable contracts shared across Electron boundaries" />
+      </Folder>
+    </Folder>
+    <Folder name="native">
+      <File name="Rust/GStreamer streamer implementation and build outputs" />
+    </Folder>
+    <Folder name="locales">
+      <File name="Source language and generated Crowdin translations" />
+    </Folder>
+  </Folder>
+</Files>
 
-| Layer | Responsibility |
-| --- | --- |
-| **Main** (Node.js) | OAuth, CloudMatch sessions, queue/session state, WebSocket signaling, settings, updater, Discord RPC, media storage, native streamer lifecycle |
-| **Preload** | Typed `window.openNow` IPC bridge via `contextBridge` |
-| **Renderer** (React) | UI, library/controller mode, WebRTC renderer client, input capture, stats overlay, capture controls |
-| **Native streamer** (Rust, optional, experimental) | JSON-lines protocol v2 child process; GStreamer offer/answer, ICE, data channels, decode/render, input readiness, and native diagnostics |
+## What is stable?
 
-The active source lives in `opennow-stable/src/`, shared contracts in `opennow-stable/src/shared/`, and the Rust streamer in `native/opennow-streamer/`.
-
-## Documentation map
-
-<Cards>
-  <Card title="Getting Started" href="/docs/guides/getting-started" description="Download, install, first launch, or build from source." />
-  <Card title="Architecture" href="/docs/architecture/overview" description="Electron process layout, data flow, and source ownership." />
-  <Card title="Native Streamer" href="/docs/reference/native-streamer" description="Experimental Rust/GStreamer protocol, settings, lookup, dependencies, and fallback behavior." />
-  <Card title="Configuration" href="/docs/reference/configuration" description="Every setting, its default, compatibility normalization, and storage." />
-  <Card title="WebRTC" href="/docs/reference/webrtc" description="Signaling, SDP negotiation, NVST SDP, data channels, and Chromium flags." />
-  <Card title="Input" href="/docs/reference/input" description="Shortcuts, keyboard layout, native input caveats, gamepad, clipboard, and microphone." />
-</Cards>
+<Accordions type="single">
+  <Accordion title="Default streaming path">
+    The default renderer path streams through Chromium WebRTC and is the production path for desktop packages.
+  </Accordion>
+  <Accordion title="Native streamer">
+    The Rust/GStreamer streamer is experimental, currently opt-in on Windows, and falls back to the web streamer when platform, protocol, backend, or media capability checks fail.
+  </Accordion>
+  <Accordion title="Session state">
+    OAuth, token refresh, provider/alliance behavior, CloudMatch session lifecycle, and launch errors are owned by the Electron main process.
+  </Accordion>
+</Accordions>

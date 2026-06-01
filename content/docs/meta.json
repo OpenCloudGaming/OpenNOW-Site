@@ -1,4 +1,6 @@
 {
   "title": "OpenNOW",
+  "icon": "MonitorPlay",
+  "defaultOpen": true,
   "pages": ["index", "guides", "development", "architecture", "reference", "advanced"]
 }

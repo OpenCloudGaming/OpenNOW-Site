@@ -1,4 +1,4 @@
-export const appName = 'OpenNOW Docs';
+export const appName = 'OpenNOW';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 
