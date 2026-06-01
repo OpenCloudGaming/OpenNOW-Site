@@ -112,10 +112,10 @@ function Page() {
               <Code2 className="size-3.5" />
               App repository
             </a>
-            <a className="flex items-center gap-2 transition hover:text-fd-foreground" href="/">
+            <Link className="flex items-center gap-2 transition hover:text-fd-foreground" to="/">
               <MonitorPlay className="size-3.5" />
               OpenNOW home
-            </a>
+            </Link>
           </div>
         ),
       }}

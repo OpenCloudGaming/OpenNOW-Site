@@ -45,10 +45,10 @@ const highlights = [
 ];
 
 const docs = [
-  ['Getting started', 'Install, sign in, choose quality settings, and launch your first game.', '/docs/guides/getting-started'],
-  ['Architecture', 'Main, preload, renderer, native streamer, IPC, and session ownership.', '/docs/architecture/overview'],
-  ['Configuration', 'Every setting, default, storage behavior, and compatibility rule.', '/docs/reference/configuration'],
-  ['WebRTC internals', 'Signaling, SDP, ICE, NVST data channels, and Chromium flags.', '/docs/reference/webrtc'],
+  ['Getting started', 'Install, sign in, choose quality settings, and launch your first game.', 'guides/getting-started'],
+  ['Architecture', 'Main, preload, renderer, native streamer, IPC, and session ownership.', 'architecture/overview'],
+  ['Configuration', 'Every setting, default, storage behavior, and compatibility rule.', 'reference/configuration'],
+  ['WebRTC internals', 'Signaling, SDP, ICE, NVST data channels, and Chromium flags.', 'reference/webrtc'],
 ] as const;
 
 const stats = [
@@ -158,10 +158,11 @@ function Home() {
             </Link>
           </div>
           <div className="grid gap-4 lg:grid-cols-4">
-            {docs.map(([title, description, href]) => (
-              <a
+            {docs.map(([title, description, splat]) => (
+              <Link
                 key={title}
-                href={href}
+                to="/docs/$"
+                params={{ _splat: splat }}
                 className="group rounded-3xl border border-white/10 bg-slate-900/65 p-6 text-left transition hover:-translate-y-1 hover:border-emerald-300/35 hover:bg-slate-900"
               >
                 <h3 className="text-lg font-semibold text-white">{title}</h3>
@@ -169,7 +170,7 @@ function Home() {
                 <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-emerald-200">
                   Read section <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
