@@ -29,11 +29,7 @@ export default defineConfig({
     }),
     react(),
     nitro({
-      externals: {
-        traceOptions: {
-          exportConditions: ['node', 'import', 'default'],
-        },
-      },
+      exportConditions: ['node', 'import', 'default'],
     }),
   ],
   resolve: {
