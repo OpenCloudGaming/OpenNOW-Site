@@ -62,26 +62,24 @@ const buildCommands = [
 function Home() {
   return (
     <HomeLayout {...baseOptions()}>
-      <main className="relative isolate min-h-screen overflow-hidden">
-        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_20%_0%,rgba(16,185,129,0.22),transparent_32rem),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.16),transparent_28rem),linear-gradient(180deg,rgba(2,6,23,0.98),rgba(5,12,22,0.94)_45%,rgba(7,13,22,1))]" />
-        <div className="opennow-grid absolute inset-0 -z-10 opacity-45" />
-        <section className="mx-auto grid w-full max-w-7xl gap-12 px-6 pb-16 pt-20 md:pt-28 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:pb-24">
+      <main className="flex flex-1 flex-col">
+        <section className="mx-auto grid w-full max-w-7xl gap-12 px-6 pb-16 pt-16 md:pt-24 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-sm text-emerald-100 shadow-[0_0_40px_rgba(16,185,129,0.16)]">
-              <BadgeCheck className="size-4" />
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-fd-card px-3 py-1 text-sm text-fd-muted-foreground">
+              <BadgeCheck className="size-4 text-emerald-500" />
               Independent open-source GeForce NOW client
             </div>
-            <h1 className="max-w-4xl text-balance text-5xl font-semibold tracking-[-0.04em] text-white sm:text-7xl">
+            <h1 className="text-balance text-4xl font-semibold tracking-tight text-fd-foreground sm:text-5xl">
               Documentation for an open desktop GeForce NOW client.
             </h1>
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-slate-300">
-              OpenNOW documents the Electron app, the renderer WebRTC path, the settings model, capture tools, input handling, and the experimental native streamer — straight from the source, without pretending the edge cases are cute.
+            <p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-fd-muted-foreground">
+              OpenNOW documents the Electron app, the renderer WebRTC path, the settings model, capture tools, input handling, and the experimental native streamer — straight from the source.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/docs/$"
                 params={{ _splat: '' }}
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-emerald-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_18px_70px_rgba(52,211,153,0.3)] transition hover:bg-emerald-200"
+                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-fd-primary px-5 py-2.5 text-sm font-medium text-fd-primary-foreground transition hover:opacity-90"
               >
                 <MonitorPlay className="size-4" />
                 Read the docs
@@ -89,14 +87,14 @@ function Home() {
               </Link>
               <a
                 href="https://github.com/OpenCloudGaming/OpenNOW/releases"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/7 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/12"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border bg-fd-card px-5 py-2.5 text-sm font-medium text-fd-foreground transition hover:bg-fd-accent"
               >
                 <Download className="size-4" />
                 Download release
               </a>
               <a
                 href="https://github.com/OpenCloudGaming/OpenNOW"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/8"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium text-fd-muted-foreground transition hover:bg-fd-accent hover:text-fd-foreground"
               >
                 <Code2 className="size-4" />
                 GitHub
@@ -104,64 +102,59 @@ function Home() {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -inset-8 -z-10 rounded-[3rem] bg-emerald-400/10 blur-3xl" />
-            <div className="overflow-hidden rounded-[2rem] border border-white/12 bg-slate-950/70 shadow-2xl shadow-emerald-950/40 backdrop-blur">
-              <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.03] px-5 py-3 text-xs text-slate-400">
-                <span className="size-2 rounded-full bg-red-400" />
-                <span className="size-2 rounded-full bg-amber-300" />
-                <span className="size-2 rounded-full bg-emerald-300" />
-                <span className="ml-2 font-mono">build from source</span>
-              </div>
-              <div className="p-5">
-                <pre className="overflow-x-auto font-mono text-sm leading-7 text-slate-200">
-                  <code>
-                    {buildCommands.map((command) => (
-                      <span key={command} className="block">
-                        <span className="select-none text-emerald-300">$ </span>
-                        {command}
-                      </span>
-                    ))}
-                  </code>
-                </pre>
-                <p className="mt-4 border-t border-white/10 pt-4 text-sm text-slate-400">
-                  Requires Node.js 22, npm, and Git. Packaged output lands in{' '}
-                  <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-emerald-100">opennow-stable/dist-release/</code>.
-                </p>
-                <Link
-                  to="/docs/$"
-                  params={{ _splat: 'guides/getting-started' }}
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-emerald-200 transition hover:text-emerald-100"
-                >
-                  Full install guide <ArrowRight className="size-4" />
-                </Link>
-              </div>
+          <div className="overflow-hidden rounded-xl border bg-fd-card shadow-sm">
+            <div className="flex items-center gap-2 border-b bg-fd-muted/40 px-4 py-3 text-xs text-fd-muted-foreground">
+              <span className="size-2.5 rounded-full bg-red-400/80" />
+              <span className="size-2.5 rounded-full bg-amber-400/80" />
+              <span className="size-2.5 rounded-full bg-emerald-400/80" />
+              <span className="ml-2 font-mono">build from source</span>
+            </div>
+            <div className="p-5">
+              <pre className="overflow-x-auto font-mono text-sm leading-7 text-fd-foreground">
+                <code>
+                  {buildCommands.map((command) => (
+                    <span key={command} className="block">
+                      <span className="select-none text-emerald-500">$ </span>
+                      {command}
+                    </span>
+                  ))}
+                </code>
+              </pre>
+              <p className="mt-4 border-t pt-4 text-sm text-fd-muted-foreground">
+                Requires Node.js 22, npm, and Git. Packaged output lands in{' '}
+                <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-xs text-fd-foreground">opennow-stable/dist-release/</code>.
+              </p>
+              <Link
+                to="/docs/$"
+                params={{ _splat: 'guides/getting-started' }}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-fd-primary transition hover:opacity-80"
+              >
+                Full install guide <ArrowRight className="size-4" />
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto grid w-full max-w-7xl gap-4 px-6 pb-14 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mx-auto grid w-full max-w-7xl gap-4 px-6 pb-16 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map(([label, value]) => (
-            <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200/70">{label}</p>
-              <p className="mt-2 text-sm font-medium text-white">{value}</p>
+            <div key={label} className="rounded-xl border bg-fd-card p-5">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-fd-muted-foreground">{label}</p>
+              <p className="mt-2 text-sm font-medium text-fd-foreground">{value}</p>
             </div>
           ))}
         </section>
 
         <section className="mx-auto w-full max-w-7xl px-6 pb-16">
-          <div className="mb-8">
-            <p className="text-sm font-medium text-emerald-200">What the client actually does</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Documented from the source.</h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground">What the client does</h2>
+          <p className="mt-2 text-fd-muted-foreground">Documented from the source.</p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {highlights.map(({ title, description, icon: Icon }) => (
-              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur">
-                <span className="grid size-9 place-items-center rounded-xl border border-emerald-400/25 bg-emerald-400/10 text-emerald-200">
+              <div key={title} className="rounded-xl border bg-fd-card p-5">
+                <span className="grid size-9 place-items-center rounded-lg bg-emerald-400/10 text-emerald-500">
                   <Icon className="size-5" />
                 </span>
-                <p className="mt-4 font-medium text-white">{title}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
+                <p className="mt-4 font-medium text-fd-foreground">{title}</p>
+                <p className="mt-2 text-sm leading-6 text-fd-muted-foreground">{description}</p>
               </div>
             ))}
           </div>
@@ -170,24 +163,24 @@ function Home() {
         <section className="mx-auto w-full max-w-7xl px-6 pb-24">
           <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="text-sm font-medium text-emerald-200">Documentation that matches the app</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Start where the problem is.</h2>
+              <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground">Start where the problem is</h2>
+              <p className="mt-2 text-fd-muted-foreground">Documentation that matches the app.</p>
             </div>
-            <Link to="/docs/$" params={{ _splat: '' }} className="text-sm font-medium text-emerald-200 hover:text-emerald-100">
+            <Link to="/docs/$" params={{ _splat: '' }} className="text-sm font-medium text-fd-primary hover:opacity-80">
               Open full docs →
             </Link>
           </div>
-          <div className="grid gap-4 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {docs.map(([title, description, splat]) => (
               <Link
                 key={title}
                 to="/docs/$"
                 params={{ _splat: splat }}
-                className="group rounded-3xl border border-white/10 bg-slate-900/65 p-6 text-left transition hover:-translate-y-1 hover:border-emerald-300/35 hover:bg-slate-900"
+                className="group rounded-xl border bg-fd-card p-5 text-left transition hover:bg-fd-accent"
               >
-                <h3 className="text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-400">{description}</p>
-                <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-emerald-200">
+                <h3 className="font-medium text-fd-foreground">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-fd-muted-foreground">{description}</p>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-fd-primary">
                   Read section <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
                 </span>
               </Link>

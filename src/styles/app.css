@@ -8,7 +8,6 @@
 
 html {
   scrollbar-gutter: stable;
-  color-scheme: dark;
 }
 
 html > body[data-scroll-locked] {
@@ -16,22 +15,6 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
-body {
-  background:
-    radial-gradient(circle at 20% 0%, rgba(16, 185, 129, 0.12), transparent 32rem),
-    radial-gradient(circle at 85% 10%, rgba(56, 189, 248, 0.1), transparent 30rem),
-    var(--color-fd-background);
-}
-
 ::selection {
-  background: rgba(52, 211, 153, 0.28);
-  color: white;
-}
-
-.opennow-grid {
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: linear-gradient(to bottom, black, transparent 82%);
+  background: color-mix(in oklab, var(--color-fd-primary) 28%, transparent);
 }
