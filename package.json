@@ -6,8 +6,8 @@
   "sideEffects": false,
   "scripts": {
     "dev": "vite dev",
-    "start": "serve -s .output/public",
-    "build": "vite build",
+    "start": "serve -s dist",
+    "build": "vite build && rm -rf dist && cp -R .output/public dist",
     "preview": "vite preview",
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
