@@ -1,4 +1,6 @@
 {
   "title": "Reference",
+  "icon": "BookMarked",
+  "defaultOpen": true,
   "pages": ["authentication", "webrtc", "native-streamer", "media", "input", "configuration"]
 }

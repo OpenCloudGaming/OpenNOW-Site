@@ -1,4 +1,6 @@
 {
   "title": "Architecture",
+  "icon": "Network",
+  "defaultOpen": true,
   "pages": ["overview"]
 }

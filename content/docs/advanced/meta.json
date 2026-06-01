@@ -1,4 +1,6 @@
 {
   "title": "Advanced",
+  "icon": "FlaskConical",
+  "defaultOpen": true,
   "pages": ["streamer-investigation"]
 }
