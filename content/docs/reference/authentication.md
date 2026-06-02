@@ -1,9 +1,9 @@
 ---
 title: Authentication
-description: OAuth + PKCE login flow and token lifecycle in OpenNOW
+description: OAuth + PKCE, QR device login, and token lifecycle in OpenNOW
 ---
 
-OpenNOW authenticates with NVIDIA services using OAuth 2.0 + PKCE. The implementation lives in `opennow-stable/src/main/gfn/auth.ts` and runs entirely in the Electron main process.
+OpenNOW authenticates with NVIDIA services using two main-process flows: browser OAuth 2.0 + PKCE and QR/device authorization. The implementation lives in `opennow-stable/src/main/gfn/auth.ts`; the renderer only asks the preload bridge to start, poll, complete, or cancel login attempts.
 
 ## Provider discovery
 
@@ -15,7 +15,7 @@ https://pcs.geforcenow.com/v1/serviceUrls
 
 Each provider entry includes an `idpId`, display name, and streaming service base URL. The default provider is NVIDIA. Alliance partners (e.g. `BPC` → bro.game) are mapped to friendly display names.
 
-## Login flow
+## Browser login flow
 
 1. Generate a PKCE verifier + SHA-256 challenge.
 2. Find an available local port from `[2259, 6460, 7119, 8870, 9096]`.
@@ -25,17 +25,32 @@ Each provider entry includes an `idpId`, display name, and streaming service bas
 6. Exchange the code + PKCE verifier for tokens at `https://login.nvidia.com/token`.
 7. Fetch the user profile (JWT claims first, then `/userinfo` fallback).
 
+## QR/device login flow
+
+The login screen also exposes a **Sign in with QR** path for users who prefer authorizing from another device.
+
+1. The renderer calls `window.openNow.startDeviceLogin({ providerIdpId })`.
+2. The main process requests device authorization from `https://login.nvidia.com/device/authorize` using the Steam Deck NVIDIA client ID and the selected provider's `idp_id`.
+3. NVIDIA returns a `device_code`, `user_code`, `verification_uri`, `verification_uri_complete`, expiry timestamp, and poll interval.
+4. The renderer renders `verificationUriComplete` as a QR code and shows the `userCode` beside it.
+5. The renderer polls `window.openNow.pollDeviceLogin({ attemptId, deviceCode })` until NVIDIA returns `authorization_pending`, `slow_down`, `authorized`, `expired_token`, `access_denied`, or another error.
+6. On `authorized`, the main process builds a pending session from the device-code token exchange; the renderer then calls `completeDeviceLogin({ attemptId })` to persist it.
+7. Cancelling or expiring a QR attempt removes both the active device-code attempt and any pending session for that attempt.
+
 ### Key constants
 
 | Item | Value |
 |------|-------|
 | Client ID | `ZU7sPN-miLujMD95LfOQ453IB0AtjM8sMyvgJ9wCXEQ` |
+| QR/device client ID | `q61ddeJrVt7O90Nl-P-N7I36yctih4Ml6FyXLrb6j-U` |
 | Scopes | `openid consent email tk_client age` |
 | Authorize URL | `https://login.nvidia.com/authorize` |
+| Device authorize URL | `https://login.nvidia.com/device/authorize` |
 | Token URL | `https://login.nvidia.com/token` |
 | Client-token URL | `https://login.nvidia.com/client_token` |
 | Userinfo URL | `https://login.nvidia.com/userinfo` |
 | Origin header | `https://nvfile` |
+| QR/device Origin header | `https://play.geforcenow.com` |
 
 ## Token management
 
@@ -64,10 +79,12 @@ If refresh fails and the token is expired, the saved session is cleared and the 
 ## Implementation notes
 
 - The login flow runs in the main process, not the renderer.
+- QR login state is kept in memory as per-attempt device-code records plus pending sessions; only `completeDeviceLogin()` writes the session to `auth-state.json`.
+- QR login uses Steam Deck-style device metadata (`STEAMOS`, `STEAMDECK`, browser/WEBRTC headers) for the device authorization request.
 - Provider selection is persisted alongside session state.
 - A deterministic device ID is derived from the hostname and OS username.
 - Auth state is stored as plain JSON in the Electron `userData` directory — no OS keychain is used.
-- Requests use a GFN desktop user-agent string.
+- Browser OAuth requests use a GFN desktop user-agent string; QR/device login requests use the Steam Deck browser user-agent.
 
 ## Launch and membership errors
 
@@ -76,6 +93,9 @@ GFN can reject a launch with `INSUFFICIENT_PLAYABILITY` / `SessionInsufficientPl
 ## Source files
 
 - `opennow-stable/src/main/gfn/auth.ts`
+- `opennow-stable/src/main/ipc/accountCatalogHandlers.ts`
+- `opennow-stable/src/preload/index.ts`
+- `opennow-stable/src/renderer/src/components/LoginScreen.tsx`
 - `opennow-stable/src/main/gfn/errorCodes.ts`
 - `opennow-stable/src/main/gfn/games.ts`
 - `opennow-stable/src/renderer/src/lib/sessionState.ts`
