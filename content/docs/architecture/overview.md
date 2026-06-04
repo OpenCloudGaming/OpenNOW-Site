@@ -41,7 +41,7 @@ native/opennow-streamer/      Rust child process with stub and modular GStreamer
 | Main process | OAuth/PKCE, provider discovery, CloudMatch create/poll/claim/stop, queue/server selection state, WebSocket signaling, settings, build metadata/updater, Discord Rich Presence, media storage, native streamer process lifecycle |
 | Preload | Narrow `window.openNow` API over IPC; isolates renderer from Node.js APIs |
 | Renderer | React app, login/library/settings, queue and launch UI, controller mode, shortcuts, renderer WebRTC playback, stats overlay, screenshots/recordings |
-| Native streamer (optional, experimental) | Windows-only Rust JSON-lines protocol v2 child process in the app; GStreamer `webrtcbin` offer/answer, local ICE, input data channels, video decode/render, stall/transition/stats diagnostics |
+| Native streamer (optional, experimental) | Windows-only Rust JSON-lines protocol v3 child process in the app; GStreamer `webrtcbin` offer/answer, local ICE, input data channels, native-window shortcut events, video decode/render, stall/transition/stats diagnostics |
 
 ## Streaming data flow
 
@@ -61,7 +61,7 @@ The default `streamClientMode` is `web`. The renderer owns `RTCPeerConnection`, 
 
 ## Native streamer path
 
-When experimental native mode is selected on Windows, the main process starts `opennow-streamer`, performs a protocol `hello`, sends `start`/`offer`/ICE/input/surface/bitrate/stop` commands, and receives `ready`/`answer` responses plus async status, local ICE, input readiness, video liveness, stats, and error events. The shipped media backend is Rust + GStreamer `webrtcbin`; unsupported platforms, unsupported builds, or unavailable backends report fallback details so the app can return to the web streamer path.
+When experimental native mode is selected on Windows, the main process starts `opennow-streamer`, performs a protocol `hello`, sends `start`/`offer`/ICE/input/surface/bitrate/update-shortcuts/stop` commands, and receives `ready`/`answer` responses plus async status, local ICE, input readiness, shortcut, video liveness, stats, and error events. The shipped media backend is Rust + GStreamer `webrtcbin`; unsupported platforms, unsupported builds, or unavailable backends report fallback details so the app can return to the web streamer path.
 
 ## Key source files
 
@@ -92,7 +92,7 @@ When experimental native mode is selected on Windows, the main process starts `o
 | `opennow-stable/src/renderer/src/components/controllerMode/ControllerLibraryPage.tsx` | Controller-first library page |
 | `opennow-stable/src/renderer/src/components/controllerMode/controllerLibrary/ControllerLibraryLayout.tsx` | Controller library layout and navigation |
 | `opennow-stable/src/shared/gfn.ts` | Shared settings, session, stream, native, and API types |
-| `opennow-stable/src/shared/nativeStreamer.ts` | TypeScript protocol v2 definitions |
+| `opennow-stable/src/shared/nativeStreamer.ts` | TypeScript protocol v3 definitions |
 | `native/opennow-streamer/src/protocol.rs` | Rust protocol/session structs |
 | `native/opennow-streamer/src/backend.rs` | Backend selection and stub fallback |
 | `native/opennow-streamer/src/gstreamer_backend.rs` | GStreamer backend orchestration |

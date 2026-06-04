@@ -45,7 +45,7 @@ OpenNOW tracks up to four controllers through the browser Gamepad API. Button an
 
 Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the app currently gates native streaming off and keeps the renderer WebRTC/input path. If native input readiness is not reported, the app should not assume the child can receive input packets.
 
-When the native streamer window has focus, OpenNOW's Electron shortcuts do not trigger inside that window. Use Alt+Tab to return focus to OpenNOW before using overlay, exit, fullscreen, stats, microphone, screenshot, or recording shortcuts.
+When the native streamer window has focus on Windows, the native input bridge matches configured app shortcuts and sends `shortcut` events back to Electron before forwarding other keyboard input to the stream. Remote keyboard packets still use virtual key codes with scancode `0`, so regional layouts such as German QWERTZ keep the selected remote layout instead of the local physical key position.
 
 ## Clipboard paste
 

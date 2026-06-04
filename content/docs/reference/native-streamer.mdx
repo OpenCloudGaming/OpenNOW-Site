@@ -9,7 +9,7 @@ import GStreamerRuntimeStrategyTable from '@/components/docs/GStreamerRuntimeStr
 import NativeEnvironmentVariablesTable from '@/components/docs/NativeEnvironmentVariablesTable';
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
 
-The native streamer is an optional Rust child process used when `streamClientMode` is set to native mode on Windows. It is supervised by Electron and communicates over JSON-lines protocol version `2`.
+The native streamer is an optional Rust child process used when `streamClientMode` is set to native mode on Windows. It is supervised by Electron and communicates over JSON-lines protocol version `3`.
 
 <Callout type="warning" title="Native streaming is experimental">
 Native streaming is experimental and may have platform-specific bugs, missing media capabilities, or fallback behavior. OpenNOW defaults to the web streamer unless native mode is explicitly enabled. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
@@ -35,7 +35,7 @@ The app currently treats native streaming as a Windows-only experimental feature
 
 If native startup fails, protocol versions mismatch, the backend reports `stub`, or required platform media support is missing, OpenNOW falls back to the renderer WebRTC client with a diagnostic reason.
 
-Enabling native streaming from Settings opens an explicit experimental-feature confirmation before `streamClientMode` is changed to `"native"`. The setting only applies to new sessions. The regular `F3` stats HUD is an Electron overlay and is hidden while the external native renderer is active; `showNativeStreamerStats` controls the native renderer's own diagnostics overlay instead. While the native streamer window has focus, OpenNOW's Electron shortcuts and overlay actions do not fire; Alt+Tab back to the OpenNOW window to stop the stream, toggle overlays, or use other app shortcuts.
+Enabling native streaming from Settings opens an explicit experimental-feature confirmation before `streamClientMode` is changed to `"native"`. The setting only applies to new sessions. The regular `F3` stats HUD is an Electron overlay and is hidden while the external native renderer is active; `showNativeStreamerStats` controls the native renderer's own diagnostics overlay instead. In native mode on Windows, the native renderer captures configured app shortcuts and reports them back to Electron so stop-stream, overlay, fullscreen, stats, microphone, screenshot, and recording actions still work while the native window has focus.
 
 ## Backend selection
 
@@ -52,7 +52,7 @@ When no backend is requested, the compiled default is `gstreamer` if the binary 
 
 The Rust GStreamer path is split across focused source modules: `gstreamer_backend.rs` coordinates backend state, `gstreamer_pipeline.rs` builds and negotiates the `webrtcbin` pipeline, `gstreamer_input.rs` owns data channels/native input, `gstreamer_liveness.rs` emits stall diagnostics, `gstreamer_platform.rs` selects platform decode/render paths, `gstreamer_transitions.rs` tracks video path transitions, and `gstreamer_config.rs` normalizes backend configuration.
 
-## Protocol v2
+## Protocol v3
 
 Electron sends newline-delimited JSON commands on stdin and reads responses/events from stdout.
 
@@ -65,6 +65,7 @@ Electron sends newline-delimited JSON commands on stdin and reads responses/even
 | `input` | Send encoded input packet |
 | `surface` | Update native render surface/window info |
 | `bitrate` | Update max bitrate limit |
+| `update-shortcuts` | Refresh native-window shortcut bindings while streaming |
 | `stop` | Stop the native session |
 
 | Responses | Purpose |
@@ -80,6 +81,7 @@ Electron sends newline-delimited JSON commands on stdin and reads responses/even
 | `status` | `starting`, `ready`, `streaming`, or `stopped` |
 | `local-ice` | Candidate to send through main-process signaling |
 | `input-ready` | Native data channels are ready for input |
+| `shortcut` | Native renderer matched a configured app shortcut and asks Electron to run it |
 | `video-stall` | Liveness/stall diagnostics and recovery attempt data |
 | `video-transition` | Decoder/render path transition |
 | `stats` | Native stream telemetry |
@@ -129,7 +131,7 @@ The native manager validates the protocol handshake and backend capabilities bef
 Fallback is expected and intentional when:
 
 - The executable cannot be found or started.
-- Protocol version is not `2`.
+- Protocol version is not `3`.
 - The binary reports `stub` because GStreamer was not compiled in.
 - A requested backend is unknown or unavailable.
 - Required GStreamer plugins or platform decoders are missing.
