@@ -92,6 +92,8 @@ Native streamer settings control an experimental opt-in path. Keep `streamClient
 
 The About settings page gets update state from `opennow-stable/src/main/updater.ts`. Packaged builds check GitHub Releases automatically 12 seconds after startup and then every 6 hours when `autoCheckForUpdates` is enabled; manual checks, downloads, and restart-to-install actions use the same updater controller. The updater does not auto-download or auto-install updates, allows prerelease updates only when the current app version is a prerelease, and can use `OPENNOW_GH_TOKEN` or `GH_TOKEN` for GitHub Releases requests.
 
+Linux updater support is gated by the package type detected in `opennow-stable/src/main/linuxUpdaterSupport.ts`. AppImage installs are supported when the `APPIMAGE` environment variable is present, and `.deb` updates are supported only on Debian-compatible systems with `dpkg` or `apt` available. Other Linux installs report updates as disabled and direct users to the GitHub Releases AppImage or a Debian/Ubuntu package instead of trying an incompatible `.deb` updater path.
+
 `opennow-stable/src/main/appBuildInfo.ts` combines `app.getVersion()` with build metadata embedded by `electron.vite.config.ts`. `OPENNOW_BUILD_NUMBER`, `BUILD_NUMBER`, or `GITHUB_RUN_NUMBER` becomes `currentBuildNumber`; `OPENNOW_BUILD_COMMIT` or `GITHUB_SHA` becomes the embedded commit. The Settings UI displays `currentDisplayVersion`, which is the package version plus ` (build N)` when a build number is available. In unpackaged development mode, updater state is disabled but still reports the same build-info fields.
 
 ## App language
