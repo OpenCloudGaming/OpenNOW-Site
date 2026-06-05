@@ -41,6 +41,8 @@ When fullscreen is active, OpenNOW also makes a best-effort `navigator.keyboard.
 
 OpenNOW tracks up to four controllers through the browser Gamepad API. Button and analog state is polled and sent over the partially reliable input channel. Controller badges/loading states can appear while the app is waiting for a controller-focused library or launch flow to become ready.
 
+Controller-mode navigation uses the standard Gamepad button layout: D-pad or left stick moves focus, south/A selects or plays, east/B goes back or closes overlays, west/X opens search, shoulder buttons switch between controller pages, and menu opens game details or cycles variants depending on the page. The guide button is treated as a menu alias when the browser exposes it as button 16.
+
 ## Native input caveat
 
 Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the app currently gates native streaming off and keeps the renderer WebRTC/input path. If native input readiness is not reported, the app should not assume the child can receive input packets.
