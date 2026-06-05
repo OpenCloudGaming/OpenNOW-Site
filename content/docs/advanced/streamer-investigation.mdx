@@ -12,10 +12,10 @@ OpenNOW now ships an optional experimental native streamer path on Windows. It i
 
 Electron still owns the GeForce NOW session lifecycle. The main process creates and claims the CloudMatch session, connects NVST signaling, receives the server offer, and forwards signaling payloads either to the renderer WebRTC client or to the native child process.
 
-The native process communicates over newline-delimited JSON on stdin/stdout. Protocol version is `2`. Electron sends commands and correlates responses by `id`; the native process also emits async events for logs, status, ICE, input readiness, video liveness, stats, and errors.
+The native process communicates over newline-delimited JSON on stdin/stdout. Protocol version is `3`. Electron sends commands and correlates responses by `id`; the native process also emits async events for logs, status, ICE, input readiness, app shortcuts, video liveness, stats, and errors.
 
 ```text
-GFN signaling WebSocket ── main process ── JSONL protocol v2 ── opennow-streamer
+GFN signaling WebSocket ── main process ── JSONL protocol v3 ── opennow-streamer
         │                         │                                  │
         │                         └─ fallback to renderer WebRTC      └─ GStreamer webrtcbin
         └─ shared offer/ICE/answer flow
@@ -63,6 +63,7 @@ Native events include:
 
 - `status` for starting/ready/streaming/stopped state
 - `input-ready` when data channels are ready for input
+- `shortcut` when the native window captures a configured app shortcut
 - `video-stall` with decoded/sink FPS, age, zero-copy flags, recovery attempt, and likely stage
 - `video-transition` for decoder/render path changes
 - `stats` for native stream telemetry
