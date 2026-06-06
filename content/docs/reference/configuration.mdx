@@ -43,7 +43,7 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 
 Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
 
-Codec diagnostics in Settings test H.264, H.265, and AV1 browser decode/encode support and whether Chromium reports GPU-backed acceleration. On Linux, a software-only or missing-H.265 result shows a VA-API setup hint: AppImage builds still use the host distro codec/driver stack, and proprietary NVIDIA systems may need distro codec packages plus `libva-nvidia-driver`/`nvidia-vaapi-driver` even after OpenNOW's restart-applied NVIDIA VA-API flags are enabled.
+Codec diagnostics in Settings are renderer session state, not persisted `settings.json` fields. They test H.264, H.265, and AV1 browser decode/encode support, whether Chromium reports GPU-backed acceleration, and store the latest results in `sessionStorage` under `opennow.codec-test-results.v1`. On Linux, a software-only or missing-H.265 result shows a VA-API setup hint: AppImage builds still use the host distro codec/driver stack, and proprietary NVIDIA systems may need distro codec packages plus `libva-nvidia-driver`/`nvidia-vaapi-driver` even after OpenNOW's restart-applied NVIDIA VA-API flags are enabled.
 
 ## Input and shortcuts
 
