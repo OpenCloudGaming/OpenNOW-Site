@@ -16,9 +16,10 @@ OpenNOW has two streaming clients that share Electron-owned session lifecycle an
 | --- | --- |
 | WebSocket signaling transport | `opennow-stable/src/main/gfn/signaling.ts` |
 | Signaling IPC coordination + native bridge | `opennow-stable/src/main/signaling/signalingCoordinator.ts` |
-| Chromium startup flags | `opennow-stable/src/main/index.ts` |
+| Chromium startup flags | `opennow-stable/src/main/index.ts`, `opennow-stable/src/main/videoAcceleration.ts` |
 | Renderer peer connection + input | `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` |
 | SDP/NVST helpers | `opennow-stable/src/renderer/src/gfn/sdp.ts` |
+| Codec capability diagnostics | `opennow-stable/src/renderer/src/lib/codecDiagnostics.ts` |
 | Native executable/protocol lifecycle | `opennow-stable/src/main/nativeStreamer/manager.ts` |
 | Native input/surface helpers | `opennow-stable/src/main/nativeStreamer/input.ts`, `opennow-stable/src/main/nativeStreamer/surface.ts` |
 | Native protocol/types | `opennow-stable/src/shared/nativeStreamer.ts`, `native/opennow-streamer/src/protocol.rs` |
@@ -78,6 +79,8 @@ The partially reliable threshold is read from the negotiated `a=ri.partialReliab
 
 Renderer WebRTC diagnostics poll `RTCPeerConnection.getStats()` for connection state, codec, resolution, HDR/color, bitrate, RTT, jitter, packet loss, frame decode/render timing, data-channel pressure, lag classification, and microphone state.
 
+The Settings codec diagnostics use Chromium `mediaCapabilities` plus WebRTC codec probing to show whether H.264, H.265, and AV1 decode/encode are available and whether the browser reports GPU-backed acceleration. On Linux, OpenNOW shows an extra hint when diagnostics are software-only or H.265 is unavailable: AppImage diagnostics still depend on the host distro's VA-API stack, so proprietary NVIDIA systems may need `libva-nvidia-driver`/`nvidia-vaapi-driver` and distro codec packages even though OpenNOW enables NVIDIA VA-API flags on restart.
+
 Native mode emits protocol events instead: `status`, `input-ready`, `shortcut`, `video-stall`, `video-transition`, `stats`, `log`, and `error`. See [Native Streamer](/docs/reference/native-streamer/) for experimental status, event fields, issue reporting, and fallback behavior.
 
 ## Chromium acceleration flags
@@ -87,9 +90,11 @@ At startup the main process configures Chromium/WebRTC for the renderer path:
 | Platform | Current acceleration behavior |
 | --- | --- |
 | Windows | D3D11 video decode and Media Foundation integration |
-| Linux x64 | VAAPI decoder/encoder flags with driver checks relaxed |
+| Linux x64 | VAAPI decoder/encoder flags with driver checks relaxed, Linux GL accelerated decode, zero-copy GL decode, accelerated encode, and NVIDIA VA-API enablement |
 | Linux ARM | V4L2/direct decoder flags |
 | macOS | Native VideoToolbox path |
 | All | MP4 MediaRecorder support, dav1d AV1 fallback, disabled mDNS candidates, unthrottled renderer/background behavior |
+
+`decoderPreference` and `encoderPreference` are read before Electron startup. `hardware` adds the corresponding force-enable Chromium switch, `software` adds the corresponding disable switch, and `auto` leaves Chromium to choose while still enabling the platform feature set. `ignore-gpu-blocklist` is always set so the GPU process does not silently blocklist available video acceleration.
 
 These flags affect the renderer WebRTC path. Native mode uses the GStreamer platform paths documented in [Native Streamer](/docs/reference/native-streamer/).
