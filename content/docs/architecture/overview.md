@@ -57,7 +57,7 @@ native/opennow-streamer/      Rust child process with stub and modular GStreamer
 
 ## WebRTC renderer path
 
-The default `streamClientMode` is `web`. The renderer owns `RTCPeerConnection`, SDP munging, NVST SDP generation, audio/video element playback, microphone capture, and data channels. Chromium acceleration flags are configured by the main process before app startup through `videoAcceleration.ts`: Windows D3D11/Media Foundation, Linux x64 VAAPI plus Linux GL/zero-copy/NVIDIA VA-API flags, Linux ARM V4L2/direct decoder, macOS VideoToolbox, MP4 MediaRecorder support, dav1d AV1 fallback, disabled mDNS ICE candidates, ignored GPU blocklists, and unthrottled renderer behavior. The Settings codec diagnostics use Chromium capability reports and show a Linux VA-API setup hint when GPU decode/encode or H.265 support is still missing.
+The default `streamClientMode` is `web`. The renderer owns `RTCPeerConnection`, SDP munging, NVST SDP generation, audio/video element playback, microphone capture, and data channels. Chromium acceleration flags are configured by the main process before app startup through `videoAcceleration.ts`: Windows D3D11/Media Foundation, Linux x64 VA-API plus Linux GL/zero-copy/NVIDIA VA-API flags, Linux ARM V4L2/direct decoder, macOS VideoToolbox, MP4 MediaRecorder support, dav1d AV1 fallback, disabled mDNS ICE candidates, ignored GPU blocklists, and unthrottled renderer behavior. The Settings codec diagnostics use Chromium capability reports and show a Linux VA-API setup hint when GPU decode/encode or H.265 support is still missing.
 
 ## Native streamer path
 
