@@ -20,6 +20,7 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `posterSizeScale` | `number` | `1` | Library poster scaling |
 | `fps` | `number` | `60` | Target frame rate |
 | `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps |
+| `recordingBitrateMbps` | `number \| null` | `null` | Recording video bitrate in Mbps; `null` leaves bitrate selection to `MediaRecorder` |
 | `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; experimental native mode starts the Rust streamer on Windows and is normalized back to web mode on unsupported platforms |
 | `nativeStreamerBackend` | `NativeStreamerBackendPreference` | `"gstreamer"` | Compatibility currently forces `gstreamer` |
 | `nativeVideoBackend` | `NativeVideoBackendPreference` | `"auto"` | Normalized to `auto`, `d3d11`, or `d3d12` |
@@ -111,6 +112,7 @@ On load, OpenNOW merges saved settings with defaults, migrates legacy values, th
 - `nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12`.
 - Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults.
 - `mouseAcceleration` is clamped to 1–150; legacy booleans become `100` or `1`.
+- `recordingBitrateMbps` is rounded and clamped to 1–200 Mbps; invalid, missing, or `null` values use automatic `MediaRecorder` bitrate selection.
 - `appAccentColor` is normalized to `green`, `blue`, `violet`, `amber`, or `rose`.
 - The short-lived legacy `sessionTimeRemainingDisplay: "stats" | "both"` value migrates to `showSessionTimeRemainingInStatsOverlay: true` and is removed from saved settings.
 
