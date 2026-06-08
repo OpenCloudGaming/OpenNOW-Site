@@ -31,8 +31,8 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `showNativeStreamerStats` | `boolean` | `false` | Show the native streamer's own stats overlay during native streaming |
 | `codec` | `VideoCodec` | `"H264"` | Stream codec preference: `H264`, `H265`, or `AV1` |
 | `colorQuality` | `ColorQuality` | `"10bit_420"` | Bit-depth/chroma preference: `8bit_420`, `8bit_444`, `10bit_420`, or `10bit_444`; 10-bit color is treated separately from HDR |
-| `decoderPreference` | `string` | `"auto"` | Decoder preference hint |
-| `encoderPreference` | `string` | `"auto"` | Encoder preference hint sent with stream preferences |
+| `decoderPreference` | `string` | `"auto"` | Decoder preference hint: `auto`, `hardware`, or `software`; read before Electron startup to choose Chromium acceleration switches |
+| `encoderPreference` | `string` | `"auto"` | Encoder preference hint: `auto`, `hardware`, or `software`; read before Electron startup to choose Chromium acceleration switches and sent with stream preferences |
 | `region` | `string` | `""` | Preferred region URL; empty means auto |
 | `sessionProxyEnabled` | `boolean` | `false` | Use an explicit proxy for session/signaling requests |
 | `sessionProxyUrl` | `string` | `""` | Proxy URL when enabled |
@@ -42,6 +42,8 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `nativeTransitionDiagnostics` | internal/optional | `undefined` | Native transition diagnostics state |
 
 Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
+
+Codec diagnostics in Settings test H.264, H.265, and AV1 browser decode/encode support and whether Chromium reports GPU-backed acceleration. On Linux, a software-only or missing-H.265 result shows a VA-API setup hint: AppImage builds still use the host distro codec/driver stack, and proprietary NVIDIA systems may need distro codec packages plus `libva-nvidia-driver`/`nvidia-vaapi-driver` even after OpenNOW's restart-applied NVIDIA VA-API flags are enabled.
 
 ## Input and shortcuts
 

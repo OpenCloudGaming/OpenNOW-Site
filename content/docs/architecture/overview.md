@@ -57,7 +57,7 @@ native/opennow-streamer/      Rust child process with stub and modular GStreamer
 
 ## WebRTC renderer path
 
-The default `streamClientMode` is `web`. The renderer owns `RTCPeerConnection`, SDP munging, NVST SDP generation, audio/video element playback, microphone capture, and data channels. Chromium acceleration flags are configured by the main process before app startup: Windows D3D11/Media Foundation, Linux x64 VAAPI, Linux ARM V4L2/direct decoder, macOS VideoToolbox, MP4 MediaRecorder support, dav1d AV1 fallback, disabled mDNS ICE candidates, and unthrottled renderer behavior.
+The default `streamClientMode` is `web`. The renderer owns `RTCPeerConnection`, SDP munging, NVST SDP generation, audio/video element playback, microphone capture, and data channels. Chromium acceleration flags are configured by the main process before app startup through `videoAcceleration.ts`: Windows D3D11/Media Foundation, Linux x64 VAAPI plus Linux GL/zero-copy/NVIDIA VA-API flags, Linux ARM V4L2/direct decoder, macOS VideoToolbox, MP4 MediaRecorder support, dav1d AV1 fallback, disabled mDNS ICE candidates, ignored GPU blocklists, and unthrottled renderer behavior. The Settings codec diagnostics use Chromium capability reports and show a Linux VA-API setup hint when GPU decode/encode or H.265 support is still missing.
 
 ## Native streamer path
 
@@ -67,7 +67,8 @@ When experimental native mode is selected on Windows, the main process starts `o
 
 | File | Purpose |
 | --- | --- |
-| `opennow-stable/src/main/index.ts` | App bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring |
+| `opennow-stable/src/main/index.ts` | App bootstrap, windows, protocol/services wiring |
+| `opennow-stable/src/main/videoAcceleration.ts` | Chromium/WebRTC acceleration feature and switch selection |
 | `opennow-stable/src/main/ipc/accountCatalogHandlers.ts` | Auth/account/catalog/cache/community IPC |
 | `opennow-stable/src/main/ipc/sessionHandlers.ts` | Create/poll/claim/stop/session-ad IPC |
 | `opennow-stable/src/main/ipc/mediaHandlers.ts` | Screenshot, recording, and media gallery IPC |
@@ -87,6 +88,7 @@ When experimental native mode is selected on Windows, the main process starts `o
 | `opennow-stable/src/main/settings.ts` | Settings defaults and compatibility normalization |
 | `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` | Renderer WebRTC peer connection, data channels, stats |
 | `opennow-stable/src/renderer/src/gfn/sdp.ts` | SDP and NVST SDP helpers |
+| `opennow-stable/src/renderer/src/lib/codecDiagnostics.ts` | Browser codec capability tests and Linux hardware-acceleration hint logic |
 | `opennow-stable/src/renderer/src/hooks/useQueueAdRuntime.ts` | Queue ad playback/reporting watchdog runtime |
 | `opennow-stable/src/renderer/src/components/QueueServerSelectModal.tsx` | Queue server selection UI |
 | `opennow-stable/src/renderer/src/components/controllerMode/ControllerLibraryPage.tsx` | Controller-first library page |
