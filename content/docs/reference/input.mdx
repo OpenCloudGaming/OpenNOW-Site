@@ -22,7 +22,7 @@ OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data 
 
 All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as `Cmd`, while the stored binding uses the same setting string.
 
-`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage.
+`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage. Intentional pointer-lock releases from OpenNOW controls, including the fullscreen shortcut, suppress the synthetic remote Escape packet so toggling fullscreen does not also open the game's Escape menu.
 
 ## Keyboard
 
@@ -36,6 +36,7 @@ When fullscreen is active, OpenNOW also makes a best-effort `navigator.keyboard.
 - `mouseSensitivity` defaults to `1` and scales relative movement.
 - `mouseAcceleration` defaults to `1` and is clamped to 1–150.
 - Latency-sensitive mouse deltas use `input_channel_partially_reliable`.
+- When Chromium drops pointer lock because it consumed Escape before the renderer sees the key event, OpenNOW sends a synthetic Escape press to the stream and then tries to restore pointer lock. Intentional unlocks from OpenNOW UI/shortcuts skip that synthetic Escape.
 
 ## Gamepad
 
