@@ -22,7 +22,7 @@ OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data 
 
 All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as `Cmd`, while the stored binding uses the same setting string.
 
-`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage.
+`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage. Intentional pointer-lock releases from OpenNOW shortcuts, including the default `F8` pointer-lock toggle and `F10` fullscreen toggle, suppress the synthetic Escape packet that is otherwise sent when Chromium releases pointer lock before the app sees an Escape keydown.
 
 ## Keyboard
 
