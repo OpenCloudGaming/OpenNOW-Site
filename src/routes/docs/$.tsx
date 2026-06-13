@@ -16,8 +16,9 @@ import { gitConfig } from '@/lib/shared';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Code2, Download, MonitorPlay } from 'lucide-react';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useMDXComponents } from '@/components/mdx';
+import { track } from '@/lib/analytics';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -85,6 +86,10 @@ const clientLoader = browserCollections.docs.createClientLoader({
 function Page() {
   const { pageTree, path, markdownUrl } = useFumadocsLoader(Route.useLoaderData());
 
+  useEffect(() => {
+    track('docs_page_viewed', { path, markdown_url: markdownUrl });
+  }, [path, markdownUrl]);
+
   return (
     <DocsLayout
       {...baseOptions()}
@@ -95,6 +100,7 @@ function Page() {
         banner: (
           <a
             href="https://github.com/OpenCloudGaming/OpenNOW/releases"
+            onClick={() => track('docs_sidebar_release_clicked')}
             className="mb-3 flex items-center gap-3 rounded-xl border bg-fd-card p-3 text-sm transition hover:bg-fd-accent"
           >
             <span className="grid size-9 place-items-center rounded-lg bg-emerald-400/10 text-emerald-500">
@@ -108,11 +114,11 @@ function Page() {
         ),
         footer: (
           <div className="space-y-2 text-xs text-fd-muted-foreground">
-            <a className="flex items-center gap-2 transition hover:text-fd-foreground" href="https://github.com/OpenCloudGaming/OpenNOW">
+            <a className="flex items-center gap-2 transition hover:text-fd-foreground" href="https://github.com/OpenCloudGaming/OpenNOW" onClick={() => track('docs_footer_link_clicked', { target: 'app_repository' })}>
               <Code2 className="size-3.5" />
               App repository
             </a>
-            <Link className="flex items-center gap-2 transition hover:text-fd-foreground" to="/">
+            <Link className="flex items-center gap-2 transition hover:text-fd-foreground" to="/" onClick={() => track('docs_footer_link_clicked', { target: 'home' })}>
               <MonitorPlay className="size-3.5" />
               OpenNOW home
             </Link>

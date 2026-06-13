@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
+import { track } from '@/lib/analytics';
 
 const highlights: { title: string; description: string; icon: LucideIcon }[] = [
   {
@@ -69,6 +70,7 @@ function Home() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
               href="https://github.com/OpenCloudGaming/OpenNOW/releases"
+              onClick={() => track('home_cta_clicked', { cta: 'download_release', location: 'hero' })}
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-fd-primary px-5 py-2.5 text-sm font-medium text-fd-primary-foreground transition hover:opacity-90"
             >
               <Download className="size-4" />
@@ -78,6 +80,7 @@ function Home() {
             <Link
               to="/docs/$"
               params={{ _splat: '' }}
+              onClick={() => track('home_cta_clicked', { cta: 'read_docs', location: 'hero' })}
               className="inline-flex items-center justify-center gap-2 rounded-lg border bg-fd-card px-5 py-2.5 text-sm font-medium text-fd-foreground transition hover:bg-fd-accent"
             >
               <MonitorPlay className="size-4" />
@@ -85,6 +88,7 @@ function Home() {
             </Link>
             <a
               href="https://github.com/OpenCloudGaming/OpenNOW"
+              onClick={() => track('home_cta_clicked', { cta: 'github', location: 'hero' })}
               className="inline-flex items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium text-fd-muted-foreground transition hover:bg-fd-accent hover:text-fd-foreground"
             >
               <Code2 className="size-4" />
@@ -124,7 +128,12 @@ function Home() {
               <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground">Start where the problem is</h2>
               <p className="mt-2 text-fd-muted-foreground">Documentation that matches the app.</p>
             </div>
-            <Link to="/docs/$" params={{ _splat: '' }} className="text-sm font-medium text-fd-primary hover:opacity-80">
+            <Link
+              to="/docs/$"
+              params={{ _splat: '' }}
+              onClick={() => track('home_open_full_docs_clicked')}
+              className="text-sm font-medium text-fd-primary hover:opacity-80"
+            >
               Open full docs →
             </Link>
           </div>
@@ -134,6 +143,7 @@ function Home() {
                 key={title}
                 to="/docs/$"
                 params={{ _splat: splat }}
+                onClick={() => track('home_doc_card_clicked', { title, splat })}
                 className="group rounded-xl border bg-fd-card p-5 text-left transition hover:bg-fd-accent"
               >
                 <h3 className="font-medium text-fd-foreground">{title}</h3>
