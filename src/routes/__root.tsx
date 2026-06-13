@@ -2,7 +2,9 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-r
 import * as React from 'react';
 import appCss from '@/styles/app.css?url';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+import { PostHogProvider } from 'posthog-js/react';
 import SearchDialog from '@/components/search';
+import { POSTHOG_KEY, posthogOptions } from '@/lib/analytics';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -27,9 +29,11 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body className="flex min-h-screen flex-col">
-        <RootProvider search={{ SearchDialog }}>
-          <Outlet />
-        </RootProvider>
+        <PostHogProvider apiKey={POSTHOG_KEY} options={posthogOptions}>
+          <RootProvider search={{ SearchDialog }}>
+            <Outlet />
+          </RootProvider>
+        </PostHogProvider>
         <Scripts />
       </body>
     </html>
