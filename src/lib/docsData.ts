@@ -175,6 +175,11 @@ export const localDataLocations: LocalDataLocation[] = [
     path: '`app.getPath("userData")/auth-state.json`',
   },
   {
+    key: 'gfnDeviceId',
+    data: 'Stable CloudMatch device ID',
+    path: '`app.getPath("userData")/gfn-device-id.json`',
+  },
+  {
     key: 'appLanguage',
     data: 'App language',
     path: 'Browser localStorage key `opennow.locale`',
