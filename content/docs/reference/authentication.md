@@ -76,6 +76,14 @@ If refresh fails and the token is expired, the saved session is cleared and the 
 | `gfn_tier` | Membership tier |
 | `picture` | Avatar URL |
 
+After a session is available, OpenNOW also calls the MES subscriptions endpoint to resolve the real `membershipTier`, time-allocation fields, storage add-on details, and the entitled stream profiles used by Settings. JWTs do not always include `gfn_tier`, so the MES result can replace the fallback `FREE` tier cached from `/userinfo`.
+
+## Linked game accounts
+
+The Settings account section uses NVIDIA's LCARS GraphQL endpoint (`https://apps.gxn.nvidia.com/graphql`) to discover supported store providers and read the current user's linked/synced accounts. Providers are normalized to stable codes such as `UPLAY`, `BATTLENET`, `EPIC`, `STEAM`, and `XBOX`; bundled provider definitions are used if the static provider query fails.
+
+Linking uses the ALS API (`https://als.geforcenow.com/v1`) to request a provider login URL, opens the external browser, and waits on the same local callback port list as browser OAuth. Link, unlink, and resync actions invalidate account-scoped game/library/catalog caches, including proxy-scoped cache keys when a session proxy is configured, so the library can refresh after account changes.
+
 ## Implementation notes
 
 - The login flow runs in the main process, not the renderer.
@@ -85,6 +93,7 @@ If refresh fails and the token is expired, the saved session is cleared and the 
 - A deterministic device ID is derived from the hostname and OS username.
 - Auth state is stored as plain JSON in the Electron `userData` directory — no OS keychain is used.
 - Browser OAuth requests use a GFN desktop user-agent string; QR/device login requests use the Steam Deck browser user-agent.
+- Subscription and linked-account requests use shared LCARS/GFN headers from `clientHeaders.ts`; the renderer receives typed DTOs through preload IPC rather than calling NVIDIA endpoints directly.
 
 ## Launch and membership errors
 
@@ -94,8 +103,11 @@ GFN can reject a launch with `INSUFFICIENT_PLAYABILITY` / `SessionInsufficientPl
 
 - `opennow-stable/src/main/gfn/auth.ts`
 - `opennow-stable/src/main/ipc/accountCatalogHandlers.ts`
+- `opennow-stable/src/main/gfn/subscription.ts`
+- `opennow-stable/src/main/gfn/accountConnections.ts`
 - `opennow-stable/src/preload/index.ts`
 - `opennow-stable/src/renderer/src/components/LoginScreen.tsx`
+- `opennow-stable/src/renderer/src/components/SettingsPage.tsx`
 - `opennow-stable/src/main/gfn/errorCodes.ts`
 - `opennow-stable/src/main/gfn/games.ts`
 - `opennow-stable/src/renderer/src/lib/sessionState.ts`

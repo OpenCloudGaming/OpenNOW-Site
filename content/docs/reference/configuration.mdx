@@ -43,6 +43,8 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 
 Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
 
+After sign-in, Settings fetches the current MES subscription from `https://mes.geforcenow.com/v4/subscriptions` and uses its entitled `width`/`height`/`framesPerSecond` profiles to filter the resolution and FPS menus. If a saved profile is no longer entitled, OpenNOW normalizes it to the closest entitled profile before launch; if the subscription response has no entitlement list, the app keeps the safe `1920x1080`/`60` fallback instead of exposing the static high-end presets.
+
 Codec diagnostics in Settings are renderer session state, not persisted `settings.json` fields. They test H.264, H.265, and AV1 browser decode/encode support, whether Chromium reports GPU-backed acceleration, and store the latest results in `sessionStorage` under `opennow.codec-test-results.v1`. On Linux, a software-only or missing-H.265 result shows a VA-API setup hint: AppImage builds still use the host distro codec/driver stack, and proprietary NVIDIA systems may need distro codec packages plus `libva-nvidia-driver`/`nvidia-vaapi-driver` even after OpenNOW's restart-applied NVIDIA VA-API flags are enabled.
 
 ## Input and shortcuts
@@ -50,6 +52,7 @@ Codec diagnostics in Settings are renderer session state, not persisted `setting
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
 | `clipboardPaste` | `boolean` | `false` | Paste clipboard text into the stream |
+| `enableGyroscopeControls` | `boolean` | `false` | Experimental controller motion-sensor input mapping for gyro aiming when the input backend supports it |
 | `mouseSensitivity` | `number` | `1` | Relative mouse delta multiplier |
 | `mouseAcceleration` | `number` | `1` | Acceleration strength clamped to 1–150 |
 | `shortcutToggleStats` | `string` | `"F3"` | Toggle stats overlay |

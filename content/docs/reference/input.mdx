@@ -41,6 +41,8 @@ When fullscreen is active, OpenNOW also makes a best-effort `navigator.keyboard.
 
 OpenNOW tracks up to four controllers through the browser Gamepad API. Button and analog state is polled and sent over the partially reliable input channel. Controller badges/loading states can appear while the app is waiting for a controller-focused library or launch flow to become ready.
 
+The `enableGyroscopeControls` setting is an experimental, opt-in bridge for controller motion sensors. It defaults off and only exposes gyro aiming data when the browser/input backend reports compatible motion axes; regular gamepad button and stick packets continue to work without it.
+
 Controller-mode navigation uses the standard Gamepad button layout: D-pad or left stick moves focus, south/A selects or plays, east/B goes back or closes overlays, west/X opens search, shoulder buttons switch between controller pages, and menu opens game details or cycles variants depending on the page. The guide button is treated as a menu alias when the browser exposes it as button 16.
 
 ## Native input caveat
