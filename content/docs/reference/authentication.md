@@ -3,7 +3,7 @@ title: Authentication
 description: OAuth + PKCE, QR device login, and token lifecycle in OpenNOW
 ---
 
-OpenNOW authenticates with NVIDIA services using two main-process flows: browser OAuth 2.0 + PKCE and QR/device authorization. The implementation lives in `opennow-stable/src/main/gfn/auth.ts`; the renderer only asks the preload bridge to start, poll, complete, or cancel login attempts.
+OpenNOW authenticates with NVIDIA services using two main-process flows: browser OAuth 2.0 + PKCE and QR/device authorization. The implementation lives in `opennow-stable/src/main/platforms/gfn/auth.ts`; the renderer only asks the preload bridge to start, poll, complete, or cancel login attempts.
 
 ## Provider discovery
 
@@ -101,14 +101,14 @@ GFN can reject a launch with `INSUFFICIENT_PLAYABILITY` / `SessionInsufficientPl
 
 ## Source files
 
-- `opennow-stable/src/main/gfn/auth.ts`
+- `opennow-stable/src/main/platforms/gfn/auth.ts`
 - `opennow-stable/src/main/ipc/accountCatalogHandlers.ts`
-- `opennow-stable/src/main/gfn/subscription.ts`
-- `opennow-stable/src/main/gfn/accountConnections.ts`
+- `opennow-stable/src/main/platforms/gfn/subscription.ts`
+- `opennow-stable/src/main/platforms/gfn/accountConnections.ts`
 - `opennow-stable/src/preload/index.ts`
 - `opennow-stable/src/renderer/src/components/LoginScreen.tsx`
 - `opennow-stable/src/renderer/src/components/SettingsPage.tsx`
-- `opennow-stable/src/main/gfn/errorCodes.ts`
-- `opennow-stable/src/main/gfn/games.ts`
+- `opennow-stable/src/main/platforms/gfn/errorCodes.ts`
+- `opennow-stable/src/main/platforms/gfn/games.ts`
 - `opennow-stable/src/renderer/src/lib/sessionState.ts`
-- `opennow-stable/src/shared/gfn.ts` (type definitions)
+- `opennow-stable/src/shared/gfn/` (type definitions)

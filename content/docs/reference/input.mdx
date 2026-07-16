@@ -5,7 +5,7 @@ description: Keyboard, mouse, gamepad, clipboard, microphone, shortcuts, and nat
 
 import DataChannelsTable from '@/components/docs/DataChannelsTable';
 
-OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In experimental native mode on Windows, the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback when native input readiness is unavailable.
+OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In experimental native mode, the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback when native input readiness is unavailable.
 
 ## Default shortcuts
 
@@ -47,13 +47,13 @@ Controller-mode navigation uses the standard Gamepad button layout: D-pad or lef
 
 ## Native input caveat
 
-Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, the app currently gates native streaming off and keeps the renderer WebRTC/input path. If native input readiness is not reported, the app should not assume the child can receive input packets.
+Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, native streaming may run through the child process, but input support depends on the platform/backend capabilities reported by the streamer. If native input readiness is not reported, the app should not assume the child can receive input packets.
 
 When the native streamer window has focus on Windows, the native input bridge matches configured app shortcuts and sends `shortcut` events back to Electron before forwarding other keyboard input to the stream. Remote keyboard packets still use virtual key codes with scancode `0`, so regional layouts such as German QWERTZ keep the selected remote layout instead of the local physical key position.
 
 ## Clipboard paste
 
-While streaming, OpenNOW intercepts the host paste shortcut so local/browser paste behavior does not leak into the app UI. When `clipboardPaste` is enabled, OpenNOW reads text from the browser clipboard API and falls back to Electron's main-process clipboard bridge when needed, then converts up to 4096 mappable characters into synthetic keystrokes using the selected `keyboardLayout`. If clipboard text cannot be read, OpenNOW falls back to sending the remote paste shortcut.
+While streaming, OpenNOW intercepts the host paste shortcut so local/browser paste behavior does not leak into the app UI. When `clipboardPaste` is enabled, web mode reads text from the browser clipboard API and falls back to Electron's main-process clipboard bridge when needed, then converts up to 4096 mappable characters into synthetic keystrokes using the selected `keyboardLayout`. Native mode can emit a `clipboard-paste` shortcut event so Electron reads the host clipboard and sends the same GFN paste packet through signaling. If clipboard text cannot be read, OpenNOW falls back to sending the remote paste shortcut.
 
 ## Microphone
 
@@ -80,6 +80,7 @@ Controller mode changes navigation and layout, not the underlying GFN input prot
 | Setting | Description |
 | --- | --- |
 | `controllerMode` | Enable controller-first library layout |
+| `launchInConsoleMode` | Launch sessions with GFN's TV/console-style app launch mode and fullscreen controller shell |
 | `autoFullScreen` | Auto-enter fullscreen when controller mode triggers it |
 
 Queue/server selection and wait-time screens still apply in controller mode; controller-friendly loading surfaces are UI wrappers around the same CloudMatch launch state.

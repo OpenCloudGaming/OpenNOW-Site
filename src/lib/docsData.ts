@@ -48,8 +48,8 @@ export const dataChannels: DataChannelRow[] = [
 export const nativePlatformVideoPaths: NativePlatformVideoPath[] = [
   {
     platform: 'Windows',
-    concisePaths: 'D3D12, D3D11, software fallback',
-    preferredPaths: 'D3D12 for high-FPS sessions, otherwise D3D11, then software fallback',
+    concisePaths: 'D3D12, D3D11, Vulkan diagnostic path, software fallback',
+    preferredPaths: 'D3D12 for high-FPS sessions, otherwise D3D11, then Vulkan when explicitly selected, then software fallback',
   },
   {
     platform: 'macOS',
@@ -58,13 +58,13 @@ export const nativePlatformVideoPaths: NativePlatformVideoPath[] = [
   },
   {
     platform: 'Linux x64',
-    concisePaths: 'VAAPI, V4L2, software fallback',
-    preferredPaths: 'VAAPI, then V4L2, then software fallback',
+    concisePaths: 'VAAPI, V4L2, Vulkan, software fallback',
+    preferredPaths: 'VAAPI, then V4L2, then Vulkan when explicitly selected, then software fallback',
   },
   {
     platform: 'Linux ARM/Raspberry Pi',
-    concisePaths: 'V4L2 stateless, VAAPI, software fallback',
-    preferredPaths: 'V4L2 stateless, then VAAPI, then software fallback',
+    concisePaths: 'V4L2 stateless, VAAPI, Vulkan, software fallback',
+    preferredPaths: 'V4L2 stateless, then VAAPI, then Vulkan when explicitly selected, then software fallback',
   },
 ];
 
@@ -102,7 +102,7 @@ export const nativeStreamerEnvironmentVariables: NativeStreamerEnvironmentVariab
     variable: 'OPENNOW_NATIVE_EXTERNAL_RENDERER',
     setBy: 'Electron on Windows',
     purpose: 'External native renderer flag',
-    diagnosticPurpose: 'Enable native external renderer path; compatibility currently forces this true',
+    diagnosticPurpose: 'Enable native external renderer path; compatibility disables it outside Windows',
   },
   {
     variable: 'OPENNOW_NATIVE_CLOUD_GSYNC',

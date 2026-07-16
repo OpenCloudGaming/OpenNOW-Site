@@ -111,4 +111,6 @@ The release workflow packages this matrix:
 
 <ReleasePackageMatrixTable />
 
-Windows ARM64 artifacts are release downloads only; the Windows updater feed remains the x64 `latest.yml` channel. Manual releases can update `opennow-stable/package.json` and lockfile to the requested version before tagging so source archives match the app version.
+Windows ARM64 artifacts are release downloads only; the Windows updater feed remains the x64 `latest.yml` channel. Manual stable releases can update `opennow-stable/package.json` and lockfile to the requested version before tagging so source archives match the app version.
+
+Manual release dispatch now accepts `stable` or `nightly`. A nightly must be dispatched from `dev` with the next stable semver, then the workflow appends `-nightly.{run}.{attempt}`, marks the GitHub release as prerelease, does not make it latest, and leaves `dev`'s package version unchanged. The app-side `updateChannel` setting selects either the regular `latest` feed or the opt-in `nightly` feed.

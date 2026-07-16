@@ -100,7 +100,7 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
     The default renderer path streams through Chromium WebRTC and is the production path for desktop packages.
   </Accordion>
   <Accordion title="Native streamer">
-    The Rust/GStreamer streamer is experimental, currently opt-in on Windows, and falls back to the web streamer when platform, protocol, backend, or media capability checks fail.
+    The Rust/GStreamer streamer is experimental, opt-in on supported desktop platforms, and falls back to the web streamer when platform, protocol, backend, runtime, or media capability checks fail.
   </Accordion>
   <Accordion title="Session state">
     OAuth, token refresh, provider/alliance behavior, CloudMatch session lifecycle, and launch errors are owned by the Electron main process.
