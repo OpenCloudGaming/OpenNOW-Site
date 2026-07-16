@@ -6,7 +6,7 @@ description: Advanced notes on the Rust/GStreamer native streamer path
 import NativeEnvironmentVariablesTable from '@/components/docs/NativeEnvironmentVariablesTable';
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
 
-OpenNOW now ships an optional experimental native streamer path on Windows. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+OpenNOW now ships an optional experimental native streamer path on supported desktop platforms. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 ## Shipped design
 
@@ -73,7 +73,7 @@ These diagnostics are designed to make native fallback predictable under partial
 
 ## Known platform limitations
 
-- Native streaming is currently gated on Windows in the app; macOS and Linux normalize native mode back to the renderer WebRTC path.
+- Native streaming is accepted on Windows, macOS, and Linux, but platform media/runtime capabilities still decide whether a native session can start or must fall back to the renderer WebRTC path.
 - Native OS-level input capture is implemented on Windows.
 - Linux backend experiments depend on system GStreamer libraries and hardware-acceleration plugins.
 - Windows ARM64 release packaging currently does not build the native streamer.

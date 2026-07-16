@@ -8,17 +8,17 @@ import DataChannelsTable from '@/components/docs/DataChannelsTable';
 OpenNOW has two streaming clients that share Electron-owned session lifecycle and NVST signaling:
 
 - **Web mode** (`streamClientMode: "web"`, default): the renderer owns Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
-- **Native mode** (experimental, currently Windows-only in the app): the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared, and OpenNOW may fall back to web mode for platform-specific capability gaps.
+- **Native mode** (experimental on supported desktop platforms): the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared, and OpenNOW may fall back to web mode for executable, backend, protocol, runtime, or media capability gaps.
 
 ## Source files
 
 | Role | File |
 | --- | --- |
-| WebSocket signaling transport | `opennow-stable/src/main/gfn/signaling.ts` |
+| WebSocket signaling transport | `opennow-stable/src/main/platforms/gfn/signaling.ts` |
 | Signaling IPC coordination + native bridge | `opennow-stable/src/main/signaling/signalingCoordinator.ts` |
 | Chromium startup flags | `opennow-stable/src/main/index.ts`, `opennow-stable/src/main/videoAcceleration.ts` |
-| Renderer peer connection + input | `opennow-stable/src/renderer/src/gfn/webrtcClient.ts` |
-| SDP/NVST helpers | `opennow-stable/src/renderer/src/gfn/sdp.ts` |
+| Renderer peer connection + input | `opennow-stable/src/renderer/src/platforms/gfn/webrtcClient.ts` |
+| SDP/NVST helpers | `opennow-stable/src/renderer/src/platforms/gfn/sdp.ts` |
 | Codec capability diagnostics | `opennow-stable/src/renderer/src/lib/codecDiagnostics.ts` |
 | Native executable/protocol lifecycle | `opennow-stable/src/main/nativeStreamer/manager.ts` |
 | Native input/surface helpers | `opennow-stable/src/main/nativeStreamer/input.ts`, `opennow-stable/src/main/nativeStreamer/surface.ts` |
