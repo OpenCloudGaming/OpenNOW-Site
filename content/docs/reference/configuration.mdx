@@ -40,6 +40,7 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `gameLanguage` | `GameLanguage` | `"en_US"` | Game language sent to GFN |
 | `enablePersistingInGameSettings` | `boolean` | `false` | Request NVIDIA's per-game in-game graphics/settings persistence on new sessions |
 | `enableL4S` | `boolean` | `false` | Request L4S behavior where supported |
+| `identifyAsSteamDeck` | `boolean` | `false` | Advertise the stream/MES client as Steam Deck to expose Deck-specific resolutions and 90 FPS where NVIDIA allows it |
 | `enableCloudGsync` | `boolean` | `false` | User-facing Cloud G-Sync/VRR preference |
 | `nativeTransitionDiagnostics` | internal/optional | `undefined` | Native transition diagnostics state |
 | `videoShader` | `VideoShaderSettings` | disabled, sharpen `40`, neutral color values | Web-mode GPU post-processing shader settings |
@@ -47,6 +48,8 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
 
 After sign-in, Settings fetches the current MES subscription from `https://mes.geforcenow.com/v4/subscriptions` and uses its entitled `width`/`height`/`framesPerSecond` profiles to filter the resolution and FPS menus. If a saved profile is no longer entitled, OpenNOW normalizes it to the closest entitled profile before launch; if the subscription response has no entitlement list, the app keeps the safe `1920x1080`/`60` fallback instead of exposing the static high-end presets.
+
+`identifyAsSteamDeck` switches OpenNOW's GFN device identity for MES, CloudMatch, and net-test requests to the official Steam Deck-style `STEAMOS`/`STEAMDECK`/`SteamOS` profile. It does not change the OAuth client ID, and the Settings video options refresh after the toggle so subscription filtering can include or remove Deck-specific profiles.
 
 Codec diagnostics in Settings are renderer session state, not persisted `settings.json` fields. They test H.264, H.265, and AV1 browser decode/encode support, whether Chromium reports GPU-backed acceleration, and store the latest results in `sessionStorage` under `opennow.codec-test-results.v1`. On Linux, a software-only or missing-H.265 result shows a VA-API setup hint: AppImage builds still use the host distro codec/driver stack, and proprietary NVIDIA systems may need distro codec packages plus `libva-nvidia-driver`/`nvidia-vaapi-driver` even after OpenNOW's restart-applied NVIDIA VA-API flags are enabled.
 
@@ -103,6 +106,8 @@ Codec diagnostics in Settings are renderer session state, not persisted `setting
 | `autoCheckForUpdates` | `boolean` | `true` | Check for app updates automatically |
 | `updateChannel` | `UpdateChannel` | `"stable"` | Updater channel: stable releases or opt-in nightly previews |
 | `lastSeenReleaseHighlightsVersion` | `string` | `""` | Last app version for which the What's New modal was acknowledged |
+| `errorReportingConsent` | `ErrorReportingConsent` | `"unset"` | First-run anonymous diagnostics consent: `unset`, `granted`, or `denied` |
+| `telemetryInstallId` | `string` | `""` | Anonymous random install ID generated only when diagnostics or feedback needs PostHog capture |
 
 ## Updates and build metadata
 
@@ -111,6 +116,12 @@ The About settings page gets update state from `opennow-stable/src/main/updater.
 Linux updater support is gated by the package type detected in `opennow-stable/src/main/linuxUpdaterSupport.ts`. AppImage installs are supported when the `APPIMAGE` environment variable is present, and `.deb` updates are supported only on Debian-compatible systems with `dpkg` or `apt` available. Other Linux installs report updates as disabled and direct users to the GitHub Releases AppImage or a Debian/Ubuntu package instead of trying an incompatible `.deb` updater path.
 
 `opennow-stable/src/main/appBuildInfo.ts` combines `app.getVersion()` with build metadata embedded by `electron.vite.config.ts`. `OPENNOW_BUILD_NUMBER`, `BUILD_NUMBER`, or `GITHUB_RUN_NUMBER` becomes `currentBuildNumber`; `OPENNOW_BUILD_COMMIT` or `GITHUB_SHA` becomes the embedded commit. The Settings UI displays `currentDisplayVersion`, which is the package version plus ` (build N)` when a build number is available. In unpackaged development mode, updater state is disabled but still reports the same build-info fields.
+
+## Diagnostics and feedback
+
+OpenNOW shows a one-time diagnostics consent prompt while `errorReportingConsent` is `"unset"`. When consent is granted, main and renderer PostHog clients use `telemetryInstallId` to send anonymous app-open and exception events with app version, build, platform, architecture, and Electron/runtime metadata; when consent is denied, exception capture stays off.
+
+The Settings About page can still send explicit feedback through the Feedback button. Feedback is a user-submitted event with a category and message; the user can optionally include app/system version details and recent redacted main + renderer logs, and the message is trimmed before capture.
 
 ## App language
 
@@ -129,6 +140,8 @@ On load, OpenNOW merges saved settings with defaults, migrates legacy values, th
 - `updateChannel` is normalized to `stable` or `nightly`.
 - `appTheme` is normalized to `light`, `dark`, or `auto`; `translucentUI` is normalized to a boolean.
 - `steamControllerCompatibilityMode` is normalized to a boolean.
+- `identifyAsSteamDeck` is normalized to a boolean and defaults to the host desktop identity when disabled.
+- `errorReportingConsent` is normalized to `unset`, `granted`, or `denied`; invalid `telemetryInstallId` values are cleared until a new random ID is needed.
 - `videoShader` is normalized to safe UI ranges: sharpen 0–100, saturation 0–200, contrast/brightness 50–150, vibrance 0–100, and film grain 0–100.
 - Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults.
 - `mouseAcceleration` is clamped to 1–150; legacy booleans become `100` or `1`.
