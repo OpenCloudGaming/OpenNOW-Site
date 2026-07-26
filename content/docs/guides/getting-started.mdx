@@ -5,7 +5,7 @@ description: Download, install, first launch, and source builds for OpenNOW
 
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
 
-OpenNOW is an open-source desktop client for GeForce NOW. The current app is the Electron client in `opennow-stable/`.
+OpenNOW is an open-source GeForce NOW client. The main desktop app is the Electron client in `opennow-stable/`, with separate native and mobile builds available for other platforms.
 
 ## Download a release
 
@@ -16,7 +16,10 @@ Grab the latest build from [GitHub Releases](https://github.com/OpenCloudGaming/
 | Windows x64 | NSIS installer, portable `.exe`, updater metadata | Experimental native streamer is available and bundles a private GStreamer runtime |
 | Windows ARM64 | NSIS installer, portable `.exe` | Release download only; no native streamer build in the release matrix |
 | macOS x64 / arm64 | `.dmg`, `.zip` | Web streamer remains the default; experimental native streamer builds can use the bundled GStreamer runtime |
+| macOS (OpenNOW Mac) | [Release `.zip`](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) | Separate performance-focused macOS build maintained by Jayian1890 |
 | Linux x64 / arm64 | `.AppImage`, `.deb` | Web streamer remains the default; experimental native mode uses host distro GStreamer packages, and auto-updates are supported for AppImage and Debian-compatible `.deb` installs |
+| Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release |
+| Android beta | [Direct `.apk`](https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9) | Sideload the beta only when testing pre-release Android builds |
 | iOS | [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2) | Install through Apple's TestFlight while the iOS build is in beta |
 | Nintendo Switch | [`SwitchNOW.nro`](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) | Native Horizon OS homebrew client for modded Switch systems; follow the [Switch installation guide](/docs/guides/nintendo-switch) |
 
