@@ -1,7 +1,7 @@
 <h1 align="center">OpenNOW Docs</h1>
 
 <p align="center">
-  <strong>Fumadocs + TanStack Start SPA documentation site for <a href="https://github.com/OpenCloudGaming/OpenNOW">OpenCloudGaming/OpenNOW</a>, the open-source Electron-based GeForce NOW client.</strong>
+  <strong>Fumadocs + TanStack Start SPA documentation site for the OpenNOW desktop and Nintendo Switch GeForce NOW clients.</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## About
 
-This repo hosts the public documentation website for [OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) — an open-source Electron desktop client for GeForce NOW. The app lives in `opennow-stable/` and uses Electron, React, TypeScript, and an optional Rust/GStreamer native streamer.
+This repo hosts the public documentation website for the [OpenNOW desktop client](https://github.com/OpenCloudGaming/OpenNOW) and native [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) homebrew client. The desktop app uses Electron, React, TypeScript, and an optional Rust/GStreamer native streamer; the Switch client is a separate C++ Horizon OS application.
 
 Docs content lives in `content/docs` as MDX. Shared docs data and React MDX components live under `src/lib` and `src/components/docs`.
 
@@ -29,6 +29,7 @@ Docs content lives in `content/docs` as MDX. Shared docs data and React MDX comp
 | Section | Description |
 |---------|-------------|
 | [Getting Started](https://opennow.zortos.me/docs/guides/getting-started) | Download releases or build from source |
+| [Nintendo Switch](https://opennow.zortos.me/docs/guides/nintendo-switch) | Install the homebrew client, configure streaming, and use Switch controls and shortcuts |
 | [Architecture](https://opennow.zortos.me/docs/architecture/overview) | Electron main / preload / renderer split |
 | [Authentication](https://opennow.zortos.me/docs/reference/authentication) | OAuth + PKCE login flow |
 | [WebRTC](https://opennow.zortos.me/docs/reference/webrtc) | Signaling, SDP, and data channels |
