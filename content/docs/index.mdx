@@ -12,11 +12,9 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
 
-OpenNOW is an open-source desktop client for GeForce NOW. These docs cover the install path, the Electron app, the renderer WebRTC stream, settings, capture, input, and the experimental native streamer.
+OpenNOW is an open-source GeForce NOW client. These docs cover the Electron desktop app and the native [OpenNOW-Switch](/docs/guides/nintendo-switch) homebrew client, including installation, streaming, settings, input, and troubleshooting.
 
-For macOS users looking for a more performant OpenNOW version, Jayian1890 maintains the separate [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac) repository.
-
-For modded Nintendo Switch systems, [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) is a native Horizon OS homebrew client with controller-first catalog browsing and WebRTC streaming. Install the latest `.nro` from [OpenNOW-Switch Releases](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest).
+For macOS users looking for a separate performance-focused build, Jayian1890 maintains [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac).
 
 <Callout type="info" title="Independent community project">
 OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of NVIDIA Corporation.
@@ -24,6 +22,7 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
 
 <Cards>
   <Card title="Install and play" icon={<Download />} href="/docs/guides/getting-started" description="Release packages, first launch, sign-in, app settings, and source builds." />
+  <Card title="Nintendo Switch" icon={<Gamepad2 />} href="/docs/guides/nintendo-switch" description="Install the native homebrew client, sign in, tune streaming, and create HOME-screen shortcuts." />
   <Card title="Architecture map" icon={<Network />} href="/docs/architecture/overview" description="Main, preload, renderer, shared contracts, native process, and data ownership." />
   <Card title="Configuration reference" icon={<SlidersHorizontal />} href="/docs/reference/configuration" description="Every setting, default, persisted key, and compatibility normalization rule." />
   <Card title="WebRTC and signaling" icon={<Radio />} href="/docs/reference/webrtc" description="CloudMatch, SDP, ICE, NVST data channels, Chromium flags, and failure handling." />
@@ -38,7 +37,7 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
     **Download** the latest desktop release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
   </Step>
   <Step>
-    **Install** the artifact for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, or the iOS TestFlight beta.
+    **Install** the artifact for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, Nintendo Switch `SwitchNOW.nro`, or the iOS TestFlight beta.
   </Step>
   <Step>
     **Sign in** through browser OAuth or QR/device authorization and let OpenNOW persist the session locally.
@@ -53,6 +52,7 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
 <Tabs items={['Users', 'Builders', 'Streaming internals']}>
   <Tab>
     - Start with [Getting Started](/docs/guides/getting-started).
+    - Use [Nintendo Switch](/docs/guides/nintendo-switch) for homebrew installation, controls, and Switch-specific streaming settings.
     - Keep [Configuration](/docs/reference/configuration) open when tuning quality, shortcuts, capture, and controller mode.
     - Use [Media](/docs/reference/media) for screenshots, recordings, local storage, and gallery behavior.
   </Tab>

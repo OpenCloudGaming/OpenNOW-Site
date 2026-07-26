@@ -40,6 +40,7 @@ export const posthogOptions: Partial<PostHogConfig> = {
 export type AnalyticsEvent =
   | 'docs_page_viewed'
   | 'home_cta_clicked'
+  | 'home_download_clicked'
   | 'home_doc_card_clicked'
   | 'home_open_full_docs_clicked'
   | 'docs_sidebar_release_clicked'

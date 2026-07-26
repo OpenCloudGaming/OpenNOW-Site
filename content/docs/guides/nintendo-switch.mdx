@@ -1,0 +1,128 @@
+---
+title: Nintendo Switch
+description: Install, configure, and use the native OpenNOW-Switch homebrew client
+icon: Gamepad2
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+[OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) is a native Horizon OS homebrew client for GeForce NOW. It uses a controller-first Borealis interface, WebRTC signaling, H.264 video, Opus audio, and native Switch input delivery.
+
+<Callout type="warn" title="Active development">
+The Switch client is still maturing and may have platform-specific bugs. It requires a modded Nintendo Switch with custom firmware, Homebrew Menu, an internet connection, and a valid GeForce NOW account.
+</Callout>
+
+The current release keeps the inherited `SwitchNOW.nro` filename and `sdmc:/switch/SwitchNOW/` data path so upgrades preserve existing accounts and settings.
+
+## Install the client
+
+<Steps>
+  <Step>
+    **Download** `SwitchNOW.nro` from the [latest OpenNOW-Switch release](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest).
+  </Step>
+  <Step>
+    **Copy** the file to the `sdmc:/switch/SwitchNOW/` folder on the Switch SD card and keep the filename `SwitchNOW.nro`.
+  </Step>
+  <Step>
+    **Start Homebrew Menu in application mode** by holding `R` while opening an installed game. This gives the client full memory and is required by the HOME-screen installer.
+  </Step>
+  <Step>
+    **Launch `SwitchNOW.nro`** from Homebrew Menu, then connect a GeForce NOW account by scanning the short-lived QR code and approving the sign-in on another device.
+  </Step>
+</Steps>
+
+OpenNOW stores the account session, stream settings, cover cache, play history, and opt-in diagnostic logs under `sdmc:/switch/SwitchNOW/`. An older `sdmc:/switch/OpenNOWSwitch/` directory is migrated automatically the first time the current client starts.
+
+## Browse and launch games
+
+The Store and Library support incremental catalog loading, cover caching, search, filters, sorting, and per-game storefront selection. Use the shoulder buttons to move between the main areas without leaving controller navigation.
+
+| Input | Launcher action |
+| --- | --- |
+| Left stick / D-pad | Move focus through controls and game tiles |
+| `A` | Select the focused item |
+| `B` | Go back or close a dialog |
+| `L` / `R` | Switch between Store, Library, and Settings |
+| `Y` | Search the Store or Library |
+| `ZL` / `ZR` / `X` | Run the context action shown in the toolbar |
+
+Launching a game shows the queue, rig setup, and connection stages before opening the stream. Game availability, queue times, and session limits still depend on the selected GeForce NOW membership and region.
+
+## Tune the stream
+
+Open **Settings > Stream** to choose a server location, resolution, frame rate, bitrate, decoder, and picture-processing mode. The default Balanced preset is 720p60 at 12 Mbps.
+
+| Preset | Resolution and FPS | Maximum bitrate |
+| --- | --- | --- |
+| Safe | 1280×720 at 30 FPS | 8 Mbps |
+| Balanced | 1280×720 at 60 FPS | 12 Mbps |
+| Quality | 1920×1080 at 60 FPS | 20 Mbps |
+
+Resolution, FPS, and bitrate can also be changed independently. The available bitrate steps are 8, 12, 16, 20, and 25 Mbps, and the client currently negotiates H.264 video.
+
+<Tabs items={['Decoder', 'Picture processing', 'Audio']}>
+  <Tab>
+    **Auto** prefers Tegra X1 NVDEC hardware decoding and falls back to the FFmpeg software decoder if hardware setup fails. If an NVDEC session did not shut down cleanly, the next automatic session starts in software safe mode instead of repeating the crash.
+  </Tab>
+  <Tab>
+    **Adaptive** is the recommended default and balances motion resilience with light image processing. **Clarity** applies stronger detail recovery, while **Original** leaves the decoded server image unchanged.
+  </Tab>
+  <Tab>
+    Stream audio uses Opus. Settings expose mute and an 8×–16× volume boost; the audio pipeline uses a bounded 30–100 ms buffer and defaults to 40 ms.
+  </Tab>
+</Tabs>
+
+## In-stream controls
+
+The client sends an Xbox-compatible virtual controller to GeForce NOW. With the default **Xbox** face-button layout, physical Switch positions are translated as `A → B`, `B → A`, `X → Y`, and `Y → X`; choose **Switch** under **Settings > Game & controls** to send matching letters.
+
+| Switch input | Stream action |
+| --- | --- |
+| `L` / `R` | `LB` / `RB` |
+| `ZL` / `ZR` | `LT` / `RT` |
+| Left / right stick | Xbox analog sticks |
+| Stick clicks | `L3` / `R3` |
+| `-` | View / Select |
+| Short `+` press | Menu / Start |
+| Hold `+` for at least 500 ms | Nexus / Guide |
+| `ZL + ZR + -` | Stop streaming and return to the game page |
+| `- + Y` | Open the transparent in-stream keyboard |
+| Touch / touch drag | Move the remote pointer and click / drag |
+
+Game input is paused while the on-screen keyboard owns input, so typing does not trigger controller actions in the game.
+
+## Add HOME-screen shortcuts
+
+The downloaded file remains an `.nro`, so it appears in Homebrew Menu by default. OpenNOW bundles its own NRO forwarder generator and installer for optional Horizon HOME entries; no PC-side forwarder generator is required.
+
+### Add OpenNOW to HOME
+
+1. Launch OpenNOW in full-memory/application mode.
+2. Open **Settings > App > Switch HOME screen**.
+3. Choose **Add OpenNOW to HOME**, confirm, and wait for the bundled installer to finish.
+
+### Add a game to HOME
+
+1. Open the game's detail page in OpenNOW.
+2. Choose **Create Switch shortcut**.
+3. Choose **Install on HOME** and wait for the installer to finish.
+
+Each game shortcut contains the game's title, square cover art, and a local `.opennow` launch manifest. The manifest identifies the game and storefront but contains no account tokens or credentials; the main client uses the account already saved under `sdmc:/switch/SwitchNOW/`.
+
+<Callout type="info" title="Forwarder requirements">
+Installing HOME entries requires application mode and custom firmware that can run unsigned homebrew forwarders. OpenNOW does not download or change signature-policy patches.
+</Callout>
+
+When replacing an older OpenNOW or SwitchNOW HOME entry, delete only the old software from **System Settings > Data Management > Software**. Keep `sdmc:/switch/SwitchNOW/`, copy the new `SwitchNOW.nro` over the existing file, then install the forwarder again from OpenNOW.
+
+## Troubleshooting
+
+- **The client or installer runs out of memory:** close it, reopen Homebrew Menu by holding `R` while launching an installed game, and start OpenNOW in application mode.
+- **A stream falls back to software decoding:** leave the decoder on **Auto** unless diagnosing a problem. Auto uses software when NVDEC initialization fails or the previous hardware session ended uncleanly.
+- **Wi-Fi cannot sustain the stream:** try the Safe preset or lower FPS and bitrate separately. A lower setting prevents the decode queue from accumulating stale frames.
+- **A saved login expires:** reconnect the account with a new QR code; OpenNOW refreshes valid saved sessions automatically.
+- **Support needs logs:** enable diagnostics under Settings before reproducing the issue. Diagnostic files are written under `sdmc:/switch/SwitchNOW/` and detailed logging is off during normal play.
+
+Report Switch-specific problems in the [OpenNOW-Switch issue tracker](https://github.com/OpenCloudGaming/OpenNOW-Switch/issues) or the [OpenNOW Discord](https://discord.gg/8EJYaJcNfD).

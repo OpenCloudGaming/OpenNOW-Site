@@ -8,8 +8,10 @@ import {
   Gauge,
   Gamepad2,
   Code2,
+  Laptop,
   MonitorPlay,
   ShieldCheck,
+  Smartphone,
   type LucideIcon,
 } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
@@ -46,11 +48,45 @@ const docs = [
 ] as const;
 
 const stats = [
-  ['Desktop', 'Windows · macOS · Linux'],
+  ['Platforms', 'Windows · macOS · Linux · Switch · iOS beta'],
   ['Stream path', 'Chromium WebRTC by default'],
-  ['Native mode', 'Experimental Windows Rust/GStreamer'],
-  ['Source', 'Electron · React · TypeScript'],
+  ['Switch client', 'Native Horizon OS homebrew'],
+  ['Source', 'Electron desktop · C++ Switch client'],
 ] as const;
+
+const downloads: {
+  title: string;
+  description: string;
+  format: string;
+  href: string;
+  icon: LucideIcon;
+  cta: string;
+}[] = [
+  {
+    title: 'Desktop',
+    description: 'Windows, macOS, and Linux packages for the main Electron client.',
+    format: '.exe · .dmg · .zip · .AppImage · .deb',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW/releases/latest',
+    icon: Laptop,
+    cta: 'Download desktop',
+  },
+  {
+    title: 'Nintendo Switch',
+    description: 'Native controller-first homebrew client for modded Switch systems.',
+    format: 'SwitchNOW.nro',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest',
+    icon: Gamepad2,
+    cta: 'Download for Switch',
+  },
+  {
+    title: 'iPhone and iPad',
+    description: 'Install the current iOS beta through Apple TestFlight.',
+    format: 'TestFlight beta',
+    href: 'https://testflight.apple.com/join/u1XPJKH2',
+    icon: Smartphone,
+    cta: 'Open TestFlight',
+  },
+];
 
 function Home() {
   return (
@@ -62,19 +98,19 @@ function Home() {
             Independent open-source GeForce NOW client
           </div>
           <h1 className="text-balance text-4xl font-semibold tracking-tight text-fd-foreground sm:text-5xl">
-            Stream, tune, capture, and control GeForce NOW from an open desktop client.
+            Stream, tune, capture, and control GeForce NOW from an open client.
           </h1>
           <p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-fd-muted-foreground">
-            OpenNOW is an open-source desktop client for GeForce NOW with codec and bitrate tuning, built-in capture, full controller support, and an experimental native streamer — on Windows, macOS, and Linux.
+            OpenNOW is an open-source GeForce NOW client with desktop builds for Windows, macOS, and Linux, plus native Nintendo Switch homebrew and an iOS beta.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
-              href="https://github.com/OpenCloudGaming/OpenNOW/releases"
-              onClick={() => track('home_cta_clicked', { cta: 'download_release', location: 'hero' })}
+              href="#downloads"
+              onClick={() => track('home_cta_clicked', { cta: 'choose_download', location: 'hero' })}
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-fd-primary px-5 py-2.5 text-sm font-medium text-fd-primary-foreground transition hover:opacity-90"
             >
               <Download className="size-4" />
-              Download release
+              Choose a download
               <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
             </a>
             <Link
@@ -104,6 +140,42 @@ function Home() {
               <p className="mt-2 text-sm font-medium text-fd-foreground">{value}</p>
             </div>
           ))}
+        </section>
+
+        <section id="downloads" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 pb-16">
+          <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground">Download OpenNOW</h2>
+          <p className="mt-2 text-fd-muted-foreground">Choose the client built for your device.</p>
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            {downloads.map(({ title, description, format, href, icon: Icon, cta }) => (
+              <a
+                key={title}
+                href={href}
+                onClick={() => track('home_download_clicked', { platform: title, href })}
+                className="group flex flex-col rounded-xl border bg-fd-card p-6 text-left transition hover:bg-fd-accent"
+              >
+                <span className="grid size-10 place-items-center rounded-lg bg-emerald-400/10 text-emerald-500">
+                  <Icon className="size-5" />
+                </span>
+                <h3 className="mt-5 text-lg font-medium text-fd-foreground">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-fd-muted-foreground">{description}</p>
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-fd-muted-foreground">{format}</p>
+                <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-fd-primary">
+                  {cta} <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+                </span>
+              </a>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-fd-muted-foreground">
+            Nintendo Switch installation requires custom firmware and Homebrew Menu.{' '}
+            <Link
+              to="/docs/$"
+              params={{ _splat: 'guides/nintendo-switch' }}
+              className="font-medium text-fd-primary hover:opacity-80"
+            >
+              Read the Switch installation guide
+            </Link>
+            .
+          </p>
         </section>
 
         <section className="mx-auto w-full max-w-7xl px-6 pb-16">
