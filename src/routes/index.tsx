@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   Camera,
   Download,
+  FlaskConical,
   Gauge,
   Gamepad2,
   Code2,
@@ -48,7 +49,7 @@ const docs = [
 ] as const;
 
 const stats = [
-  ['Platforms', 'Windows · macOS · Linux · Switch · iOS beta'],
+  ['Platforms', 'Windows · macOS · Linux · Android · iOS · Switch'],
   ['Stream path', 'Chromium WebRTC by default'],
   ['Switch client', 'Native Horizon OS homebrew'],
   ['Source', 'Electron desktop · C++ Switch client'],
@@ -69,6 +70,30 @@ const downloads: {
     href: 'https://github.com/OpenCloudGaming/OpenNOW/releases/latest',
     icon: Laptop,
     cta: 'Download desktop',
+  },
+  {
+    title: 'OpenNOW Mac',
+    description: 'Separate performance-focused macOS build maintained by Jayian1890.',
+    format: 'macOS .zip',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-Mac/releases',
+    icon: Laptop,
+    cta: 'Download for Mac',
+  },
+  {
+    title: 'Android',
+    description: 'Install the stable Android release from Google Play.',
+    format: 'Google Play',
+    href: 'https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow',
+    icon: Smartphone,
+    cta: 'Open Google Play',
+  },
+  {
+    title: 'Android Beta',
+    description: 'Try the latest Android beta with a direct APK download.',
+    format: '.apk beta',
+    href: 'https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9',
+    icon: FlaskConical,
+    cta: 'Download beta APK',
   },
   {
     title: 'Nintendo Switch',
@@ -101,7 +126,7 @@ function Home() {
             Stream, tune, capture, and control GeForce NOW from an open client.
           </h1>
           <p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-fd-muted-foreground">
-            OpenNOW is an open-source GeForce NOW client with desktop builds for Windows, macOS, and Linux, plus native Nintendo Switch homebrew and an iOS beta.
+            OpenNOW is an open-source GeForce NOW client for Windows, macOS, Linux, Android, iPhone, iPad, and modded Nintendo Switch systems.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
@@ -145,7 +170,7 @@ function Home() {
         <section id="downloads" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 pb-16">
           <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground">Download OpenNOW</h2>
           <p className="mt-2 text-fd-muted-foreground">Choose the client built for your device.</p>
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {downloads.map(({ title, description, format, href, icon: Icon, cta }) => (
               <a
                 key={title}

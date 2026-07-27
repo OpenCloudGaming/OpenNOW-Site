@@ -1,6 +1,6 @@
 ---
 title: OpenNOW
-description: Product, setup, architecture, and troubleshooting docs for the open-source GeForce NOW desktop client
+description: Product, setup, architecture, and troubleshooting docs for the open-source OpenNOW clients
 icon: MonitorPlay
 ---
 
@@ -12,7 +12,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
 
-OpenNOW is an open-source GeForce NOW client. These docs cover the Electron desktop app and the native [OpenNOW-Switch](/docs/guides/nintendo-switch) homebrew client, including installation, streaming, settings, input, and troubleshooting.
+OpenNOW is an open-source GeForce NOW client with desktop, Android, iOS, and native [OpenNOW-Switch](/docs/guides/nintendo-switch) builds. These docs cover installation, streaming, settings, input, architecture, and troubleshooting.
 
 For macOS users looking for a separate performance-focused build, Jayian1890 maintains [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac).
 
@@ -34,10 +34,10 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
 
 <Steps>
   <Step>
-    **Download** the latest desktop release from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
+    **Download** the build for your device from the [OpenNOW download picker](/#downloads).
   </Step>
   <Step>
-    **Install** the artifact for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, Nintendo Switch `SwitchNOW.nro`, or the iOS TestFlight beta.
+    **Install** the artifact for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, Android from Google Play or the beta `.apk`, Nintendo Switch `SwitchNOW.nro`, or the iOS TestFlight beta.
   </Step>
   <Step>
     **Sign in** through browser OAuth or QR/device authorization and let OpenNOW persist the session locally.

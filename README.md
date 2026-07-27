@@ -1,7 +1,7 @@
 <h1 align="center">OpenNOW Docs</h1>
 
 <p align="center">
-  <strong>Fumadocs + TanStack Start SPA documentation site for the OpenNOW desktop and Nintendo Switch GeForce NOW clients.</strong>
+  <strong>Fumadocs + TanStack Start SPA documentation site for the OpenNOW desktop, mobile, and Nintendo Switch GeForce NOW clients.</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## About
 
-This repo hosts the public documentation website for the [OpenNOW desktop client](https://github.com/OpenCloudGaming/OpenNOW) and native [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) homebrew client. The desktop app uses Electron, React, TypeScript, and an optional Rust/GStreamer native streamer; the Switch client is a separate C++ Horizon OS application.
+This repo hosts the public documentation website for the [OpenNOW desktop client](https://github.com/OpenCloudGaming/OpenNOW), mobile builds, and native [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) homebrew client. The desktop app uses Electron, React, TypeScript, and an optional Rust/GStreamer native streamer; the Switch client is a separate C++ Horizon OS application.
 
 Docs content lives in `content/docs` as MDX. Shared docs data and React MDX components live under `src/lib` and `src/components/docs`.
 
