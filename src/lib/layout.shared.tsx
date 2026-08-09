@@ -1,13 +1,11 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { BookOpen, Code2, Download, MessageCircle, MonitorPlay, Radio, Settings2 } from 'lucide-react';
+import { BookOpen, Code2, Download, MessageCircle, Radio, Settings2 } from 'lucide-react';
 import { appName } from './shared';
 
 function NavTitle() {
   return (
     <span className="flex items-center gap-2 font-semibold tracking-tight">
-      <span className="grid size-8 place-items-center rounded-[0.65rem] bg-gradient-to-br from-emerald-400 to-teal-500 text-emerald-950 shadow-[0_8px_24px_-10px_rgba(16,185,129,0.8)]">
-        <MonitorPlay className="size-4" />
-      </span>
+      <img src="/favicon.svg" alt="" width={28} height={28} className="size-7" />
       <span>{appName}<span className="ml-1.5 text-xs font-medium text-fd-muted-foreground">Docs</span></span>
     </span>
   );

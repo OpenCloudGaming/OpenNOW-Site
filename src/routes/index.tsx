@@ -3,7 +3,6 @@ import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import {
   ArrowRight,
   ArrowUpRight,
-  BadgeCheck,
   Camera,
   Code2,
   Download,
@@ -12,7 +11,6 @@ import {
   Gauge,
   Laptop,
   MonitorPlay,
-  Play,
   Radio,
   ShieldCheck,
   Smartphone,
@@ -138,86 +136,31 @@ function Home() {
     <HomeLayout {...baseOptions()}>
       <main className="home-page flex flex-1 flex-col overflow-hidden">
         <section className="hero-grid relative border-b">
-          <div className="hero-glow hero-glow-one" />
-          <div className="hero-glow hero-glow-two" />
-          <div className="relative mx-auto grid w-full max-w-7xl gap-14 px-6 pb-20 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-28 lg:pt-24">
-            <div>
-              <p className="mb-7 text-xs font-semibold uppercase tracking-[0.18em] text-fd-primary">Open-source cloud gaming</p>
-              <h1 className="max-w-3xl text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-fd-foreground sm:text-6xl lg:text-7xl">
-                Your cloud games.
-                <span className="hero-gradient-text block"> Your rules.</span>
-              </h1>
-              <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-fd-muted-foreground">
-                OpenNOW is an independent GeForce NOW client with deeper stream controls, local capture, and native apps across desktop, mobile, and Nintendo Switch.
-              </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#downloads"
-                  onClick={() => track('home_cta_clicked', { cta: 'choose_download', location: 'hero' })}
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-fd-primary px-5 py-3 text-sm font-semibold text-fd-primary-foreground shadow-[0_12px_36px_-16px_color-mix(in_oklab,var(--color-fd-primary)_80%,transparent)] transition hover:-translate-y-0.5 hover:brightness-105"
-                >
-                  <Download className="size-4" />
-                  Choose a download
-                  <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
-                </a>
-                <Link
-                  to="/docs/$"
-                  params={{ _splat: 'guides/getting-started' }}
-                  onClick={() => track('home_cta_clicked', { cta: 'get_started', location: 'hero' })}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-fd-card/70 px-5 py-3 text-sm font-semibold text-fd-foreground backdrop-blur transition hover:-translate-y-0.5 hover:bg-fd-accent"
-                >
-                  Read the quick start
-                </Link>
-              </div>
-              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fd-muted-foreground">
-                {['No vendor lock-in', 'Local settings', 'Community built'].map((item) => (
-                  <span key={item} className="inline-flex items-center gap-1.5">
-                    <BadgeCheck className="size-4 text-emerald-500" /> {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="stream-console relative mx-auto w-full max-w-xl lg:mx-0">
-              <div className="stream-console-bar flex items-center justify-between border-b px-4 py-3">
-                <div className="flex gap-1.5" aria-hidden="true">
-                  <span className="size-2.5 rounded-full bg-rose-400/70" />
-                  <span className="size-2.5 rounded-full bg-amber-400/70" />
-                  <span className="size-2.5 rounded-full bg-emerald-400/70" />
-                </div>
-                <span className="inline-flex items-center gap-2 text-xs font-medium text-fd-muted-foreground">
-                  <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
-                  Session ready
-                </span>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="stream-stage relative flex min-h-56 flex-col justify-between overflow-hidden rounded-2xl p-6 sm:min-h-64">
-                  <div className="stream-orbit" aria-hidden="true" />
-                  <div className="relative flex items-start justify-between">
-                    <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70 backdrop-blur">OpenNOW stream</span>
-                    <span className="grid size-10 place-items-center rounded-full bg-emerald-400 text-emerald-950 shadow-lg shadow-emerald-400/20">
-                      <Play className="ml-0.5 size-4 fill-current" />
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-200/70">Balanced preset</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-white">Ready when you are.</p>
-                    <p className="mt-1 text-sm text-white/55">Low-latency WebRTC · controller connected</p>
-                  </div>
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-2.5">
-                  {[
-                    ['Resolution', '2560 × 1440'],
-                    ['Frame rate', '120 FPS'],
-                    ['Bitrate cap', '75 Mbps'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-xl border bg-fd-background/50 px-3 py-3.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-fd-muted-foreground">{label}</p>
-                      <p className="mt-1.5 text-xs font-semibold text-fd-foreground sm:text-sm">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-6 pb-20 pt-20 text-center lg:pb-28 lg:pt-28">
+            <p className="mb-7 text-xs font-semibold uppercase tracking-[0.18em] text-fd-primary">Open-source cloud gaming</p>
+            <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-fd-foreground sm:text-6xl lg:text-7xl">
+              Your cloud games. Your rules.
+            </h1>
+            <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-fd-muted-foreground">
+              OpenNOW is an independent GeForce NOW client with deeper stream controls, local capture, and native apps across desktop, mobile, and Nintendo Switch.
+            </p>
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              <a
+                href="#downloads"
+                onClick={() => track('home_cta_clicked', { cta: 'choose_download', location: 'hero' })}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-fd-primary px-5 py-3 text-sm font-semibold text-fd-primary-foreground transition-colors hover:opacity-90"
+              >
+                <Download className="size-4" />
+                Choose a download
+              </a>
+              <Link
+                to="/docs/$"
+                params={{ _splat: 'guides/getting-started' }}
+                onClick={() => track('home_cta_clicked', { cta: 'get_started', location: 'hero' })}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold text-fd-foreground transition-colors hover:bg-fd-accent"
+              >
+                Read the quick start
+              </Link>
             </div>
           </div>
         </section>
