@@ -101,7 +101,7 @@ function Page() {
           <a
             href="https://github.com/OpenCloudGaming/OpenNOW/releases"
             onClick={() => track('docs_sidebar_release_clicked')}
-            className="mb-3 flex items-center gap-3 rounded-xl border bg-fd-card p-3 text-sm transition hover:bg-fd-accent"
+            className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 p-3 text-sm transition hover:border-emerald-500/35 hover:bg-emerald-500/10"
           >
             <span className="grid size-9 place-items-center rounded-lg bg-emerald-400/10 text-emerald-500">
               <Download className="size-4" />

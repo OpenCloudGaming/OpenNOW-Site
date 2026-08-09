@@ -1,0 +1,147 @@
+---
+title: Troubleshooting
+description: Diagnose sign-in, launch, stream quality, video, audio, input, and native-streamer problems
+icon: Wrench
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Card, Cards } from 'fumadocs-ui/components/card';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Bug, Cable, Gamepad2, KeyRound, MonitorPlay, Radio } from 'lucide-react';
+import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
+
+Most OpenNOW problems fall into one of four layers: authentication, the GeForce NOW session, the local stream path, or input. Start with the quick checks below, then use the section that matches what you see.
+
+<Callout type="info" title="Check NVIDIA first">
+OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming services. If the official GeForce NOW client is also failing, wait for the service to recover before changing local settings.
+</Callout>
+
+## Five-minute check
+
+<Steps>
+  <Step>
+    **Restart OpenNOW.** This clears the active renderer and forces the app to rebuild session state.
+  </Step>
+  <Step>
+    **Return to the Web streamer.** If you enabled the experimental native streamer, set **Stream client** to **Web** and try the same game again. This separates native runtime or decoder problems from account and network problems.
+  </Step>
+  <Step>
+    **Use conservative stream settings.** Choose H.264, 1920×1080, 60 FPS, and a lower bitrate. If that works, restore one setting at a time to find the unsupported codec, profile, or bandwidth threshold.
+  </Step>
+  <Step>
+    **Try another game and region.** One title can have a membership or storefront restriction, while one region can have queue or server-capacity trouble.
+  </Step>
+  <Step>
+    **Capture the evidence before resetting data.** Note the exact message, game, provider, region, stream mode, app version, and steps that reproduce the problem.
+  </Step>
+</Steps>
+
+## Choose the symptom
+
+<Cards>
+  <Card title="Cannot sign in" icon={<KeyRound />} href="#sign-in-and-account" description="Browser callback, QR code, expired session, or linked-store trouble." />
+  <Card title="Game will not launch" icon={<MonitorPlay />} href="#launch-queue-and-session" description="Membership, queue, region, active-session, and catalog failures." />
+  <Card title="Poor video or connection" icon={<Radio />} href="#stream-quality-and-video" description="Stutter, black video, unsupported codecs, and network instability." />
+  <Card title="Input or microphone" icon={<Gamepad2 />} href="#input-controller-and-microphone" description="Pointer lock, keyboard, controller, clipboard, and audio capture." />
+  <Card title="Native streamer" icon={<Cable />} href="#native-streamer" description="Runtime checks, GStreamer dependencies, fallback, and diagnostics." />
+  <Card title="Report a bug" icon={<Bug />} href="#collect-a-useful-report" description="What to include so maintainers can reproduce the issue." />
+</Cards>
+
+## Sign-in and account
+
+<Accordions type="multiple">
+  <Accordion title="The browser signs in but OpenNOW does not continue">
+    Keep OpenNOW open while completing browser OAuth. The callback returns through a temporary local HTTP port, so a firewall, privacy tool, proxy, or another process can block it. Allow OpenNOW on the local network and retry. If the browser flow remains blocked, use **Sign in with QR** instead.
+  </Accordion>
+  <Accordion title="The QR code expires or authorization never completes">
+    Start a new QR attempt and complete it before its timer expires. If NVIDIA responds with `slow_down`, leave the page open; OpenNOW adjusts its polling interval automatically. Make sure the phone and OpenNOW use the same intended NVIDIA or alliance-provider account.
+  </Accordion>
+  <Accordion title="OpenNOW asks you to sign in again">
+    The saved access and refresh tokens may have expired or been rejected. Sign in again first. If every restart loses a valid session, close OpenNOW, back up `auth-state.json`, remove that file, and retry so the app can create clean authentication state.
+  </Accordion>
+  <Accordion title="A game is missing after linking a store">
+    Open **Settings > Accounts**, link or resync the supported store, then refresh the library. OpenNOW invalidates account-scoped catalog caches after link, unlink, and resync actions, but NVIDIA still decides which owned games appear in GeForce NOW.
+  </Accordion>
+</Accordions>
+
+## Launch, queue, and session
+
+| Symptom | What it usually means | What to try |
+| --- | --- | --- |
+| Upgrade or insufficient playability message | NVIDIA reports that the selected game or stream profile requires a higher membership tier | Choose an entitled game/profile or change the GeForce NOW membership |
+| Active session conflict | NVIDIA believes another stream is still active | Stop the other session, wait for cleanup, then launch again |
+| Queue does not advance | The selected region is at capacity, the queue request expired, or service state changed | Leave and relaunch; if available, choose another region |
+| Game opens from the public catalog but not the library | The required store account is not linked or synced | Link/resync the store under Settings, then refresh |
+| One game fails while others launch | The failure is likely title, storefront, SKU, or membership specific | Record the exact game and storefront before reporting it |
+
+Do not repeatedly relaunch while an earlier CloudMatch session is still being released. Stop the session once, wait briefly, then make one clean attempt.
+
+## Stream quality and video
+
+Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can sustain. H.265, AV1, 10-bit color, 4:4:4 chroma, high frame rates, and ultrawide profiles require compatible subscription profiles plus local browser, GPU, driver, and display support.
+
+| Symptom | Isolation step | Next action |
+| --- | --- | --- |
+| Black screen with audio | Switch to H.264 and 8-bit 4:2:0, then restart the stream | Update the GPU driver; leave decoder preference on Auto unless diagnosing |
+| Regular stutter or rising latency | Lower bitrate first, then FPS | Use wired Ethernet or stronger Wi-Fi; stop competing traffic and try a closer region |
+| Blocky image but stable input | Increase bitrate gradually | Keep the highest value that remains stable rather than the maximum available value |
+| Colors look wrong | Return color quality to 8-bit 4:2:0 and disable experimental combinations | Re-enable 10-bit or 4:4:4 separately to identify the unsupported mode |
+| Fullscreen or acceleration changed after a setting edit | Restart OpenNOW | Decoder and Chromium acceleration preferences are read before Electron starts |
+
+<Callout type="warn" title="Change one variable at a time">
+Changing codec, resolution, FPS, bitrate, decoder, and region together makes the result impossible to interpret. Begin with the conservative profile, then restore one option per stream.
+</Callout>
+
+## Input, controller, and microphone
+
+- **Mouse does not control the game:** click the stream to acquire pointer lock. Use the configured release shortcut before interacting with OpenNOW again.
+- **Keyboard mapping is wrong:** confirm the selected keyboard layout in Settings and reconnect the stream after changing it.
+- **Controller is not detected:** connect it before launching, verify the operating system sees it, then restart OpenNOW. Close remapping software temporarily if it creates duplicate virtual controllers.
+- **Controller mode is hard to leave:** use the controller-mode exit control or the configured app shortcut; controller mode changes the browsing UI but does not change NVIDIA account state.
+- **Clipboard paste does nothing:** make sure keyboard input is active in the stream and use the configured paste shortcut rather than the operating system shortcut alone.
+- **Microphone is silent:** grant microphone permission to OpenNOW at the operating-system level, select the intended mode in Settings, and reconnect the stream so the audio track is negotiated again.
+
+See [Input and Controls](/docs/reference/input) for the default shortcut table, pointer behavior, data channels, and microphone modes.
+
+## Native streamer
+
+The native Rust/GStreamer streamer is experimental. The Web streamer is the control case: if Web works and Native fails, the account, game entitlement, queue, and basic network path are probably healthy.
+
+1. Set **Stream client** to **Web**, restart the stream, and confirm the same game works.
+2. Return to **Native** and leave the native video backend on **Auto**.
+3. On Linux, install the distribution's GStreamer base, good, bad, ugly, libav, and relevant hardware-acceleration plugins. Windows x64 and macOS release packages can use a bundled private runtime.
+4. Check the native status or fallback reason. OpenNOW falls back when the executable, protocol, backend, runtime, or media capability check fails.
+5. Enable native diagnostics only while reproducing the issue, then include the transition, stall, or fallback details in the report.
+
+Use [Native Streamer](/docs/reference/native-streamer) for executable lookup, platform video paths, environment overrides, and protocol details.
+
+## Reset local state
+
+Local settings and authentication are separate files. Close OpenNOW before moving or deleting either file.
+
+<LocalDataLocationsTable />
+
+- Move `settings.json` aside to reset preferences without deleting the saved sign-in.
+- Move `auth-state.json` aside to reset the account session without resetting stream preferences.
+- Back up both files before destructive troubleshooting if you need to inspect or restore them later.
+- Screenshots and recordings live in their own media directories; resetting settings or authentication does not require deleting captures.
+
+## Collect a useful report
+
+Include the following in a [GitHub issue](https://github.com/OpenCloudGaming/OpenNOW/issues) or the [OpenNOW Discord](https://discord.gg/8EJYaJcNfD):
+
+- OpenNOW version and whether it is a stable, nightly, beta, or source build
+- Operating system, architecture, GPU, and GPU-driver version
+- Web or native stream mode; for native mode, the backend and fallback reason
+- Provider, GeForce NOW membership tier, selected region, and game/storefront when relevant
+- Codec, resolution, FPS, bitrate, color quality, and decoder preference
+- Exact error text and a short, repeatable sequence of steps
+- Whether the same account and game work in the official GeForce NOW client
+- A screenshot or recording with account tokens, email addresses, device codes, and other personal data removed
+
+<Callout type="danger" title="Do not post credentials">
+Never attach `auth-state.json`, access tokens, refresh tokens, QR device codes, or unredacted account details to a public issue.
+</Callout>
+
+Switch-specific crashes, installation failures, and decoder problems belong in the [OpenNOW-Switch issue tracker](https://github.com/OpenCloudGaming/OpenNOW-Switch/issues). Include whether Homebrew Menu was opened in applet mode or full-memory application mode.

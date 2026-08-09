@@ -14,17 +14,25 @@ export const Route = createRootRoute({
       { title: 'OpenNOW Docs' },
       {
         name: 'description',
-        content: 'Documentation for OpenNOW, the open-source Electron GeForce NOW client.',
+        content: 'Download, configure, and troubleshoot OpenNOW, the open-source GeForce NOW client for desktop, mobile, and Nintendo Switch.',
       },
+      { name: 'theme-color', content: '#071410' },
+      { property: 'og:site_name', content: 'OpenNOW Docs' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:title', content: 'OpenNOW — Open-source GeForce NOW client' },
+      { property: 'og:description', content: 'Install, tune, and troubleshoot OpenNOW across desktop, mobile, and Nintendo Switch.' },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [
+      { rel: 'stylesheet', href: appCss },
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+    ],
   }),
   component: RootComponent,
 });
 
 function RootComponent() {
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
