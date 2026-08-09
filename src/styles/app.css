@@ -210,22 +210,9 @@ html > body[data-scroll-locked] {
   text-transform: uppercase;
 }
 
-.feature-card,
 .download-card,
 .bento-card {
   box-shadow: 0 18px 42px -36px rgba(0, 0, 0, 0.6);
-}
-
-.feature-card::after {
-  position: absolute;
-  right: -4rem;
-  bottom: -5rem;
-  width: 11rem;
-  height: 11rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in oklab, var(--color-fd-primary) 10%, transparent), transparent 66%);
-  content: '';
-  pointer-events: none;
 }
 
 .download-zone {

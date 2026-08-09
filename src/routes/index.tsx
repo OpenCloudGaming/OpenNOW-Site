@@ -5,7 +5,6 @@ import {
   ArrowUpRight,
   BadgeCheck,
   Camera,
-  CircleHelp,
   Code2,
   Download,
   FlaskConical,
@@ -17,30 +16,26 @@ import {
   Radio,
   ShieldCheck,
   Smartphone,
-  Sparkles,
   Wifi,
   type LucideIcon,
 } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
 import { track } from '@/lib/analytics';
 
-const quickLinks: { title: string; description: string; icon: LucideIcon; href: string }[] = [
+const quickLinks: { title: string; description: string; href: string }[] = [
   {
     title: 'Install OpenNOW',
     description: 'Choose the right package and launch your first stream.',
-    icon: Download,
     href: '/docs/guides/getting-started',
   },
   {
     title: 'Tune your stream',
     description: 'Balance codec, resolution, frame rate, and bitrate.',
-    icon: Gauge,
     href: '/docs/reference/configuration',
   },
   {
     title: 'Fix a problem',
     description: 'Work through sign-in, launch, video, audio, and input issues.',
-    icon: CircleHelp,
     href: '/docs/guides/troubleshooting',
   },
 ];
@@ -147,10 +142,7 @@ function Home() {
           <div className="hero-glow hero-glow-two" />
           <div className="relative mx-auto grid w-full max-w-7xl gap-14 px-6 pb-20 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-28 lg:pt-24">
             <div>
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/8 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">
-                <Sparkles className="size-3.5" />
-                Open-source cloud gaming
-              </div>
+              <p className="mb-7 text-xs font-semibold uppercase tracking-[0.18em] text-fd-primary">Open-source cloud gaming</p>
               <h1 className="max-w-3xl text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-fd-foreground sm:text-6xl lg:text-7xl">
                 Your cloud games.
                 <span className="hero-gradient-text block"> Your rules.</span>
@@ -230,34 +222,25 @@ function Home() {
           </div>
         </section>
 
-        <section className="relative mx-auto w-full max-w-7xl px-6 py-20 sm:py-24">
-          <div className="max-w-2xl">
-            <p className="section-kicker">Start here</p>
-            <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-fd-foreground sm:text-4xl">Find the answer before the queue moves.</h2>
-            <p className="mt-4 text-lg leading-8 text-fd-muted-foreground">Practical paths for installing, tuning, and getting unstuck.</p>
-          </div>
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {quickLinks.map(({ title, description, icon: Icon, href }, index) => (
+        <section className="mx-auto w-full max-w-3xl px-6 py-20 sm:py-24">
+          <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground sm:text-3xl">Start here</h2>
+          <p className="mt-3 leading-7 text-fd-muted-foreground">Three pages cover most of what people need first.</p>
+          <nav className="mt-8 border-t" aria-label="Start here">
+            {quickLinks.map(({ title, description, href }) => (
               <Link
                 key={title}
                 to={href}
                 onClick={() => track('home_doc_card_clicked', { title, href })}
-                className="feature-card group relative overflow-hidden rounded-2xl border bg-fd-card/70 p-6 transition hover:-translate-y-1 hover:border-emerald-500/35"
+                className="group flex items-start justify-between gap-6 border-b py-5"
               >
-                <div className="flex items-center justify-between">
-                  <span className="grid size-11 place-items-center rounded-xl border border-emerald-500/15 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
-                    <Icon className="size-5" />
-                  </span>
-                  <span className="text-xs font-semibold tabular-nums text-fd-muted-foreground">0{index + 1}</span>
-                </div>
-                <h3 className="mt-7 text-lg font-semibold text-fd-foreground">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-fd-muted-foreground">{description}</p>
-                <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-fd-primary">
-                  Open guide <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+                <span>
+                  <span className="block font-medium text-fd-foreground transition group-hover:text-fd-primary">{title}</span>
+                  <span className="mt-1 block text-sm leading-6 text-fd-muted-foreground">{description}</span>
                 </span>
+                <ArrowRight className="mt-1.5 size-4 shrink-0 text-fd-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-fd-primary" />
               </Link>
             ))}
-          </div>
+          </nav>
         </section>
 
         <section id="downloads" className="download-zone scroll-mt-20 border-y">
