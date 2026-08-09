@@ -20,21 +20,21 @@ import {
 import { baseOptions } from '@/lib/layout.shared';
 import { track } from '@/lib/analytics';
 
-const quickLinks: { title: string; description: string; href: string }[] = [
+const quickLinks: { title: string; description: string; splat: string }[] = [
   {
     title: 'Install OpenNOW',
     description: 'Choose the right package and launch your first stream.',
-    href: '/docs/guides/getting-started',
+    splat: 'guides/getting-started',
   },
   {
     title: 'Tune your stream',
     description: 'Balance codec, resolution, frame rate, and bitrate.',
-    href: '/docs/reference/configuration',
+    splat: 'reference/configuration',
   },
   {
     title: 'Fix a problem',
     description: 'Work through sign-in, launch, video, audio, and input issues.',
-    href: '/docs/guides/troubleshooting',
+    splat: 'guides/troubleshooting',
   },
 ];
 
@@ -169,11 +169,12 @@ function Home() {
           <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground sm:text-3xl">Start here</h2>
           <p className="mt-3 leading-7 text-fd-muted-foreground">Three pages cover most of what people need first.</p>
           <nav className="mt-8 border-t" aria-label="Start here">
-            {quickLinks.map(({ title, description, href }) => (
+            {quickLinks.map(({ title, description, splat }) => (
               <Link
                 key={title}
-                to={href}
-                onClick={() => track('home_doc_card_clicked', { title, href })}
+                to="/docs/$"
+                params={{ _splat: splat }}
+                onClick={() => track('home_doc_card_clicked', { title, href: `/docs/${splat}` })}
                 className="group flex items-start justify-between gap-6 border-b py-5"
               >
                 <span>
@@ -261,7 +262,7 @@ function Home() {
                   key={title}
                   to="/docs/$"
                   params={{ _splat: splat }}
-                  onClick={() => track('home_doc_card_clicked', { title, splat })}
+                  onClick={() => track('home_doc_card_clicked', { title, href: `/docs/${splat}` })}
                   className="group grid gap-4 py-6 transition hover:pl-2 sm:grid-cols-[48px_0.7fr_1fr_auto] sm:items-center"
                 >
                   <span className="grid size-11 place-items-center rounded-xl border bg-fd-background text-fd-primary"><Icon className="size-5" /></span>

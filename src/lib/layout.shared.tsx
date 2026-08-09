@@ -6,7 +6,7 @@ function NavTitle() {
   return (
     <span className="flex items-center gap-2 font-semibold tracking-tight">
       <img src="/favicon.svg" alt="" width={28} height={28} className="size-7" />
-      <span>{appName}<span className="ml-1.5 text-xs font-medium text-fd-muted-foreground">Docs</span></span>
+      <span>{appName} <span className="text-xs font-medium text-fd-muted-foreground">Docs</span></span>
     </span>
   );
 }
