@@ -2,5 +2,5 @@
   "title": "Guides",
   "icon": "Compass",
   "defaultOpen": true,
-  "pages": ["getting-started", "nintendo-switch"]
+  "pages": ["getting-started", "troubleshooting", "nintendo-switch"]
 }

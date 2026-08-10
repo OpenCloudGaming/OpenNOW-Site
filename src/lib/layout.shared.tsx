@@ -1,14 +1,12 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { BookOpen, Code2, Download, MessageCircle, MonitorPlay, Radio, Settings2 } from 'lucide-react';
-import { appName, gitConfig } from './shared';
+import { BookOpen, Code2, Download, MessageCircle, Radio, Settings2 } from 'lucide-react';
+import { appName } from './shared';
 
 function NavTitle() {
   return (
     <span className="flex items-center gap-2 font-semibold tracking-tight">
-      <span className="grid size-7 place-items-center rounded-lg border border-emerald-400/30 bg-emerald-400/10 text-emerald-300 shadow-[0_0_28px_rgba(52,211,153,0.22)]">
-        <MonitorPlay className="size-4" />
-      </span>
-      <span>{appName}</span>
+      <img src="/favicon.svg" alt="" width={28} height={28} className="size-7" />
+      <span>{appName} <span className="text-xs font-medium text-fd-muted-foreground">Docs</span></span>
     </span>
   );
 }
@@ -22,7 +20,6 @@ export function baseOptions(): BaseLayoutProps {
       url: '/',
       transparentMode: 'top',
     },
-    githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
     links: [
       {
         text: 'Docs',

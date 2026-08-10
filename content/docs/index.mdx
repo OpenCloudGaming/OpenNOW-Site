@@ -10,7 +10,7 @@ import { Card, Cards } from 'fumadocs-ui/components/card';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
-import { Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
+import { CircleHelp, Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
 
 OpenNOW is an open-source GeForce NOW client with desktop, Android, iOS, and native [OpenNOW-Switch](/docs/guides/nintendo-switch) builds. These docs cover installation, streaming, settings, input, architecture, and troubleshooting.
 
@@ -22,6 +22,7 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
 
 <Cards>
   <Card title="Install and play" icon={<Download />} href="/docs/guides/getting-started" description="Release packages, first launch, sign-in, app settings, and source builds." />
+  <Card title="Troubleshoot a problem" icon={<CircleHelp />} href="/docs/guides/troubleshooting" description="Fast checks for sign-in, launch, video, network, audio, input, and native-streamer issues." />
   <Card title="Nintendo Switch" icon={<Gamepad2 />} href="/docs/guides/nintendo-switch" description="Install the native homebrew client, sign in, tune streaming, and create HOME-screen shortcuts." />
   <Card title="Architecture map" icon={<Network />} href="/docs/architecture/overview" description="Main, preload, renderer, shared contracts, native process, and data ownership." />
   <Card title="Configuration reference" icon={<SlidersHorizontal />} href="/docs/reference/configuration" description="Every setting, default, persisted key, and compatibility normalization rule." />
