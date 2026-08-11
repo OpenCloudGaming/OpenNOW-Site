@@ -7,16 +7,16 @@
   "scripts": {
     "dev": "vite dev",
     "start": "vite preview",
-    "build": "vite build && rm -rf dist && cp -R .output/public dist && cp dist/_shell.html dist/index.html",
+    "generate:docs-data": "fumadocs-mdx && vite-node --config vite.generate.config.ts scripts/generate-docs-static-data.vite.ts",
+    "build": "npm run generate:docs-data && vite build && rm -rf dist && cp -R .output/public dist && cp dist/_shell.html dist/index.html",
     "preview": "vite preview",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "fumadocs-mdx && npm run generate:docs-data && tsc --noEmit"
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
     "@tanstack/react-router": "1.170.10",
     "@tanstack/react-router-devtools": "1.167.0",
     "@tanstack/react-start": "1.168.18",
-    "@tanstack/start-static-server-functions": "1.167.11",
     "fumadocs-core": "16.9.3",
     "fumadocs-mdx": "15.0.10",
     "fumadocs-ui": "16.9.3",
@@ -38,6 +38,7 @@
     "srvx": "^0.11.16",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
+    "vite-node": "^6.0.0",
     "wrangler": "4.95.0"
   }
 }
