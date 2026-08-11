@@ -1,7 +1,5 @@
-import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { createServerFn } from '@tanstack/react-start';
-import { slugsToMarkdownPath, source } from '@/lib/source';
 import browserCollections from 'collections/browser';
 import {
   DocsBody,
@@ -13,7 +11,8 @@ import {
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
 import { gitConfig } from '@/lib/shared';
-import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
+import { loadDocsPageData } from '@/lib/docsLoader';
+import { DocsError } from '@/components/docs-error';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Code2, Download, MonitorPlay } from 'lucide-react';
 import { Suspense, useEffect } from 'react';
@@ -22,29 +21,14 @@ import { track } from '@/lib/analytics';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
+  errorComponent: DocsError,
   loader: async ({ params }) => {
     const slugs = params._splat?.split('/') ?? [];
-    const data = await loader({ data: slugs });
+    const data = await loadDocsPageData(slugs);
     await clientLoader.preload(data.path);
     return data;
   },
 });
-
-const loader = createServerFn({
-  method: 'GET',
-})
-  .inputValidator((slugs: string[]) => slugs)
-  .middleware([staticFunctionMiddleware])
-  .handler(async ({ data: slugs }) => {
-    const page = source.getPage(slugs);
-    if (!page) throw notFound();
-
-    return {
-      path: page.path,
-      markdownUrl: slugsToMarkdownPath(page.slugs).url,
-      pageTree: await source.serializePageTree(source.getPageTree()),
-    };
-  });
 
 const clientLoader = browserCollections.docs.createClientLoader({
   component(
