@@ -20,7 +20,9 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `posterSizeScale` | `number` | `1.05` | Library poster scaling |
 | `fps` | `number` | `60` | Target frame rate |
 | `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps |
-| `recordingBitrateMbps` | `number \| null` | `null` | Recording video bitrate in Mbps; `null` leaves bitrate selection to `MediaRecorder` |
+| `recordingBitrateMbps` | `number \| null` | `null` | Recording video bitrate in Mbps; `null` leaves bitrate selection to `MediaRecorder`; custom values clamp to 1–12 |
+| `recordingResolution` | `RecordingResolution` | `"720p"` | Local recording capture height: `720p`, `1080p`, or `1440p` |
+| `recordingFps` | `RecordingFps` | `30` | Local recording frame rate: `30` or `60` |
 | `streamClientMode` | `StreamClientMode` | `"web"` | Renderer WebRTC by default; experimental native mode starts the Rust streamer on supported desktop platforms |
 | `nativeStreamerBackend` | `NativeStreamerBackendPreference` | `"gstreamer"` | Compatibility currently forces `gstreamer` |
 | `nativeVideoBackend` | `NativeVideoBackendPreference` | `"auto"` | Normalized to `auto`, `d3d11`, `d3d12`, or `vulkan` |
@@ -30,12 +32,13 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `nativeExternalRenderer` | `boolean` | `false` | Optional separate native renderer window; compatibility disables it outside Windows |
 | `transportMode` | `StreamTransportMode` | `"webrtc"` | Native media transport; legacy `nvst` values normalize back to WebRTC |
 | `showNativeStreamerStats` | `boolean` | `false` | Show the native streamer's own stats overlay during native streaming |
-| `codec` | `VideoCodec` | `"H264"` | Stream codec preference: `H264`, `H265`, or `AV1` |
+| `codec` | `CodecPreference` | `"auto"` | Stream codec preference: `auto`, `AV1`, `H264`, or `H265`; `auto` follows capability-aware negotiation order |
+| `fallbackCodec` | `FallbackCodecPreference` | `"auto"` | Bounded fallback when the preferred codec cannot produce video |
 | `colorQuality` | `ColorQuality` | `"8bit_420"` | Bit-depth/chroma preference: `8bit_420`, `8bit_444`, `10bit_420`, or `10bit_444`; 10-bit color is treated separately from HDR |
 | `decoderPreference` | `string` | `"auto"` | Decoder preference hint: `auto`, `hardware`, or `software`; read before Electron startup to choose Chromium acceleration switches |
 | `encoderPreference` | `string` | `"auto"` | Encoder preference hint: `auto`, `hardware`, or `software`; read before Electron startup to choose Chromium acceleration switches and sent with stream preferences |
 | `region` | `string` | `""` | Preferred region URL; empty means auto |
-| `sessionProxyEnabled` | `boolean` | `false` | Use an explicit proxy for session/signaling requests |
+| `sessionProxyEnabled` | `boolean` | `false` | Use an explicit proxy for session/signaling and proxied catalog requests |
 | `sessionProxyUrl` | `string` | `""` | Proxy URL when enabled |
 | `gameLanguage` | `GameLanguage` | `"en_US"` | Game language sent to GFN |
 | `enablePersistingInGameSettings` | `boolean` | `false` | Request NVIDIA's per-game in-game graphics/settings persistence on new sessions |
@@ -46,6 +49,12 @@ OpenNOW persists user settings as JSON at `app.getPath("userData")/settings.json
 | `videoShader` | `VideoShaderSettings` | disabled, sharpen `40`, neutral color values | Web-mode GPU post-processing shader settings |
 
 Native streamer settings control an experimental opt-in path. Keep `streamClientMode` at the default `"web"` unless you are testing native streaming and expect possible platform-specific fallback behavior.
+
+### Session and community proxy
+
+`sessionProxyEnabled` / `sessionProxyUrl` send CloudMatch session and related traffic through an HTTP(S) proxy. Settings → Stream can provision the **Zortos community proxy**: the app POSTs to `https://opennow-proxy-production.up.railway.app/api/public/proxy`, then uses the returned CONNECT endpoint (`altaria.proxy.rlwy.net:51545`). Provision allows up to 45 seconds and retries transient statuses so Railway cold starts do not fail the toggle immediately. Saved legacy `opennow-proxy-tcp.zortos.me:3128` (and related) URLs still show the community-proxy badge.
+
+Catalog GraphQL/metadata requests that use the same proxy are bounded to **10 seconds**. On timeout, transport failure, or selected transient proxy HTTP statuses, OpenNOW retries the catalog call **directly** and temporarily bypasses that proxy for later catalog calls (about 60 seconds). Healthy proxy responses stay proxied. Session and queue traffic continue to use the configured session proxy.
 
 After sign-in, Settings fetches the current MES subscription from `https://mes.geforcenow.com/v4/subscriptions` and uses its entitled `width`/`height`/`framesPerSecond` profiles to filter the resolution and FPS menus. If a saved profile is no longer entitled, OpenNOW normalizes it to the closest entitled profile before launch; if the subscription response has no entitlement list, the app keeps the safe `1920x1080`/`60` fallback instead of exposing the static high-end presets.
 
@@ -63,7 +72,7 @@ Codec diagnostics in Settings are renderer session state, not persisted `setting
 | `nativeCursorOverlay` | `boolean` | `true` | Use the WebRTC cursor data channel overlay instead of leaving cursor rendering to the stream |
 | `mouseSensitivity` | `number` | `1` | Relative mouse delta multiplier |
 | `mouseAcceleration` | `number` | `1` | Acceleration strength clamped to 1–150 |
-| `shortcutToggleStats` | `string` | `"F3"` | Toggle stats overlay |
+| `shortcutToggleStats` | `string` | `"Ctrl+N"` | Cycle stats HUD modes: Off → Compact → Full |
 | `shortcutTogglePointerLock` | `string` | `"F8"` | Toggle pointer lock |
 | `shortcutToggleFullscreen` | `string` | `"F10"` | Toggle fullscreen |
 | `shortcutStopStream` | `string` | `"Ctrl+Shift+Q"` | Stop session |
@@ -82,9 +91,13 @@ Codec diagnostics in Settings are renderer session state, not persisted `setting
 | `microphoneDeviceId` | `string` | `""` | Preferred input device ID |
 | `hideStreamButtons` | `boolean` | `false` | Hide stream overlay buttons |
 | `showAntiAfkIndicator` | `boolean` | `true` | Show anti-AFK status indicator |
-| `showStatsOnLaunch` | `boolean` | `false` | Open stats overlay when a session starts |
+| `antiAfkReminderEveryMinutes` | `number` | `15` | Recurring anti-AFK reminder interval while anti-AFK is active |
+| `antiAfkReminderDurationSeconds` | `number` | `5` | How long each anti-AFK reminder stays visible |
+| `showStatsOnLaunch` | `boolean` | `false` | Open the stats HUD when a session starts |
+| `statsOverlayPosition` | `StatsOverlayPosition` | `"bottom-left"` | HUD corner: `bottom-left`, `bottom-right`, `top-left`, or `top-right` |
 | `hideServerSelector` | `boolean` | `false` | Skip/hide queue server selector UI where possible |
 | `sessionCounterEnabled` | `boolean` | `false` | Enable session timer display behavior |
+| `showSessionReport` | `boolean` | `true` | Show a privacy-safe quality summary after each completed stream |
 | `showSessionTimeRemainingInStatsOverlay` | `boolean` | `false` | Show the GFN session-limit countdown in the stats overlay |
 | `sessionClockShowEveryMinutes` | `number` | `60` | Re-show the session timer every N minutes |
 | `sessionClockShowDurationSeconds` | `number` | `30` | Duration for each session timer display |
@@ -92,12 +105,16 @@ Codec diagnostics in Settings are renderer session state, not persisted `setting
 | `appTheme` | `AppTheme` | `"auto"` | UI theme: `light`, `dark`, or `auto` |
 | `translucentUI` | `boolean` | `false` | Use translucent settings/nav overlay surfaces |
 
+The in-stream stats HUD cycles **Off → Compact → Full** with `shortcutToggleStats` (default `Ctrl+N`). Compact and Full separate server, receive, decode, and render measurements and can surface ICE transport, network capacity, session location, and server GPU context.
+
 ## Controller, window, and app behavior
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
 | `controllerMode` | `boolean` | `false` | Controller-first library UI |
+| `controllerModePromptDismissed` | `boolean` | `false` | Suppress the gamepad-detected console-mode suggestion after the user declines it |
 | `launchInConsoleMode` | `boolean` | `false` | Launch sessions with GFN's TV/console app launch mode and fullscreen controller shell |
+| `consoleProfilePickerOnLaunch` | `boolean` | `true` | Show the Who's playing? profile picker when console mode starts |
 | `autoFullScreen` | `boolean` | `false` | Auto-enter fullscreen when controller mode triggers it |
 | `favoriteGameIds` | `string[]` | `[]` | Saved favorites |
 | `windowWidth` | `number` | `1400` | Last window width |
@@ -111,7 +128,7 @@ Codec diagnostics in Settings are renderer session state, not persisted `setting
 
 ## Updates and build metadata
 
-The About settings page gets update state from `opennow-stable/src/main/updater.ts`. Packaged builds check GitHub Releases automatically 12 seconds after startup and then every 6 hours when `autoCheckForUpdates` is enabled; manual checks, downloads, and restart-to-install actions use the same updater controller. The updater does not auto-download or auto-install updates, can use `OPENNOW_GH_TOKEN` or `GH_TOKEN` for GitHub Releases requests, and applies `updateChannel` through `opennow-stable/src/main/updateChannel.ts`: stable uses the `latest` feed without prereleases, while nightly uses the `nightly` feed with prereleases enabled and downgrade checks disabled.
+The **Settings → About** page gets update state from `opennow-stable/src/main/updater.ts`. Packaged builds check GitHub Releases automatically 12 seconds after startup and then every 6 hours when `autoCheckForUpdates` is enabled; checks are automatic, while download and restart-to-install remain user-initiated through the same updater controller. Unpackaged development builds disable updater actions. The updater can use `OPENNOW_GH_TOKEN` or `GH_TOKEN` for GitHub Releases requests, and applies `updateChannel` through `opennow-stable/src/main/updateChannel.ts`: stable uses the `latest` feed without prereleases, while nightly uses the `nightly` feed with prereleases enabled and downgrade checks disabled.
 
 Linux updater support is gated by the package type detected in `opennow-stable/src/main/linuxUpdaterSupport.ts`. AppImage installs are supported when the `APPIMAGE` environment variable is present, and `.deb` updates are supported only on Debian-compatible systems with `dpkg` or `apt` available. Other Linux installs report updates as disabled and direct users to the GitHub Releases AppImage or a Debian/Ubuntu package instead of trying an incompatible `.deb` updater path.
 
@@ -121,7 +138,7 @@ Linux updater support is gated by the package type detected in `opennow-stable/s
 
 OpenNOW shows a one-time diagnostics consent prompt while `errorReportingConsent` is `"unset"`. When consent is granted, main and renderer PostHog clients use `telemetryInstallId` to send anonymous app-open and exception events with app version, build, platform, architecture, and Electron/runtime metadata; when consent is denied, exception capture stays off.
 
-The Settings About page can still send explicit feedback through the Feedback button. Feedback is a user-submitted event with a category and message; the user can optionally include app/system version details and recent redacted main + renderer logs, and the message is trimmed before capture.
+**Settings → About** still supports general feedback and a desktop **bug report** path. Bug reports require a short title and a meaningful description, can include app/system details plus redacted logs, and can attach the latest privacy-safe session quality summary (`DesktopSessionReport`) when one is available from `showSessionReport`. Uploads return a reference id when accepted.
 
 ## App language
 
@@ -131,7 +148,7 @@ App language is selected in Settings, but it is renderer UI state rather than a 
 
 On load, OpenNOW merges saved settings with defaults, migrates legacy values, then saves the file if anything changed.
 
-- Codec and color-quality values are normalized to the supported user-facing enum values. The default stream preference is H.264 + `8bit_420`; 10-bit color depth does not enable HDR, which is still hardcoded off until a separate HDR toggle exists.
+- Codec and color-quality values are normalized to the supported user-facing enum values. The default stream preference is `auto` codec + `auto` fallback + `8bit_420`; 10-bit color depth does not enable HDR, which is still hardcoded off until a separate HDR toggle exists.
 - `streamClientMode: "native"` is normalized back to `"web"` only when the app is running on an unsupported desktop platform.
 - `nativeStreamerBackend` is forced to `gstreamer`.
 - `nativeExternalRenderer` is honored only on Windows and is normalized to `false` elsewhere.
@@ -143,9 +160,9 @@ On load, OpenNOW merges saved settings with defaults, migrates legacy values, th
 - `identifyAsSteamDeck` is normalized to a boolean and defaults to the host desktop identity when disabled.
 - `errorReportingConsent` is normalized to `unset`, `granted`, or `denied`; invalid `telemetryInstallId` values are cleared until a new random ID is needed.
 - `videoShader` is normalized to safe UI ranges: sharpen 0–100, saturation 0–200, contrast/brightness 50–150, vibrance 0–100, and film grain 0–100.
-- Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults.
+- Old macOS-style default shortcuts are migrated to the current `Ctrl+Shift+...` defaults; the stats shortcut default is `Ctrl+N`.
 - `mouseAcceleration` is clamped to 1–150; legacy booleans become `100` or `1`.
-- `recordingBitrateMbps` is rounded and clamped to 1–200 Mbps; invalid, missing, or `null` values use automatic `MediaRecorder` bitrate selection.
+- `recordingBitrateMbps` is rounded and clamped to 1–12 Mbps; invalid, missing, or `null` values use automatic `MediaRecorder` bitrate selection. `recordingResolution` / `recordingFps` normalize to the supported option lists.
 - `appAccentColor` is normalized to `green`, `blue`, `violet`, `amber`, or `rose`.
 - The short-lived legacy `sessionTimeRemainingDisplay: "stats" | "both"` value migrates to `showSessionTimeRemainingInStatsOverlay: true` and is removed from saved settings.
 

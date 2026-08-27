@@ -11,7 +11,7 @@ OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data 
 
 | Shortcut | Action |
 | --- | --- |
-| `F3` | Toggle stats overlay |
+| `Ctrl+N` | Cycle stats HUD (Off → Compact → Full) |
 | `F8` | Toggle pointer lock |
 | `F10` | Toggle fullscreen |
 | `F11` | Take screenshot |
@@ -22,7 +22,9 @@ OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data 
 
 All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as `Cmd`, while the stored binding uses the same setting string.
 
-`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage. Intentional host-side releases, including the `F8` pointer-lock toggle and `F10` fullscreen toggle, suppress the synthetic remote Escape that OpenNOW normally sends when Chromium drops pointer lock after an intercepted Escape key.
+The stats HUD modes are **Off**, **Compact**, and **Full**. Compact and Full separate server, receive, decode, and render measurements and can show ICE transport, network capacity, session location, and server GPU context. When `showStatsOnLaunch` is enabled, a new session opens the HUD in Compact mode; `statsOverlayPosition` chooses the corner.
+
+`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage. Intentional host-side releases, including the `F8` pointer-lock toggle and `F10` fullscreen toggle, suppress the synthetic remote Escape that OpenNOW normally sends when Chromium drops pointer lock after an intercepted Escape key. Escape and pointer-lock transitions keep capture and recapture input more reliably on current desktop builds.
 
 ## Keyboard
 
@@ -75,15 +77,17 @@ In web mode, `MicrophoneManager` adds the microphone track to the renderer `RTCP
 
 ## Controller mode UI
 
-Controller mode changes navigation and layout, not the underlying GFN input protocol.
+Controller mode changes navigation and layout, not the underlying GFN input protocol. Current desktop builds also offer a controller-first console shell with PIN-protected profiles and couch-friendly navigation.
 
 | Setting | Description |
 | --- | --- |
 | `controllerMode` | Enable controller-first library layout |
+| `controllerModePromptDismissed` | Suppress the gamepad-detected console-mode suggestion after decline |
 | `launchInConsoleMode` | Launch sessions with GFN's TV/console-style app launch mode and fullscreen controller shell |
+| `consoleProfilePickerOnLaunch` | Show the Who's playing? profile picker when console mode starts |
 | `autoFullScreen` | Auto-enter fullscreen when controller mode triggers it |
 
-Queue/server selection and wait-time screens still apply in controller mode; controller-friendly loading surfaces are UI wrappers around the same CloudMatch launch state.
+OpenNOW can suggest console mode when a gamepad connects; the prompt itself is controller-accessible. Queue/server selection and wait-time screens still apply in controller mode; controller-friendly loading surfaces are UI wrappers around the same CloudMatch launch state.
 
 ## Data channels
 

@@ -73,6 +73,8 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
 | Active session conflict | NVIDIA believes another stream is still active | Stop the other session, wait for cleanup, then launch again |
 | Queue does not advance | The selected region is at capacity, the queue request expired, or service state changed | Leave and relaunch; if available, choose another region |
 | Game opens from the public catalog but not the library | The required store account is not linked or synced | Link/resync the store under Settings, then refresh |
+| Catalog browse hangs or fails only with a session proxy enabled | Catalog requests that go through a failing proxy time out after 10s, then retry direct and temporarily bypass that proxy for later catalog calls | Wait for the direct retry; session/queue traffic still uses the configured session proxy. Disable the proxy if catalog never recovers |
+| Community proxy toggle fails or takes a long time | Railway community provision can cold-start; OpenNOW allows up to 45s and retries transient provision failures | Keep Settings open until provision finishes; old `zortos.me` proxy URLs still show the community badge |
 | One game fails while others launch | The failure is likely title, storefront, SKU, or membership specific | Record the exact game and storefront before reporting it |
 
 Do not repeatedly relaunch while an earlier CloudMatch session is still being released. Stop the session once, wait briefly, then make one clean attempt.
@@ -99,6 +101,7 @@ Changing codec, resolution, FPS, bitrate, decoder, and region together makes the
 - **Keyboard mapping is wrong:** confirm the selected keyboard layout in Settings and reconnect the stream after changing it.
 - **Controller is not detected:** connect it before launching, verify the operating system sees it, then restart OpenNOW. Close remapping software temporarily if it creates duplicate virtual controllers.
 - **Controller mode is hard to leave:** use the controller-mode exit control or the configured app shortcut; controller mode changes the browsing UI but does not change NVIDIA account state.
+- **Console / couch mode prompt keeps appearing:** OpenNOW can suggest controller-first console mode when a gamepad connects. Decline once to dismiss for that decision path, or enable `controllerMode` / `launchInConsoleMode` deliberately in Settings. Profile PIN flows and the Who's playing? picker are part of the console shell when enabled.
 - **Clipboard paste does nothing:** make sure keyboard input is active in the stream and use the configured paste shortcut rather than the operating system shortcut alone.
 - **Microphone is silent:** grant microphone permission to OpenNOW at the operating-system level, select the intended mode in Settings, and reconnect the stream so the audio track is negotiated again.
 
@@ -129,16 +132,18 @@ Local settings and authentication are separate files. Close OpenNOW before movin
 
 ## Collect a useful report
 
-Include the following in a [GitHub issue](https://github.com/OpenCloudGaming/OpenNOW/issues) or the [OpenNOW Discord](https://discord.gg/8EJYaJcNfD):
+On desktop, prefer the in-app bug report flow from **Settings → About** (or the feedback entry that opens bug mode). You can attach a structured session quality summary from the post-stream report when `showSessionReport` is enabled. Session summaries are privacy-safe aggregates (ping, bitrate, loss, FPS, codec, region/GPU labels, findings) and deliberately omit credentials, session IDs, and account identifiers.
+
+If you file outside the app, include the following in a [GitHub issue](https://github.com/OpenCloudGaming/OpenNOW/issues) or the [OpenNOW Discord](https://discord.gg/8EJYaJcNfD):
 
 - OpenNOW version and whether it is a stable, nightly, beta, or source build
 - Operating system, architecture, GPU, and GPU-driver version
 - Web or native stream mode; for native mode, the backend and fallback reason
 - Provider, GeForce NOW membership tier, selected region, and game/storefront when relevant
-- Codec, resolution, FPS, bitrate, color quality, and decoder preference
+- Codec (including any negotiated fallback), resolution, FPS, bitrate, color quality, and decoder preference
 - Exact error text and a short, repeatable sequence of steps
 - Whether the same account and game work in the official GeForce NOW client
-- A screenshot or recording with account tokens, email addresses, device codes, and other personal data removed
+- A screenshot, recording, or exported session summary with account tokens, email addresses, device codes, and other personal data removed
 
 <Callout type="danger" title="Do not post credentials">
 Never attach `auth-state.json`, access tokens, refresh tokens, QR device codes, or unredacted account details to a public issue.

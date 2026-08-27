@@ -5,11 +5,17 @@ description: Download, install, first launch, and source builds for OpenNOW
 
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
 OpenNOW is an open-source GeForce NOW client. The main desktop app is the Electron client in `opennow-stable/`, with separate native and mobile builds available for other platforms.
+
+<Callout type="info" title="v1.0.0 coming soon">
+A controller-first UI and new native streaming engine are planned for **v1.0.0**. Current desktop stable is **v0.5.5**; see the [announcement](https://x.com/Zortosdev/status/2093023076191440963) for a preview. These steps cover the shipped Electron client.
+</Callout>
 
 ## Download a release
 
-Grab the latest build from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
+Grab the latest build from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases). The current desktop stable tag is **v0.5.5**.
 
 | Platform | Formats | Notes |
 | --- | --- | --- |
@@ -31,10 +37,12 @@ Desktop artifact names use the app version, platform, and architecture, such as 
 2. Choose a provider if prompted.
 3. Sign in through the browser-based NVIDIA OAuth flow, or use **Sign in with QR** to authorize from another device.
 4. Browse your library or the public catalog, and use Settings to link/resync supported store accounts when GFN requires account connections for owned games.
-5. Open Settings to choose bitrate, codec, region, app language, controller mode, and other preferences. Resolution and FPS choices are filtered to the profiles reported by your current GFN subscription.
-6. Launch a game. Queue and server-selection screens appear when GFN requires them.
+5. Open Settings to choose bitrate, codec, region, app language, controller/console mode, and other preferences. Resolution and FPS choices are filtered to the profiles reported by your current GFN subscription. Packaged builds check for updates from **Settings → About**; download and restart remain user-initiated.
+6. Launch a game. Queue and server-selection screens appear when GFN requires them. After a session ends, OpenNOW can show a privacy-safe session quality summary when `showSessionReport` is enabled (default on).
 
 Some GFN catalog entries require a specific membership tier. When NVIDIA reports `INSUFFICIENT_PLAYABILITY`, OpenNOW shows a membership-upgrade launch error instead of treating it as a duplicate-session conflict. If the catalog provides SKU-specific text or a minimum membership label, that text is used in the launch-error panel.
+
+On Windows, OpenNOW stays single-instance by default. Start the installed executable with `--secondary` to open one additional isolated client (separate profile and sign-in). Update from the primary instance; the secondary instance disables updates.
 
 By default OpenNOW streams through Chromium/WebRTC in the renderer. The optional native streamer mode is experimental on supported desktop platforms and uses a Rust child process with a GStreamer backend for video decode/rendering while Electron still owns session lifecycle and signaling. Native mode may have platform-specific bugs or missing media capabilities; if the platform, native executable, backend, protocol, runtime, or media capability is unavailable, OpenNOW reports the reason and falls back to the web streamer path. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
@@ -80,4 +88,4 @@ Close the app before deleting these files to reset local state.
 
 ## If something goes wrong
 
-Start with the [Troubleshooting guide](/docs/guides/troubleshooting). It provides a conservative stream profile, symptom-based checks for sign-in and launch failures, native-streamer isolation steps, local reset instructions, and a checklist for useful bug reports.
+Start with the [Troubleshooting guide](/docs/guides/troubleshooting). It provides a conservative stream profile, symptom-based checks for sign-in and launch failures, native-streamer isolation steps, local reset instructions, and how to use desktop bug reports with optional session summaries.
