@@ -23,11 +23,13 @@ OpenNOW captures screenshots and recordings from the renderer video stream and s
 
 - Triggered by the recording shortcut (default `F12`) or the stream overlay button.
 - In the web/embedded renderer path, the renderer uses `MediaRecorder` to capture the stream.
-- Recording bitrate is configurable in Settings. `Auto` leaves bitrate selection to `MediaRecorder`; custom values are rounded and clamped to **1–200 Mbps** before being passed as `videoBitsPerSecond`.
+- Recording bitrate is configurable in Settings. `Auto` leaves bitrate selection to `MediaRecorder`; custom values are rounded and clamped to **1–12 Mbps** before being passed as `videoBitsPerSecond`.
+- Recording resolution (`720p` / `1080p` / `1440p`, default `720p`) and recording FPS (`30` / `60`, default `30`) are also configurable.
 - Chunks are streamed to the main process, which writes to a temp file.
 - On finish, the file is renamed with duration and game title metadata.
 - Limited to the newest **20** entries.
 - Format depends on browser codec support — MP4 (preferred when available) or WebM.
+- Browser recording uses presented-frame capture with ordered chunk persistence and more reliable finalization on current desktop builds.
 
 ## Media listing
 

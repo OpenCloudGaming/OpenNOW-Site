@@ -77,7 +77,7 @@ The partially reliable threshold is read from the negotiated `a=ri.partialReliab
 
 ## Diagnostics
 
-Renderer WebRTC diagnostics poll `RTCPeerConnection.getStats()` for connection state, codec, resolution, HDR/color, bitrate, RTT, jitter, packet loss, frame decode/render timing, data-channel pressure, lag classification, and microphone state.
+Renderer WebRTC diagnostics poll `RTCPeerConnection.getStats()` for connection state, codec, resolution, HDR/color, bitrate, RTT, jitter, packet loss, frame decode/render timing, data-channel pressure, lag classification, and microphone state. The in-stream stats HUD exposes those measurements in **Off / Compact / Full** modes (default shortcut `Ctrl+N`), including ICE transport, network capacity, session location, and server GPU context when available. Capability-aware codec preference can fall back within the configured `fallbackCodec` bounds when the preferred codec cannot produce video; the HUD can surface requested vs negotiated codec.
 
 The Settings codec diagnostics use Chromium `mediaCapabilities` plus WebRTC codec probing to show whether H.264, H.265, and AV1 decode/encode are available and whether the browser reports GPU-backed acceleration. Results are cached in session storage for the current renderer session. On Linux, OpenNOW shows an extra hint when diagnostics are software-only or H.265 is unavailable: AppImage diagnostics still depend on the host distro's VA-API stack, so proprietary NVIDIA systems may need `libva-nvidia-driver`/`nvidia-vaapi-driver` and distro codec packages even though OpenNOW enables NVIDIA VA-API flags on restart.
 

@@ -35,7 +35,7 @@ The app accepts native mode on Windows, macOS, and Linux. Windows has the most c
 
 If native startup fails, protocol versions mismatch, the backend reports `stub`, or required platform media support is missing, OpenNOW falls back to the renderer WebRTC client with a diagnostic reason.
 
-Enabling native streaming from Settings opens an explicit experimental-feature confirmation before `streamClientMode` is changed to `"native"`. The setting only applies to new sessions. The regular `F3` stats HUD is an Electron overlay and is hidden while the external native renderer is active; `showNativeStreamerStats` controls the native renderer's own diagnostics overlay instead. In native mode on Windows, the native input bridge captures configured app shortcuts and reports them back to Electron so stop-stream, overlay, fullscreen, stats, microphone, screenshot, and recording actions still work while the native window has focus.
+Enabling native streaming from Settings opens an explicit experimental-feature confirmation before `streamClientMode` is changed to `"native"`. The setting only applies to new sessions. The regular `Ctrl+N` stats HUD is an Electron overlay and is hidden while the external native renderer is active; `showNativeStreamerStats` controls the native renderer's own diagnostics overlay instead. In native mode on Windows, the native input bridge captures configured app shortcuts and reports them back to Electron so stop-stream, overlay, fullscreen, stats, microphone, screenshot, and recording actions still work while the native window has focus.
 
 ## Backend selection
 
