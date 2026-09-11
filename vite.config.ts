@@ -13,6 +13,15 @@ export default defineConfig({
     mdx(),
     tailwindcss(),
     tanstackStart({
+      prerender: {
+        enabled: true,
+        crawlLinks: true,
+        // Hash URLs resolve to the same HTML path as the parent page. Concurrent
+        // crawls of those anchors race-write one file and can truncate it at 64KB,
+        // which Cloudflare then serves as an empty 200 for that route.
+        filter: (page) => !String(page.path).includes('#'),
+        concurrency: 1,
+      },
       spa: {
         enabled: true,
         prerender: {
