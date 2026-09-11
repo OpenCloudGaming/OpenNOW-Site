@@ -20,7 +20,7 @@
 
 ## About
 
-This repo hosts the public documentation website for the [OpenNOW desktop client](https://github.com/OpenCloudGaming/OpenNOW), mobile builds, and native [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) homebrew client. The desktop app uses Electron, React, TypeScript, and an optional Rust/GStreamer native streamer; the Switch client is a separate C++ Horizon OS application.
+This repo hosts the public documentation website for the [OpenNOW desktop client](https://github.com/OpenCloudGaming/OpenNOW), mobile builds, and native [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) homebrew client. The desktop app uses Qt Quick, a Rust core, and an in-process native NVST streamer; the Switch client is a separate C++ Horizon OS application.
 
 Docs content lives in `content/docs` as MDX. Shared docs data and React MDX components live under `src/lib` and `src/components/docs`.
 
@@ -28,14 +28,14 @@ Docs content lives in `content/docs` as MDX. Shared docs data and React MDX comp
 
 | Section | Description |
 |---------|-------------|
-| [Getting Started](https://opennow.zortos.me/docs/guides/getting-started) | Download releases or build from source |
+| [Getting Started](https://opennow.zortos.me/docs/guides/getting-started) | Download Qt packages or build from source with CMake |
 | [Nintendo Switch](https://opennow.zortos.me/docs/guides/nintendo-switch) | Install the homebrew client, configure streaming, and use Switch controls and shortcuts |
-| [Architecture](https://opennow.zortos.me/docs/architecture/overview) | Electron main / preload / renderer split |
+| [Architecture](https://opennow.zortos.me/docs/architecture/overview) | Qt shell, Rust core, and in-process streamer |
 | [Authentication](https://opennow.zortos.me/docs/reference/authentication) | OAuth + PKCE login flow |
-| [WebRTC](https://opennow.zortos.me/docs/reference/webrtc) | Signaling, SDP, and data channels |
+| [Native Streamer](https://opennow.zortos.me/docs/reference/native-streamer) | Production NVST path, GPU presentation, and diagnostics |
+| [Protocol notes](https://opennow.zortos.me/docs/reference/webrtc) | Historical Chromium/WebRTC notes |
 | [Media](https://opennow.zortos.me/docs/reference/media) | Screenshots, recordings, and local storage |
 | [Input](https://opennow.zortos.me/docs/reference/input) | Shortcuts, pointer lock, gamepad, microphone |
-| [Native Streamer](https://opennow.zortos.me/docs/reference/native-streamer) | Experimental Rust/GStreamer streaming path, diagnostics, and fallback behavior |
 | [Configuration](https://opennow.zortos.me/docs/reference/configuration) | Settings model and defaults |
 
 ## Local development
@@ -52,4 +52,4 @@ npm run start        # serve .output/public with SPA rewrites
 
 ## Keeping docs current
 
-These pages are anchored to the upstream repo's README, development notes, and Electron source under `opennow-stable/src/`. When the app changes, update docs to match. The native streamer docs describe an experimental opt-in feature that may have platform-specific bugs or fallback behavior.
+These pages are anchored to the upstream repo's README, `opennow-qt/README.md`, and Rust/Qt source under `opennow-qt/` and `native/`. When the app changes, update docs to match. Prefer `OpenNOW-Qt-…` package guidance from the upstream README over historical Electron release notes.

@@ -33,7 +33,7 @@ export function baseOptions(): BaseLayoutProps {
         items: [
           {
             text: 'App source',
-            description: 'Electron, renderer, main process, and native streamer code.',
+            description: 'Qt shell, Rust core, and in-process native streamer code.',
             url: 'https://github.com/OpenCloudGaming/OpenNOW',
             external: true,
             icon: <Code2 className={iconClassName} />,
@@ -45,9 +45,9 @@ export function baseOptions(): BaseLayoutProps {
             icon: <Settings2 className={iconClassName} />,
           },
           {
-            text: 'WebRTC internals',
-            description: 'Session signaling, SDP negotiation, ICE, and data channels.',
-            url: '/docs/reference/webrtc',
+            text: 'Native streamer',
+            description: 'Production NVST path, GPU presentation, and diagnostics.',
+            url: '/docs/reference/native-streamer',
             icon: <Radio className={iconClassName} />,
           },
         ],

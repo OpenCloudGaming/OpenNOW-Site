@@ -12,7 +12,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { CircleHelp, Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
 
-OpenNOW is an open-source GeForce NOW client with desktop, Android, iOS, and native [OpenNOW-Switch](/docs/guides/nintendo-switch) builds. These docs cover installation, streaming, settings, input, architecture, and troubleshooting.
+OpenNOW is an open-source GeForce NOW client. The desktop app uses Qt Quick for the interface and Rust for account services and streaming. Desktop and controller-first console layouts live in the same app. Separate Android, iOS, and [OpenNOW-Switch](/docs/guides/nintendo-switch) builds are available for other platforms.
 
 For macOS users looking for a separate performance-focused build, Jayian1890 maintains [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac).
 
@@ -20,18 +20,22 @@ For macOS users looking for a separate performance-focused build, Jayian1890 mai
 OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of NVIDIA Corporation.
 </Callout>
 
-<Callout type="info" title="v1.0.0 coming soon">
-A full rebuild with a controller-first UI and a new native streaming engine is on the way. See the [announcement post](https://x.com/Zortosdev/status/2093023076191440963) for a first look. These docs describe the current desktop stable line (**v0.5.5** and earlier).
+<Callout type="info" title="Desktop 1.0.0 is Qt/native">
+OpenNOW **1.0.0** on `main` rebuilds the desktop client with Qt Quick and an in-process native NVST streamer. It replaces the retired Electron/`opennow-stable` app and has no Chromium/WebRTC fallback. See the [announcement post](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
+</Callout>
+
+<Callout type="warn" title="Binary publication is separate">
+Source on `main` is the Qt 1.0.0 line. A signed stable **v1.0.0** GitHub release may not exist yet. Prefer packages whose names start with `OpenNOW-Qt-` from [Releases](https://github.com/OpenCloudGaming/OpenNOW/releases) (including Qt nightlies) or artifacts from a successful [`qt-ci` run on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev). Older “Latest” releases can still contain Electron packages.
 </Callout>
 
 <Cards>
-  <Card title="Install and play" icon={<Download />} href="/docs/guides/getting-started" description="Release packages, first launch, sign-in, app settings, and source builds." />
-  <Card title="Troubleshoot a problem" icon={<CircleHelp />} href="/docs/guides/troubleshooting" description="Fast checks for sign-in, launch, video, network, audio, input, and native-streamer issues." />
+  <Card title="Install and play" icon={<Download />} href="/docs/guides/getting-started" description="Qt packages, first launch, desktop/console shells, settings, and CMake source builds." />
+  <Card title="Troubleshoot a problem" icon={<CircleHelp />} href="/docs/guides/troubleshooting" description="Fast checks for sign-in, launch, video, network, audio, input, and native streaming issues." />
   <Card title="Nintendo Switch" icon={<Gamepad2 />} href="/docs/guides/nintendo-switch" description="Install the native homebrew client, sign in, tune streaming, and create HOME-screen shortcuts." />
-  <Card title="Architecture map" icon={<Network />} href="/docs/architecture/overview" description="Main, preload, renderer, shared contracts, native process, and data ownership." />
-  <Card title="Configuration reference" icon={<SlidersHorizontal />} href="/docs/reference/configuration" description="Every setting, default, persisted key, and compatibility normalization rule." />
-  <Card title="WebRTC and signaling" icon={<Radio />} href="/docs/reference/webrtc" description="CloudMatch, SDP, ICE, NVST data channels, Chromium flags, and failure handling." />
-  <Card title="Native streamer" icon={<Cpu />} href="/docs/reference/native-streamer" description="Experimental Rust/GStreamer protocol, diagnostics, media caps, and fallback behavior." />
+  <Card title="Architecture map" icon={<Network />} href="/docs/architecture/overview" description="Qt shell, Rust core JSON protocol, and in-process streamer FFI." />
+  <Card title="Configuration reference" icon={<SlidersHorizontal />} href="/docs/reference/configuration" description="Settings defaults, local data locations, and Qt-era preferences." />
+  <Card title="Native streamer" icon={<Cpu />} href="/docs/reference/native-streamer" description="Production in-process NVST runtime, GPU presentation, packaging, and diagnostics." />
+  <Card title="Protocol notes" icon={<Radio />} href="/docs/reference/webrtc" description="Historical Chromium/WebRTC notes; not the default desktop path." />
   <Card title="Input and capture" icon={<Gamepad2 />} href="/docs/reference/input" description="Pointer lock, keyboard layout, gamepad, clipboard, microphone, screenshots, and recording." />
 </Cards>
 
@@ -39,16 +43,16 @@ A full rebuild with a controller-first UI and a new native streaming engine is o
 
 <Steps>
   <Step>
-    **Download** the build for your device from the [OpenNOW download picker](/#downloads).
+    **Download** an `OpenNOW-Qt-…` package from the [OpenNOW download picker](/#downloads) or [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
   </Step>
   <Step>
-    **Install** the artifact for your platform: Windows `.exe`, macOS `.dmg`/`.zip`, Linux `.AppImage`/`.deb`, Android from Google Play or the beta `.apk`, Nintendo Switch `SwitchNOW.nro`, or the iOS TestFlight beta.
+    **Install** the artifact for your platform: Windows `.msi` or portable `.zip`, Linux `.AppImage` (recommended) or `.deb`, macOS Apple Silicon `.dmg`. Android, Nintendo Switch, and iOS remain separate projects.
   </Step>
   <Step>
     **Sign in** through browser OAuth or QR/device authorization and let OpenNOW persist the session locally.
   </Step>
   <Step>
-    **Tune** codec, resolution, FPS, bitrate, color quality, region, input, microphone, and capture settings from the app.
+    **Tune** codec, resolution, FPS, bitrate, color quality, region, input, microphone, and capture settings. Switch between desktop and console layouts in the same app.
   </Step>
 </Steps>
 
@@ -58,18 +62,18 @@ A full rebuild with a controller-first UI and a new native streaming engine is o
   <Tab>
     - Start with [Getting Started](/docs/guides/getting-started).
     - Use [Nintendo Switch](/docs/guides/nintendo-switch) for homebrew installation, controls, and Switch-specific streaming settings.
-    - Keep [Configuration](/docs/reference/configuration) open when tuning quality, shortcuts, capture, and controller mode.
+    - Keep [Configuration](/docs/reference/configuration) open when tuning quality, shortcuts, capture, and console mode.
     - Use [Media](/docs/reference/media) for screenshots, recordings, local storage, and gallery behavior.
   </Tab>
   <Tab>
     - Read [Architecture](/docs/architecture/overview) before changing process-boundary code.
-    - Use [Development](/docs/development) for local scripts, checks, release packaging, and contribution workflow.
+    - Use [Development](/docs/development) for Qt/CMake/Cargo workflow, checks, and packaging.
     - Check [Authentication](/docs/reference/authentication) before touching provider, token, or session refresh logic.
   </Tab>
   <Tab>
-    - Read [WebRTC](/docs/reference/webrtc) for signaling, SDP negotiation, ICE, and NVST data channels.
-    - Use [Native Streamer](/docs/reference/native-streamer) for the Rust/GStreamer protocol and runtime gates.
-    - Use [Streamer Investigation](/docs/advanced/streamer-investigation) for backend strategy and diagnostics.
+    - Use [Native Streamer](/docs/reference/native-streamer) for the production NVST path and diagnostics.
+    - Read [Protocol notes](/docs/reference/webrtc) only for historical Chromium/WebRTC context.
+    - Use [Streamer Investigation](/docs/advanced/streamer-investigation) for advanced native-path notes.
   </Tab>
 </Tabs>
 
@@ -77,25 +81,22 @@ A full rebuild with a controller-first UI and a new native streaming engine is o
 
 <Files>
   <Folder name="OpenNOW" defaultOpen>
-    <Folder name="opennow-stable" defaultOpen>
-      <Folder name="src/main" defaultOpen>
-        <File name="GFN auth, CloudMatch, settings, media, native process management" />
-      </Folder>
-      <Folder name="src/preload">
-        <File name="Typed IPC bridge exposed as window.openNow" />
-      </Folder>
-      <Folder name="src/renderer">
-        <File name="React UI, library, WebRTC playback, input, stats, capture" />
-      </Folder>
-      <Folder name="src/shared">
-        <File name="Serializable contracts shared across Electron boundaries" />
-      </Folder>
+    <Folder name="opennow-qt" defaultOpen>
+      <File name="Qt Quick desktop app, C++ integration, and Qt tests" />
     </Folder>
-    <Folder name="native">
-      <File name="Rust/GStreamer streamer implementation and build outputs" />
+    <Folder name="native" defaultOpen>
+      <Folder name="opennow-core">
+        <File name="Rust accounts, settings, catalog, and session services" />
+      </Folder>
+      <Folder name="opennow-streamer">
+        <File name="Native NVST transport, media, input, and Qt FFI" />
+      </Folder>
     </Folder>
     <Folder name="locales">
-      <File name="Source language and generated Crowdin translations" />
+      <File name="English source and Crowdin-managed translations" />
+    </Folder>
+    <Folder name="docs">
+      <File name="Architecture, protocols, acceptance, and release guides" />
     </Folder>
   </Folder>
 </Files>
@@ -104,12 +105,15 @@ A full rebuild with a controller-first UI and a new native streaming engine is o
 
 <Accordions type="single">
   <Accordion title="Default streaming path">
-    The default renderer path streams through Chromium WebRTC and is the production path for desktop packages.
+    The Qt desktop app streams through the in-process native NVST streamer. There is no Chromium/WebRTC fallback in the Qt app.
   </Accordion>
-  <Accordion title="Native streamer">
-    The Rust/GStreamer streamer is experimental, opt-in on supported desktop platforms, and falls back to the web streamer when platform, protocol, backend, runtime, or media capability checks fail.
+  <Accordion title="Desktop UI">
+    Desktop (keyboard/mouse) and console (controller-first) layouts live in the same Qt application.
   </Accordion>
   <Accordion title="Session state">
-    OAuth, token refresh, provider/alliance behavior, CloudMatch session lifecycle, and launch errors are owned by the Electron main process.
+    OAuth, token refresh, provider behavior, CloudMatch session lifecycle, settings, and diagnostics are owned by the out-of-process Rust core. Qt talks to it over a versioned JSON protocol.
+  </Accordion>
+  <Accordion title="Published binaries">
+    Treat GitHub package names and release notes as the source of truth. Look for `OpenNOW-Qt-…` assets. Older Electron packages may still appear on historical tags such as v0.5.5.
   </Accordion>
 </Accordions>

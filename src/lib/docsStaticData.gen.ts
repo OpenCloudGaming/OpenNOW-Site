@@ -30,7 +30,7 @@ export const pageTree = {
             "$id": "guides/getting-started.mdx",
             "type": "page",
             "name": "Getting Started",
-            "description": "Download, install, first launch, and source builds for OpenNOW",
+            "description": "Download Qt packages, first launch, and CMake source builds for OpenNOW",
             "url": "/docs/guides/getting-started",
             "$ref": "guides/getting-started.mdx"
           },
@@ -38,7 +38,7 @@ export const pageTree = {
             "$id": "guides/troubleshooting.mdx",
             "type": "page",
             "name": "Troubleshooting",
-            "description": "Diagnose sign-in, launch, stream quality, video, audio, input, and native-streamer problems",
+            "description": "Diagnose sign-in, launch, stream quality, video, audio, input, and native streaming problems",
             "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-wrench\" aria-hidden=\"true\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\"></path></svg>",
             "url": "/docs/guides/troubleshooting",
             "$ref": "guides/troubleshooting.mdx"
@@ -64,7 +64,7 @@ export const pageTree = {
         "$id": "development.mdx",
         "type": "page",
         "name": "Development Guide",
-        "description": "Local setup, scripts, native streamer builds, CI, and release packaging",
+        "description": "Qt/CMake/Cargo local setup, checks, CI, and release packaging",
         "url": "/docs/development",
         "$ref": "development.mdx"
       },
@@ -77,7 +77,7 @@ export const pageTree = {
             "$id": "architecture/overview.md",
             "type": "page",
             "name": "Architecture Overview",
-            "description": "How the OpenNOW Electron client, renderer WebRTC path, and native streamer fit together",
+            "description": "How the Qt shell, Rust core, and in-process native streamer fit together",
             "url": "/docs/architecture/overview",
             "$ref": "architecture/overview.md"
           }
@@ -105,8 +105,8 @@ export const pageTree = {
           {
             "$id": "reference/webrtc.mdx",
             "type": "page",
-            "name": "WebRTC",
-            "description": "Signaling, SDP negotiation, NVST SDP, data channels, diagnostics, and Chromium acceleration in OpenNOW",
+            "name": "Protocol notes (historical WebRTC)",
+            "description": "Historical Chromium/WebRTC signaling notes; not the default Qt desktop path",
             "url": "/docs/reference/webrtc",
             "$ref": "reference/webrtc.mdx"
           },
@@ -114,7 +114,7 @@ export const pageTree = {
             "$id": "reference/native-streamer.mdx",
             "type": "page",
             "name": "Native Streamer",
-            "description": "Settings, protocol, executable lookup, GStreamer dependencies, diagnostics, and fallback behavior",
+            "description": "Production in-process NVST runtime, Qt GPU presentation, packaging, and diagnostics",
             "url": "/docs/reference/native-streamer",
             "$ref": "reference/native-streamer.mdx"
           },
@@ -138,7 +138,7 @@ export const pageTree = {
             "$id": "reference/configuration.mdx",
             "type": "page",
             "name": "Configuration",
-            "description": "Settings model, defaults, compatibility normalization, and storage for OpenNOW",
+            "description": "Settings defaults, local data locations, and Qt-era preferences for OpenNOW",
             "url": "/docs/reference/configuration",
             "$ref": "reference/configuration.mdx"
           }
@@ -159,7 +159,7 @@ export const pageTree = {
             "$id": "advanced/streamer-investigation.mdx",
             "type": "page",
             "name": "Native Streamer Architecture",
-            "description": "Advanced notes on the Rust/GStreamer native streamer path",
+            "description": "Advanced notes on the in-process Qt/native NVST streamer path",
             "url": "/docs/advanced/streamer-investigation",
             "$ref": "advanced/streamer-investigation.mdx"
           }

@@ -66,9 +66,9 @@ const highlights: { title: string; description: string; icon: LucideIcon; classN
 ];
 
 const deepDives = [
-  ['Architecture', 'Follow a session across Electron main, preload, renderer, and the native process.', 'architecture/overview', Radio],
-  ['WebRTC internals', 'Understand signaling, SDP, ICE, NVST data channels, and Chromium flags.', 'reference/webrtc', Wifi],
-  ['Native streamer', 'Explore the experimental Rust and GStreamer path, runtime checks, and fallback.', 'reference/native-streamer', FlaskConical],
+  ['Architecture', 'Follow a session across the Qt shell, out-of-process Rust core, and in-process streamer.', 'architecture/overview', Radio],
+  ['Native streamer', 'See how the production NVST runtime loads in-process and presents GPU video in Qt.', 'reference/native-streamer', MonitorPlay],
+  ['Protocol notes', 'Historical Chromium/WebRTC path notes retained for signaling and SDP context.', 'reference/webrtc', Wifi],
 ] as const;
 
 const downloads: {
@@ -82,11 +82,11 @@ const downloads: {
 }[] = [
   {
     title: 'Desktop',
-    description: 'The main Electron client for Windows, macOS, and Linux.',
-    format: '.exe · .dmg · .zip · .AppImage · .deb',
-    href: 'https://github.com/OpenCloudGaming/OpenNOW/releases/latest',
+    description: 'Qt Quick + native NVST client. Look for OpenNOW-Qt packages; older releases may still ship Electron.',
+    format: '.msi · .zip · .AppImage · .deb · .dmg',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW/releases',
     icon: Laptop,
-    cta: 'Get the latest release',
+    cta: 'Browse desktop builds',
     featured: true,
   },
   {
