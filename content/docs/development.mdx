@@ -1,116 +1,73 @@
 ---
 title: Development Guide
-description: Local setup, scripts, native streamer builds, CI, and release packaging
+description: Qt/CMake/Cargo local setup, checks, CI, and release packaging
 ---
 
 import ReleasePackageMatrixTable from '@/components/docs/ReleasePackageMatrixTable';
 
-OpenNOW's active desktop client lives in `opennow-stable/` in the [OpenCloudGaming/OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) repository. This site is the canonical public documentation for that codebase.
+OpenNOW's active desktop client lives in `opennow-qt/` in the [OpenCloudGaming/OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) repository, with Rust services under `native/`. This site is the canonical public documentation for that codebase. You do not need Node.js or npm to build or run the desktop app.
 
 ## Prerequisites
 
-- Node.js 22
-- npm
-- Git
-- Rust/Cargo when working on the native streamer
-- GStreamer development packages when building the Rust streamer with the `gstreamer` backend
+- Qt 6.8+ with Quick, Multimedia, and ShaderTools
+- CMake 3.24+ and a C++20 toolchain
+- SDL3
+- Rust/Cargo
+- Platform media dependencies for the native streamer
+- Linux: `pkg-config`, `libwayland-dev`, and `wayland-protocols` (required even for X11 builds)
 - A GeForce NOW account for end-to-end session testing
 
-Install from the Electron workspace:
-
 ```bash
-git clone https://github.com/OpenCloudGaming/OpenNOW.git
-cd OpenNOW/opennow-stable
-npm install
+git clone --branch main https://github.com/OpenCloudGaming/OpenNOW.git
+cd OpenNOW
+cmake -S opennow-qt -B build/opennow-qt -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/opennow-qt
+ctest --test-dir build/opennow-qt --output-on-failure
 ```
 
-## Scripts
+Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable.
 
-Root scripts proxy into `opennow-stable/`:
+## Common commands
 
-| Root command | Purpose |
+| Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start Electron/Vite development mode |
-| `npm run build` | Build the renderer and Electron bundles |
-| `npm run native:check` | Run `cargo check` for `native/opennow-streamer` |
-| `npm run native:build` | Build the release Rust streamer and copy it into `native/opennow-streamer/bin` |
-| `npm run typecheck` | Run Node and renderer TypeScript checks |
-| `npm run locales:check` | Validate renderer translation keys and locale JSON files |
-| `npm run crowdin:upload` | Upload `locales/en.json` source strings to Crowdin |
-| `npm run crowdin:download` | Download translated locale JSON files from Crowdin |
-| `npm run dist` | Build app + native streamer, then package unsigned artifacts |
-| `npm run dist:signed` | Build app + native streamer, then package with signing enabled |
+| `cmake -S opennow-qt -B build/opennow-qt …` | Configure the Qt app, core, and streamer FFI |
+| `cmake --build build/opennow-qt` | Build the desktop app |
+| `ctest --test-dir build/opennow-qt --output-on-failure` | Run Qt/C++ and related tests |
+| `cpack --config build/opennow-qt/CPackConfig.cmake …` | Create platform packages when packaging is configured |
 
-Workspace scripts available inside `opennow-stable/`:
+The Qt CMake build compiles `opennow-streamer-ffi` with Cargo's release profile and links the resulting shared library into the app. There is no separate packaged streamer executable.
 
-| Workspace command | Purpose |
-| --- | --- |
-| `npm run dev` | Electron/Vite dev server |
-| `npm run preview` | Preview a production build |
-| `npm run lint` | Run `oxlint src` |
-| `npm test` | Run the Node test harness |
-| `npm run native:check` | Cargo check the native streamer crate |
-| `npm run native:build` | Run `scripts/build-native-streamer.mjs` |
-| `npm run typecheck` | Type-check main/preload and renderer projects |
-| `npm run locales:check` | Validate renderer translation keys and locale JSON files |
-| `npm run build` | Production build only |
-| `npm run dist` | Unsigned electron-builder packaging |
-| `npm run dist:signed` | Signed electron-builder packaging |
+Repository JavaScript under `scripts/` is for tools such as localization checks. It is not required to build or launch the desktop client.
 
 ## Source layout
 
 ```text
-locales/                         Source and translated renderer locale JSON files
-
-opennow-stable/
-├── src/main/                 Electron main process
-│   ├── gfn/                  Auth, service URLs, catalog, CloudMatch, NVST transport
-│   ├── ipc/                  Account/catalog/cache, session, and media IPC handlers
-│   ├── session/              Cloud G-Sync, session conflict, selection/lifecycle helpers
-│   ├── signaling/            Signaling IPC coordinator and native-streamer routing
-│   ├── media/                Screenshot/recording persistence and thumbnails
-│   ├── services/             Cache services, PrintedWaste queue metadata, region ping, timeouts
-│   ├── nativeStreamer/       Rust child-process lifecycle plus input/surface helpers
-│   ├── discordRpc.ts         Discord Rich Presence integration
-│   ├── appBuildInfo.ts       packaged version/build metadata
-│   ├── updater.ts            electron-updater integration
-│   ├── videoAcceleration.ts  Chromium video acceleration feature/switch selection
-│   ├── settings.ts           settings.json defaults and migration
-│   └── index.ts              app bootstrap, Chromium/WebRTC flags, windows, protocol/services wiring
-├── src/preload/              contextBridge API
-├── src/renderer/src/         React UI, stream view, settings, hooks, controller mode
-├── src/shared/               Shared IPC, Settings, protocol, and GFN types
-├── scripts/build-native-streamer.mjs
-├── scripts/check-translations.mjs
-└── package.json
-
-native/opennow-streamer/       Rust native streamer process with modular GStreamer backend
+opennow-qt/                  Qt Quick desktop app, C++ integration, and Qt tests
+native/opennow-core/         Rust accounts, settings, catalog, and session services
+native/opennow-streamer/     Native NVST transport, media, input, and Qt FFI
+locales/                     English source and Crowdin-managed translations
+docs/                        Architecture, protocols, acceptance, and release guides
+scripts/                     Repository-only tooling (for example localization)
+.github/                     CI workflows and contributor guidance
 ```
 
 ## Localization
 
-Renderer UI strings live in `locales/en.json` as the English source file. Crowdin maps that file to `locales/%two_letters_code%.json` for translated locale files; current locale codes are `de`, `en`, `es`, `fr`, `ja`, `ko`, `nl`, `pl`, `ro`, `ru`, `tr`, and `zh`. The Settings UI defines friendly language names for every current locale code and falls back to uppercase codes for any newly loaded locale without a label. Run `npm run locales:check` before merging localization changes to verify renderer `t("...")` keys exist in English and that non-English locale JSON files parse cleanly.
-
-At runtime the renderer loads `locales/*.json`, normalizes locale codes such as `en-US` or `en_US` to `en`, stores the selected app language in browser localStorage as `opennow.locale`, and falls back to English for missing files or keys.
+UI strings live in `locales/en.json` as the English source file. Crowdin manages the other locale files. For translations, edit only `locales/en.json`. See the upstream contributing guide for the current locale workflow.
 
 ## Native streamer builds
 
-`npm run native:build` runs Cargo in release mode through `opennow-stable/scripts/build-native-streamer.mjs`. By default it builds with the `gstreamer` feature. Set `OPENNOW_NATIVE_STREAMER_FEATURES=none` to build without optional media support, or set a comma-separated feature list to override. The script also supports `OPENNOW_NATIVE_STREAMER_TARGET`, `OPENNOW_NATIVE_STREAMER_PLATFORM_KEY`, and `OPENNOW_BUNDLE_GSTREAMER_RUNTIME`.
+For the Qt app, the streamer is built and linked through CMake/Cargo as an in-process library. The standalone `opennow-streamer` binary remains a development host and is not evidence for the packaged Qt presentation path.
 
-When the `gstreamer` feature is enabled, the build environment must provide GStreamer development files and plugins needed by `webrtcbin`. Release builders bundle a private GStreamer runtime on Windows x64 and macOS. Linux packages use distro GStreamer dependencies instead.
-
-See [Native Streamer](/docs/reference/native-streamer/) for runtime behavior, environment variables, protocol, and platform decoder paths.
+See [Native Streamer](/docs/reference/native-streamer/) for runtime behavior, GPU integration, and diagnostics.
 
 ## CI and releases
 
-PRs and pushes run the `auto-build.yml` CI workflow. The `select-builds` job builds a platform matrix on sponsored Blacksmith runners (`blacksmith-2vcpu-windows-2025`, `blacksmith-6vcpu-macos-15`, `blacksmith-2vcpu-ubuntu-2404`, and `blacksmith-2vcpu-ubuntu-2404-arm`). Pull requests that target `dev` validate the reduced Windows x64 and Linux x64 matrix; other events use the full Windows x64/ARM64, macOS x64/arm64, and Linux x64/arm64 matrix.
+Qt work uses the `qt-ci` / related Qt workflows on GitHub Actions. Public Qt packages use names like `OpenNOW-Qt-<version>-…`. Nightlies are typically published from `dev` and marked as prereleases without replacing an older Electron “Latest” tag until a signed stable Qt release is cut.
 
-Each matrix job installs the Electron workspace dependencies with Node.js 22, then runs lint, typecheck, and tests. The Node test harness discovers `src/**/*.test.ts`, runs them through `tsx --test`, and appends a GitHub step summary with discovered files, pass/fail counts, skipped/todo/cancelled counts, and runner startup errors when present. The CI workflow also writes a compact lint/typecheck/test summary to the job summary.
-
-The release workflow packages this matrix:
+Current package matrix:
 
 <ReleasePackageMatrixTable />
 
-Windows ARM64 artifacts are release downloads only; the Windows updater feed remains the x64 `latest.yml` channel. Manual stable releases can update `opennow-stable/package.json` and lockfile to the requested version before tagging so source archives match the app version.
-
-Manual release dispatch now accepts `stable` or `nightly`. A nightly must be dispatched from `dev` with the next stable semver, then the workflow appends `-nightly.{run}.{attempt}`, marks the GitHub release as prerelease, does not make it latest, and leaves `dev`'s package version unchanged. The app-side `updateChannel` setting selects either the regular `latest` feed or the opt-in `nightly` feed.
+Manual publication details live in the upstream [nightly guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-nightly-release.md) and [release-candidate guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-release-candidate.md). Prefer those docs over historical Electron packaging notes.

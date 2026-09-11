@@ -1,32 +1,27 @@
 ---
-title: WebRTC
-description: Signaling, SDP negotiation, NVST SDP, data channels, diagnostics, and Chromium acceleration in OpenNOW
+title: Protocol notes (historical WebRTC)
+description: Historical Chromium/WebRTC signaling notes; not the default Qt desktop path
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
 import DataChannelsTable from '@/components/docs/DataChannelsTable';
 
-OpenNOW has two streaming clients that share Electron-owned session lifecycle and NVST signaling:
+<Callout type="warn" title="Not the default desktop path">
+OpenNOW's Qt desktop client streams through the in-process native NVST runtime. It does **not** embed Chromium, does not use renderer `RTCPeerConnection`, and has no WebRTC fallback. This page keeps historical Electron-era signaling notes that can still help when reading older issues or comparing protocol concepts. For current desktop behavior, use [Native Streamer](/docs/reference/native-streamer/).
+</Callout>
 
-- **Web mode** (`streamClientMode: "web"`, default): the renderer owns Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
-- **Native mode** (experimental on supported desktop platforms): the Rust/GStreamer child process answers the server offer and handles WebRTC media/data channels natively. Main-process signaling remains shared, and OpenNOW may fall back to web mode for executable, backend, protocol, runtime, or media capability gaps.
+## Historical Electron dual-path model
 
-## Source files
+The retired Electron client had two streaming clients that shared main-process session lifecycle and NVST signaling:
 
-| Role | File |
-| --- | --- |
-| WebSocket signaling transport | `opennow-stable/src/main/platforms/gfn/signaling.ts` |
-| Signaling IPC coordination + native bridge | `opennow-stable/src/main/signaling/signalingCoordinator.ts` |
-| Chromium startup flags | `opennow-stable/src/main/index.ts`, `opennow-stable/src/main/videoAcceleration.ts` |
-| Renderer peer connection + input | `opennow-stable/src/renderer/src/platforms/gfn/webrtcClient.ts` |
-| SDP/NVST helpers | `opennow-stable/src/renderer/src/platforms/gfn/sdp.ts` |
-| Codec capability diagnostics | `opennow-stable/src/renderer/src/lib/codecDiagnostics.ts` |
-| Native executable/protocol lifecycle | `opennow-stable/src/main/nativeStreamer/manager.ts` |
-| Native input/surface helpers | `opennow-stable/src/main/nativeStreamer/input.ts`, `opennow-stable/src/main/nativeStreamer/surface.ts` |
-| Native protocol/types | `opennow-stable/src/shared/nativeStreamer.ts`, `native/opennow-streamer/src/protocol.rs` |
+- **Web mode** (`streamClientMode: "web"`, default in Electron): the renderer owned Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
+- **Native mode** (experimental child process): a Rust/GStreamer process answered the server offer. Electron could fall back to web mode when native checks failed.
 
-## Signaling
+That dual-path design is gone from the Qt app.
 
-The main process connects to the session signaling server:
+## Signaling shape (still useful context)
+
+Historical OpenNOW desktop builds connected to the session signaling server like this:
 
 ```text
 wss://{signalingServer}/nvst/sign_in?peer_id={name}&version=2
@@ -36,31 +31,23 @@ wss://{signalingServer}/nvst/sign_in?peer_id={name}&version=2
 - Origin: `https://play.geforcenow.com`
 - Heartbeat: `{ hb: 1 }` every 5 seconds
 
-After the `peer_info` init message, incoming signaling messages are classified as SDP offers, ICE candidates, or peer messages that may need ACKs. Offers and ICE are routed to the active streaming client. Answers, NVST SDP, and local ICE candidates are sent back through the same main-process signaling client.
+After the `peer_info` init message, incoming signaling messages were classified as SDP offers, ICE candidates, or peer messages that may need ACKs.
 
-Electron routes connect/disconnect, answer/ICE, native input, native render surface, native status, and Cloud G-Sync capability IPC through `SignalingCoordinator`. `GfnSignalingClient` remains the WebSocket transport; the coordinator decides whether incoming offers/ICE go to the renderer or native manager and sends answers/local ICE back through the client.
+## Historical renderer peer connection
 
-## Renderer peer connection
+In Electron web mode, the renderer:
 
-In web mode, the renderer:
+1. Fixed server SDP placeholders such as `0.0.0.0` using the session server IP.
+2. Created `RTCPeerConnection` with GFN ICE servers.
+3. Preferred the configured codec and normalized color quality.
+4. Set the remote offer and created a local answer.
+5. Waited for ICE gathering, then sent the answer plus NVST SDP.
+6. Injected the manual media endpoint candidate from `mediaConnectionInfo` when present.
+7. Attached video/audio tracks to `<video>` and `<audio>` elements.
 
-1. Fixes server SDP placeholders such as `0.0.0.0` using the session server IP.
-2. Creates `RTCPeerConnection` with GFN ICE servers.
-3. Prefers the configured codec and normalized color quality.
-4. Sets the remote offer and creates a local answer.
-5. Waits for ICE gathering, then sends the answer plus NVST SDP.
-6. Injects the manual media endpoint candidate from `mediaConnectionInfo` when present.
-7. Attaches video/audio tracks to `<video>` and `<audio>` elements.
+## NVST SDP attributes
 
-## Native answer path
-
-In experimental native mode, `SignalingCoordinator` sends the server offer to the Rust child through `NativeStreamerManager` with an `offer` command. The GStreamer backend uses `webrtcbin` to create the local answer and emits local ICE as protocol events. Electron still sends the answer and ICE through `GfnSignalingClient`, so CloudMatch, signaling auth, and session teardown stay centralized.
-
-## NVST SDP
-
-OpenNOW sends standard WebRTC SDP plus an NVIDIA NVST SDP blob. NVST SDP carries stream-quality attributes such as resolution, viewport, FPS, bitrate, codec, color quality, QoS/FEC, bandwidth estimation, and ICE credentials.
-
-The NVST session describes these m-lines:
+OpenNOW historically sent standard WebRTC SDP plus an NVIDIA NVST SDP blob. NVST SDP carries stream-quality attributes such as resolution, viewport, FPS, bitrate, codec, color quality, QoS/FEC, bandwidth estimation, and ICE credentials.
 
 | m-line | Direction | Purpose |
 | --- | --- | --- |
@@ -73,28 +60,13 @@ The NVST session describes these m-lines:
 
 <DataChannelsTable />
 
-The partially reliable threshold is read from the negotiated `a=ri.partialReliableThresholdMs` SDP attribute. Native mode creates compatible data channels in the child process and reports `input-ready` before Electron sends native input packets.
+The partially reliable threshold was read from the negotiated `a=ri.partialReliableThresholdMs` SDP attribute.
 
-## Diagnostics
+## Where to go instead
 
-Renderer WebRTC diagnostics poll `RTCPeerConnection.getStats()` for connection state, codec, resolution, HDR/color, bitrate, RTT, jitter, packet loss, frame decode/render timing, data-channel pressure, lag classification, and microphone state. The in-stream stats HUD exposes those measurements in **Off / Compact / Full** modes (default shortcut `Ctrl+N`), including ICE transport, network capacity, session location, and server GPU context when available. Capability-aware codec preference can fall back within the configured `fallbackCodec` bounds when the preferred codec cannot produce video; the HUD can surface requested vs negotiated codec.
-
-The Settings codec diagnostics use Chromium `mediaCapabilities` plus WebRTC codec probing to show whether H.264, H.265, and AV1 decode/encode are available and whether the browser reports GPU-backed acceleration. Results are cached in session storage for the current renderer session. On Linux, OpenNOW shows an extra hint when diagnostics are software-only or H.265 is unavailable: AppImage diagnostics still depend on the host distro's VA-API stack, so proprietary NVIDIA systems may need `libva-nvidia-driver`/`nvidia-vaapi-driver` and distro codec packages even though OpenNOW enables NVIDIA VA-API flags on restart.
-
-Native mode emits protocol events instead: `status`, `input-ready`, `shortcut`, `video-stall`, `video-transition`, `stats`, `log`, and `error`. See [Native Streamer](/docs/reference/native-streamer/) for experimental status, event fields, issue reporting, and fallback behavior.
-
-## Chromium acceleration flags
-
-At startup the main process configures Chromium/WebRTC for the renderer path:
-
-| Platform | Current acceleration behavior |
+| Need | Page |
 | --- | --- |
-| Windows | D3D11 video decode and Media Foundation integration |
-| Linux x64 | VA-API decoder/encoder flags with driver checks relaxed, Linux GL accelerated decode, zero-copy GL decode, accelerated encode, and NVIDIA VA-API enablement |
-| Linux ARM | V4L2/direct decoder flags |
-| macOS | Native VideoToolbox path |
-| All | MP4 MediaRecorder support, dav1d AV1 fallback, disabled mDNS candidates, unthrottled renderer/background behavior |
-
-`decoderPreference` and `encoderPreference` are read before Electron startup. `hardware` adds the corresponding force-enable Chromium switch, `software` adds the corresponding disable switch, and `auto` leaves Chromium to choose while still enabling the platform feature set. `ignore-gpu-blocklist` is always set so the GPU process does not silently blocklist available video acceleration.
-
-These flags affect the renderer WebRTC path. Native mode uses the GStreamer platform paths documented in [Native Streamer](/docs/reference/native-streamer/).
+| Current desktop streaming path | [Native Streamer](/docs/reference/native-streamer/) |
+| Process boundaries | [Architecture](/docs/architecture/overview/) |
+| Settings and local data | [Configuration](/docs/reference/configuration/) |
+| Black screen / decode isolation | [Troubleshooting](/docs/guides/troubleshooting/) |

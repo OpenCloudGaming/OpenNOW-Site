@@ -6,7 +6,7 @@ export default function ReleasePackageMatrixTable() {
     <DocsTable
       columns={[
         { key: 'platform', header: 'Target' },
-        { key: 'releaseBehavior', header: 'Native/GStreamer behavior' },
+        { key: 'releaseBehavior', header: 'Qt packaging behavior' },
         { key: 'artifacts', header: 'Artifacts' },
       ]}
       rows={gstreamerRuntimeStrategies}

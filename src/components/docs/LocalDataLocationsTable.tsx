@@ -10,7 +10,7 @@ export default function LocalDataLocationsTable({
   variant = 'data',
   pathHeader = 'Location',
 }: LocalDataLocationsTableProps) {
-  const mediaRows = ['screenshots', 'recordings', 'thumbnailCache'].map(
+  const mediaRows = ['screenshots', 'recordings'].map(
     (key) => localDataLocations.find((row) => row.key === key)!,
   );
 

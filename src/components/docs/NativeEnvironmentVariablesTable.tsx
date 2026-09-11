@@ -5,30 +5,9 @@ interface NativeEnvironmentVariablesTableProps {
   variant?: 'reference' | 'advanced';
 }
 
-const advancedVariableOrder = [
-  'OPENNOW_NATIVE_STREAMER',
-  'OPENNOW_NATIVE_STREAMER_PROTOCOL',
-  'OPENNOW_NATIVE_STREAMER_BACKEND',
-  'OPENNOW_NATIVE_CODEC',
-  'OPENNOW_NATIVE_VIDEO_BACKEND',
-  'OPENNOW_NATIVE_VIDEO_API',
-  'OPENNOW_NATIVE_EXTERNAL_RENDERER',
-  'OPENNOW_NATIVE_CLOUD_GSYNC',
-  'OPENNOW_NATIVE_D3D_FULLSCREEN',
-  'OPENNOW_NATIVE_PRESENT_MAX_FPS',
-  'OPENNOW_NATIVE_ZERO_COPY',
-];
-
 export default function NativeEnvironmentVariablesTable({
   variant = 'reference',
 }: NativeEnvironmentVariablesTableProps) {
-  const rows =
-    variant === 'advanced'
-      ? advancedVariableOrder.map(
-          (variable) => nativeStreamerEnvironmentVariables.find((row) => row.variable === variable)!,
-        )
-      : nativeStreamerEnvironmentVariables;
-
   const columns =
     variant === 'advanced'
       ? [
@@ -41,5 +20,5 @@ export default function NativeEnvironmentVariablesTable({
           { key: 'purpose', header: 'Purpose' },
         ];
 
-  return <DocsTable columns={columns} rows={rows} />;
+  return <DocsTable columns={columns} rows={nativeStreamerEnvironmentVariables} />;
 }

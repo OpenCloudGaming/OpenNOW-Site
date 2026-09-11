@@ -5,57 +5,55 @@ description: Keyboard, mouse, gamepad, clipboard, microphone, shortcuts, and nat
 
 import DataChannelsTable from '@/components/docs/DataChannelsTable';
 
-OpenNOW captures input in Electron and sends it to GeForce NOW over WebRTC data channels. In web mode the renderer owns the channels. In experimental native mode, the Rust streamer owns compatible channels after it emits `input-ready`; Electron input forwarding remains the fallback when native input readiness is unavailable.
+OpenNOW captures gameplay input in the Qt desktop app and sends it through the in-process native streamer. Desktop and console shells share the same input preferences; console mode changes browsing/navigation, not NVIDIA account state.
 
 ## Default shortcuts
 
 | Shortcut | Action |
 | --- | --- |
-| `Ctrl+N` | Cycle stats HUD (Off → Compact → Full) |
+| `Ctrl+N` | Cycle stats HUD |
 | `F8` | Toggle pointer lock |
-| `F10` | Toggle fullscreen |
-| `F11` | Take screenshot |
+| `F11` | Toggle fullscreen |
+| `Ctrl+F11` | Take screenshot |
 | `F12` | Start/stop recording |
+| `Ctrl+F12` | Save clip / replay action |
 | `Ctrl+Shift+Q` | Stop session |
 | `Ctrl+Shift+K` | Toggle anti-AFK |
 | `Ctrl+Shift+M` | Toggle microphone |
 
-All shortcuts can be changed in Settings. On macOS the UI may display `Ctrl` as `Cmd`, while the stored binding uses the same setting string.
+All shortcuts can be changed in Settings. On macOS the UI may display modifier labels differently while the stored binding uses the same setting string.
 
-The stats HUD modes are **Off**, **Compact**, and **Full**. Compact and Full separate server, receive, decode, and render measurements and can show ICE transport, network capacity, session location, and server GPU context. When `showStatsOnLaunch` is enabled, a new session opens the HUD in Compact mode; `statsOverlayPosition` chooses the corner.
-
-`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage. Intentional host-side releases, including the `F8` pointer-lock toggle and `F10` fullscreen toggle, suppress the synthetic remote Escape that OpenNOW normally sends when Chromium drops pointer lock after an intercepted Escape key. Escape and pointer-lock transitions keep capture and recapture input more reliably on current desktop builds.
+`allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage.
 
 ## Keyboard
 
-Keyboard events are translated to Windows-style virtual key codes and sent with scancode `0`, matching GeForce NOW's web client behavior so the server applies the selected layout instead of OpenNOW forcing a US physical-key mapping. The `keyboardLayout` setting controls the layout used by the remote session, which is important for regional layouts such as German where keys like `Y`, `Z`, and punctuation differ from US keyboards. Web mode sends keyboard packets over `input_channel_v1`; experimental native mode sends equivalent packets through the native child when its input channel is ready.
-
-When fullscreen is active, OpenNOW also makes a best-effort `navigator.keyboard.lock()` request for browser-reserved keys such as `Ctrl+T`, `Ctrl+N`, `F11`, Escape, Print Screen, and common browser/navigation keys so those shortcuts can reach the stream instead of the host browser when Chromium allows it. If Chromium releases pointer lock because it captured Escape before the stream sees it, OpenNOW sends a synthetic Escape press to the remote session and then tries to restore pointer lock.
+Keyboard events are translated for the remote session using the selected `keyboardLayout`. Regional layouts such as German QWERTZ depend on that setting rather than forcing a US physical-key mapping.
 
 ## Pointer lock and mouse
 
 - Pointer lock captures the cursor inside the stream view. Toggle with `F8` by default.
 - `mouseSensitivity` defaults to `1` and scales relative movement.
-- `mouseAcceleration` defaults to `1` and is clamped to 1–150.
-- Latency-sensitive mouse deltas use `input_channel_partially_reliable`.
+- `mouseAcceleration` defaults to `1`.
+- On macOS, relative mouse mode uses native CoreGraphics pointer capture rather than repeated cursor warps. Unlocked absolute mode can allow the pointer to leave the window.
 
 ## Gamepad
 
-OpenNOW tracks up to four controllers through the browser Gamepad API. Button and analog state is polled and sent over the partially reliable input channel. Controller badges/loading states can appear while the app is waiting for a controller-focused library or launch flow to become ready.
+OpenNOW uses SDL3 for controller discovery and input. Stick dead zones and vibration intensity are configurable. Controllers can drive the console shell's focus navigation.
 
-The `enableGyroscopeControls` setting is an experimental, opt-in bridge for controller motion sensors. It defaults off and only exposes gyro aiming data when the browser/input backend reports compatible motion axes; regular gamepad button and stick packets continue to work without it.
-
-Controller-mode navigation uses the standard Gamepad button layout: D-pad or left stick moves focus, south/A selects or plays, east/B goes back or closes overlays, west/X opens search, shoulder buttons switch between controller pages, and menu opens game details or cycles variants depending on the page. The guide button is treated as a menu alias when the browser exposes it as button 16.
-
-## Native input caveat
-
-Native OS-level input capture is part of the experimental native streamer path and is implemented on Windows. On macOS, Linux, and Raspberry Pi/Linux ARM, native streaming may run through the child process, but input support depends on the platform/backend capabilities reported by the streamer. If native input readiness is not reported, the app should not assume the child can receive input packets.
-
-When the native streamer window has focus on Windows, the native input bridge matches configured app shortcuts and sends `shortcut` events back to Electron before forwarding other keyboard input to the stream. Remote keyboard packets still use virtual key codes with scancode `0`, so regional layouts such as German QWERTZ keep the selected remote layout instead of the local physical key position.
+| Setting | Description |
+| --- | --- |
+| `controllerMode` | Controller-oriented shell preference |
+| `launchInConsoleMode` | Start in console/TV-oriented shell |
+| `switchToConsoleOnPad` | Automatically switch to console when a pad connects |
+| `leaveConsoleOnPointer` | Leave console shell on pointer interaction |
+| `consoleProfilePickerOnLaunch` | Show Who's playing? when console mode starts |
+| `autoFullScreen` | Auto-enter fullscreen when console flows request it |
+| `controllerLeftStickDeadzone` / `controllerRightStickDeadzone` | Stick dead zones |
+| `controllerVibrationIntensity` | Rumble intensity |
 
 ## Clipboard paste
 
-While streaming, OpenNOW intercepts the host paste shortcut so local/browser paste behavior does not leak into the app UI. When `clipboardPaste` is enabled, web mode reads text from the browser clipboard API and falls back to Electron's main-process clipboard bridge when needed, then converts up to 4096 mappable characters into synthetic keystrokes using the selected `keyboardLayout`. Native mode can emit a `clipboard-paste` shortcut event so Electron reads the host clipboard and sends the same GFN paste packet through signaling. If clipboard text cannot be read, OpenNOW falls back to sending the remote paste shortcut.
+Settings → Controls → **Clipboard paste** enables local-to-stream plain-text paste while streaming. The native path submits text through the streamer FFI rather than converting every paste into keystrokes when the typed clipboard path is available.
 
 ## Microphone
 
@@ -63,34 +61,14 @@ While streaming, OpenNOW intercepts the host paste shortcut so local/browser pas
 | --- | --- |
 | `disabled` | No microphone capture |
 | `push-to-talk` | Hold/toggle the configured microphone shortcut to transmit |
-| `voice-activity` | Keep microphone capture active when enabled |
+| `voice-activity` | Exposed as continuous open-microphone style capture when enabled |
 
-Additional settings:
-
-| Setting | Purpose |
-| --- | --- |
-| `microphoneDeviceId` | Preferred input device; empty means system default |
-| `shortcutToggleMicrophone` | Default `Ctrl+Shift+M` |
-| `hideStreamButtons` | Hide stream overlay controls including microphone/fullscreen/end-session buttons |
-
-In web mode, `MicrophoneManager` adds the microphone track to the renderer `RTCPeerConnection`.
-
-## Controller mode UI
-
-Controller mode changes navigation and layout, not the underlying GFN input protocol. Current desktop builds also offer a controller-first console shell with PIN-protected profiles and couch-friendly navigation.
-
-| Setting | Description |
-| --- | --- |
-| `controllerMode` | Enable controller-first library layout |
-| `controllerModePromptDismissed` | Suppress the gamepad-detected console-mode suggestion after decline |
-| `launchInConsoleMode` | Launch sessions with GFN's TV/console-style app launch mode and fullscreen controller shell |
-| `consoleProfilePickerOnLaunch` | Show the Who's playing? profile picker when console mode starts |
-| `autoFullScreen` | Auto-enter fullscreen when controller mode triggers it |
-
-OpenNOW can suggest console mode when a gamepad connects; the prompt itself is controller-accessible. Queue/server selection and wait-time screens still apply in controller mode; controller-friendly loading surfaces are UI wrappers around the same CloudMatch launch state.
+Grant OS microphone permission, select the intended mode, and reconnect the stream after changing capture settings. Live acceptance should confirm remote voice reception and uninterrupted game audio.
 
 ## Data channels
 
+Historical NVST input channel names remain useful when reading protocol traces:
+
 <DataChannelsTable />
 
-See [WebRTC](/docs/reference/webrtc/) for signaling/data-channel negotiation and [Native Streamer](/docs/reference/native-streamer/) for native protocol input events.
+See [Native Streamer](/docs/reference/native-streamer/) for the production input path and [Protocol notes](/docs/reference/webrtc/) for historical Chromium/WebRTC channel notes.

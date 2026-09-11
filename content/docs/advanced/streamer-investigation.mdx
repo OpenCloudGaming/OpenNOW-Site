@@ -1,82 +1,58 @@
 ---
 title: Native Streamer Architecture
-description: Advanced notes on the Rust/GStreamer native streamer path
+description: Advanced notes on the in-process Qt/native NVST streamer path
 ---
 
 import NativeEnvironmentVariablesTable from '@/components/docs/NativeEnvironmentVariablesTable';
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
 
-OpenNOW now ships an optional experimental native streamer path on supported desktop platforms. It is not an FFmpeg-first prototype: the current design is a Rust child process with a GStreamer `webrtcbin` backend, coordinated by Electron. Expect platform-specific bugs or fallbacks while this path matures, and report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+OpenNOW's desktop client streams through an in-process native NVST runtime loaded by Qt. This is not an experimental Electron child process, and there is no Chromium/WebRTC fallback. Report streaming issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD) with a diagnostics export when possible.
 
 ## Shipped design
 
-Electron still owns the GeForce NOW session lifecycle. The main process creates and claims the CloudMatch session, connects NVST signaling, receives the server offer, and forwards signaling payloads either to the renderer WebRTC client or to the native child process.
-
-The native process communicates over newline-delimited JSON on stdin/stdout. Protocol version is `3`. Electron sends commands and correlates responses by `id`; the native process also emits async events for logs, status, ICE, input readiness, app shortcuts, video liveness, stats, and errors.
-
 ```text
-GFN signaling WebSocket ── main process ── JSONL protocol v3 ── opennow-streamer
-        │                         │                                  │
-        │                         └─ fallback to renderer WebRTC      └─ GStreamer webrtcbin
-        └─ shared offer/ICE/answer flow
+GFN CloudMatch session ── Rust core ── session context ── Qt shell
+                                              │
+                                              └─ opennow-streamer-ffi (in-process)
+                                                       │
+                                                       └─ NVST transport + platform decode
+                                                              │
+                                                              └─ GPU texture → Qt scene graph
 ```
+
+The Rust core owns authentication and CloudMatch session lifecycle. Qt owns windows, overlays, and presentation. The embedded streamer owns NVST sockets, media, input, recording, and GPU frame publication. Qt does not create a second video window or spawn a streamer child process.
 
 ## Responsibilities
 
 | Component | Owns |
 | --- | --- |
-| Electron main | CloudMatch, signaling WebSocket, native executable lookup, environment variables, protocol supervision, fallback decisions |
-| Renderer | App UI, session controls, surface updates, Electron input forwarding fallback, web streamer path |
-| Rust streamer | Offer/answer, local ICE, input data channels, experimental GStreamer pipeline, platform decode/render, native diagnostics |
-
-## GStreamer backend
-
-The `gstreamer` backend is split across focused Rust modules instead of a monolithic backend: `gstreamer_backend.rs` coordinates backend state, while `gstreamer_pipeline.rs`, `gstreamer_input.rs`, `gstreamer_liveness.rs`, `gstreamer_platform.rs`, `gstreamer_transitions.rs`, and `gstreamer_config.rs` own pipeline, input, diagnostics, platform, transition, and configuration details.
-
-Together, these modules create a `webrtcbin` pipeline, validate and adapt the remote SDP, negotiate the local answer, emit local ICE candidates, accept remote ICE, open the GFN input data channels, track input readiness, and shut down the pipeline on stop.
-
-If the binary was built without the `gstreamer` feature, or if an unknown/unavailable backend is requested, it reports `stub` capabilities with `requestedBackend` and `fallbackReason`. Electron uses that to fail the native attempt early and return to web mode instead of hanging.
+| Rust core | CloudMatch, settings, catalog, updates, diagnostics export helpers |
+| Qt shell | UI, overlays, QRhi device lending, desktop/console layouts |
+| Native streamer FFI | NVST lifecycle, decode/audio/input/recording, GPU frame tokens |
 
 ## Platform decode/render selection
 
-The backend chooses a low-latency platform path when plugins and drivers are available:
-
 <NativePlatformVideoPathsTable variant="preferred" />
 
-`nativeVideoBackend` is normalized to `auto`, `d3d11`, or `d3d12` in settings. Diagnostic environment overrides can force broader paths while testing.
+`nativeVideoBackend` defaults to `auto`. Unsupported forced backends fail explicitly rather than silently selecting a different API.
 
-## Runtime bundling
+## Packaging
 
-Release builds use `npm run native:build`, which builds the Rust binary and copies it to `native/opennow-streamer/bin`. Packaged apps prefer `resources/native/opennow-streamer/<platformKey>/opennow-streamer(.exe)`.
+Qt CMake builds `opennow-streamer-ffi` and installs it beside the executable and `opennow-core`. Look for `OpenNOW-Qt-…` packages. Linux packages may include a bundled FFmpeg fallback while GPU driver interfaces remain dynamically discovered.
 
-Windows x64 and macOS release jobs can bundle a private GStreamer runtime next to the selected streamer binary. The Electron manager detects that runtime and points only the child process at it on supported native-streaming platforms. Linux packages rely on distro GStreamer packages; the `.deb` declares the common runtime dependencies.
-
-## Environment variables
+## Environment overrides
 
 <NativeEnvironmentVariablesTable variant="advanced" />
 
-Build-time variables include `OPENNOW_NATIVE_STREAMER_FEATURES`, `OPENNOW_NATIVE_STREAMER_TARGET`, `OPENNOW_NATIVE_STREAMER_PLATFORM_KEY`, and `OPENNOW_BUNDLE_GSTREAMER_RUNTIME`.
+## Diagnostics
 
-## Diagnostics and liveness
+Native and Qt logs are collected through **Settings → About → Copy diagnostics**. Distinguish an entirely black application window from a stream-only black video surface when filing reports.
 
-Native events include:
+## Known limitations
 
-- `status` for starting/ready/streaming/stopped state
-- `input-ready` when data channels are ready for input
-- `shortcut` when the native window captures a configured app shortcut
-- `video-stall` with decoded/sink FPS, age, zero-copy flags, recovery attempt, and likely stage
-- `video-transition` for decoder/render path changes
-- `stats` for native stream telemetry
-- `error` for backend or protocol failures
+- The Qt app is still under active development; platform-specific streaming and GPU issues are expected.
+- Publishing a build does not mean every acceptance checklist item has passed.
+- Nightly packages may be unsigned/not notarized.
+- Separate Android, iOS, Switch, and OpenNOW-Mac projects are not this Qt desktop path.
 
-These diagnostics are designed to make native fallback predictable under partial failures.
-
-## Known platform limitations
-
-- Native streaming is accepted on Windows, macOS, and Linux, but platform media/runtime capabilities still decide whether a native session can start or must fall back to the renderer WebRTC path.
-- Native OS-level input capture is implemented on Windows.
-- Linux backend experiments depend on system GStreamer libraries and hardware-acceleration plugins.
-- Windows ARM64 release packaging currently does not build the native streamer.
-- Native external rendering is separate from the renderer `<video>` path, so renderer MediaRecorder/canvas capture features do not apply the same way.
-
-For the full reference, use [Native Streamer](/docs/reference/native-streamer/). For the shared signaling details, use [WebRTC](/docs/reference/webrtc/).
+For the full reference, use [Native Streamer](/docs/reference/native-streamer/). Historical Chromium notes remain on [Protocol notes](/docs/reference/webrtc/).

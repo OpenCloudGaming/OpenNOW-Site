@@ -1,83 +1,70 @@
 ---
 title: Getting Started
-description: Download, install, first launch, and source builds for OpenNOW
+description: Download Qt packages, first launch, and CMake source builds for OpenNOW
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
 
-OpenNOW is an open-source GeForce NOW client. The main desktop app is the Electron client in `opennow-stable/`, with separate native and mobile builds available for other platforms.
+OpenNOW is an open-source GeForce NOW client. The desktop app is the Qt Quick client in `opennow-qt/`, with a Rust core and an in-process native NVST streamer. Separate native and mobile builds are available for other platforms.
 
-<Callout type="info" title="v1.0.0 coming soon">
-A controller-first UI and new native streaming engine are planned for **v1.0.0**. Current desktop stable is **v0.5.5**; see the [announcement](https://x.com/Zortosdev/status/2093023076191440963) for a preview. These steps cover the shipped Electron client.
+<Callout type="info" title="Desktop 1.0.0 is Qt/native">
+OpenNOW **1.0.0** on `main` replaces the retired Electron/`opennow-stable` client. The Qt app has no Chromium/WebRTC fallback. See the [announcement](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
 </Callout>
 
 ## Download a release
 
-Grab the latest build from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases). The current desktop stable tag is **v0.5.5**.
+Look for packages starting with `OpenNOW-Qt-` in [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases). Older releases may contain the retired Electron app, so check the release notes before downloading. If there is no published Qt nightly, sign in to GitHub and download the artifacts from a successful [`qt-ci` run on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev).
 
-| Platform | Formats | Notes |
+A signed stable **v1.0.0** tag may not be published yet. Prefer current `OpenNOW-Qt-…` nightlies or `qt-ci` artifacts over the GitHub “Latest” badge when that badge still points at Electron-era packages.
+
+| Platform | Qt package | How to run it |
 | --- | --- | --- |
-| Windows x64 | NSIS installer, portable `.exe`, updater metadata | Experimental native streamer is available and bundles a private GStreamer runtime |
-| Windows ARM64 | NSIS installer, portable `.exe` | Release download only; no native streamer build in the release matrix |
-| macOS x64 / arm64 | `.dmg`, `.zip` | Web streamer remains the default; experimental native streamer builds can use the bundled GStreamer runtime |
+| Windows x64 / ARM64 | `.msi`, portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe` |
+| Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it |
+| Linux x64 / ARM64 | `.deb` | Your distribution must provide Qt 6.8+ and SDL3. Use the AppImage on stock Ubuntu 24.04 |
+| macOS Apple Silicon, macOS 13+ | `.dmg` | Open the DMG and drag OpenNOW into Applications. Intel Macs are not included |
 | macOS (OpenNOW Mac) | [Release `.zip`](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) | Separate performance-focused macOS build maintained by Jayian1890 |
-| Linux x64 / arm64 | `.AppImage`, `.deb` | Web streamer remains the default; experimental native mode uses host distro GStreamer packages, and auto-updates are supported for AppImage and Debian-compatible `.deb` installs |
-| Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release |
+| Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release; separate from the Qt desktop app |
 | Android beta | [Direct `.apk`](https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9) | Sideload the beta only when testing pre-release Android builds |
 | iOS | [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2) | Install through Apple's TestFlight while the iOS build is in beta |
 | Nintendo Switch | [`SwitchNOW.nro`](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) | Native Horizon OS homebrew client for modded Switch systems; follow the [Switch installation guide](/docs/guides/nintendo-switch) |
 
-Desktop artifact names use the app version, platform, and architecture, such as `OpenNOW-v{version}-setup-x64.exe`, `OpenNOW-v{version}-mac-arm64.dmg`, or `OpenNOW-v{version}-linux-x64.AppImage`.
+Nightly platform packages are unsigned. An upcoming stable Qt release may also be published unsigned until signed production packages are available. Windows may show an unknown-publisher / SmartScreen warning. The macOS app is not notarized; if Gatekeeper blocks it, use System Settings → Privacy & Security → Open Anyway when offered. Do not disable Gatekeeper globally. Updates for unsigned packages are manual. `SHA256SUMS` detects corrupted downloads; it does not verify who published a package.
 
 ## First launch
 
 1. Open OpenNOW.
-2. Choose a provider if prompted.
+2. Complete first-run onboarding when prompted, or replay it later from **Settings → About → Replay onboarding**.
 3. Sign in through the browser-based NVIDIA OAuth flow, or use **Sign in with QR** to authorize from another device.
-4. Browse your library or the public catalog, and use Settings to link/resync supported store accounts when GFN requires account connections for owned games.
-5. Open Settings to choose bitrate, codec, region, app language, controller/console mode, and other preferences. Resolution and FPS choices are filtered to the profiles reported by your current GFN subscription. Packaged builds check for updates from **Settings → About**; download and restart remain user-initiated.
-6. Launch a game. Queue and server-selection screens appear when GFN requires them. After a session ends, OpenNOW can show a privacy-safe session quality summary when `showSessionReport` is enabled (default on).
+4. Browse your library or the public catalog. Use Settings to link/resync supported store accounts when GFN requires account connections for owned games.
+5. Open Settings to choose bitrate, codec, region, language, console/desktop preferences, and other options. Resolution and FPS choices follow the profiles reported by your current GFN subscription.
+6. Use the same app in desktop (keyboard/mouse) or console (controller-first) layout. Console mode is a shell preference, not a separate download.
+7. Launch a game. Queue and server-selection screens appear when GFN requires them. After a session ends, OpenNOW can show a privacy-safe session quality summary when `showSessionReport` is enabled (default on).
 
-Some GFN catalog entries require a specific membership tier. When NVIDIA reports `INSUFFICIENT_PLAYABILITY`, OpenNOW shows a membership-upgrade launch error instead of treating it as a duplicate-session conflict. If the catalog provides SKU-specific text or a minimum membership label, that text is used in the launch-error panel.
+Some GFN catalog entries require a specific membership tier. When NVIDIA reports `INSUFFICIENT_PLAYABILITY`, OpenNOW shows a membership-upgrade launch error instead of treating it as a duplicate-session conflict.
 
-On Windows, OpenNOW stays single-instance by default. Start the installed executable with `--secondary` to open one additional isolated client (separate profile and sign-in). Update from the primary instance; the secondary instance disables updates.
-
-By default OpenNOW streams through Chromium/WebRTC in the renderer. The optional native streamer mode is experimental on supported desktop platforms and uses a Rust child process with a GStreamer backend for video decode/rendering while Electron still owns session lifecycle and signaling. Native mode may have platform-specific bugs or missing media capabilities; if the platform, native executable, backend, protocol, runtime, or media capability is unavailable, OpenNOW reports the reason and falls back to the web streamer path. Report native-streamer issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
-
-On Linux, native mode uses system GStreamer libraries and plugins rather than a bundled private runtime. Install base/good/bad/ugly/libav plugins plus VAAPI, V4L2, GL, Vulkan, and driver packages where your distro provides them.
+Desktop streaming uses the in-process native NVST streamer. There is no web/Chromium streamer to fall back to. Export a diagnostic report through **Settings → About → Copy diagnostics** when something breaks. Report issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 ## Build from source
 
-Prerequisites:
+Use `main` for the release source or `dev` for ongoing development. Before building, install:
 
-- Node.js 22
-- npm
-- Git
-- Rust/Cargo for native streamer work
-- GStreamer development packages when building the native `gstreamer` backend
+- Qt 6.8+ with Quick, Multimedia, and ShaderTools
+- CMake 3.24+ and a C++20 toolchain
+- SDL3, Cargo, and the media dependencies for your platform
+
+Linux also needs `pkg-config`, `libwayland-dev`, and `wayland-protocols`, even for X11 builds. You do not need Node.js or npm to build or run the desktop app.
 
 ```bash
-git clone https://github.com/OpenCloudGaming/OpenNOW.git
-cd OpenNOW/opennow-stable
-npm install
-cd ..
-npm run dev
+git clone --branch main https://github.com/OpenCloudGaming/OpenNOW.git
+cd OpenNOW
+cmake -S opennow-qt -B build/opennow-qt -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/opennow-qt
+ctest --test-dir build/opennow-qt --output-on-failure
 ```
 
-Common root scripts:
-
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start development mode |
-| `npm run build` | Build production bundles |
-| `npm run native:check` | Check the Rust native streamer crate |
-| `npm run native:build` | Build the Rust native streamer |
-| `npm run typecheck` | Run TypeScript checks |
-| `npm run dist` | Build unsigned packages |
-| `npm run dist:signed` | Build signed packages when signing is configured |
-
-Packaged output is written under `opennow-stable/dist-release/`.
+See the [Qt app guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/opennow-qt/README.md) for platform-specific details, hardware notes, and acceptance checks.
 
 ## Local data
 
@@ -87,4 +74,4 @@ Close the app before deleting these files to reset local state.
 
 ## If something goes wrong
 
-Start with the [Troubleshooting guide](/docs/guides/troubleshooting). It provides a conservative stream profile, symptom-based checks for sign-in and launch failures, native-streamer isolation steps, local reset instructions, and how to use desktop bug reports with optional session summaries.
+Start with the [Troubleshooting guide](/docs/guides/troubleshooting). It covers NVIDIA-first checks, conservative stream settings, diagnostics export, and local reset instructions.
