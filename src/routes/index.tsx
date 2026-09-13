@@ -82,7 +82,7 @@ const downloads: {
 }[] = [
   {
     title: 'Desktop',
-    description: 'Qt Quick + native NVST client. Look for OpenNOW-Qt packages; older releases may still ship Electron.',
+    description: 'Qt Quick + native NVST client. Latest published desktop packages are OpenNOW-Qt (v1.0.0); historical tags may still ship Electron.',
     format: '.msi · .zip · .AppImage · .deb · .dmg',
     href: 'https://github.com/OpenCloudGaming/OpenNOW/releases',
     icon: Laptop,

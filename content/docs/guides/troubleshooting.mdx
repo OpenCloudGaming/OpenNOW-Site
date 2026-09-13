@@ -73,6 +73,7 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
 | Active session conflict | NVIDIA believes another stream is still active | Stop the other session, wait for cleanup, then launch again |
 | Queue does not advance | The selected region is at capacity, the queue request expired, or service state changed | Leave and relaunch; if available, choose another region |
 | Game opens from the public catalog but not the library | The required store account is not linked or synced | Link/resync the store under Settings, then refresh |
+| Wrong storefront launches for a multi-store title | The selected platform variant does not match the owned copy | Before launch, choose the correct store variant (Steam, Xbox, Epic, and so on) on the game detail / platform picker |
 | Catalog browse hangs or fails only with a session proxy enabled | Catalog requests that go through a failing proxy can time out, then retry direct | Wait for the direct retry; disable the proxy if catalog never recovers |
 | Community proxy toggle fails or takes a long time | Community provision can cold-start; OpenNOW allows a longer wait and retries transient failures | Keep Settings open until provision finishes |
 | One game fails while others launch | The failure is likely title, storefront, SKU, or membership specific | Record the exact game and storefront before reporting it |
@@ -89,6 +90,10 @@ Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can s
 | Regular stutter or rising latency | Lower bitrate first, then FPS | Use wired Ethernet or stronger Wi-Fi; stop competing traffic and try a closer region |
 | Blocky image but stable input | Increase bitrate gradually | Keep the highest value that remains stable rather than the maximum available value |
 | Colors look wrong | Return color quality to 8-bit 4:2:0 and disable experimental combinations | Re-enable 10-bit or 4:4:4 separately to identify the unsupported mode |
+| Stutter after enabling 10-bit | 10-bit color can stutter on some systems; Settings warns when you select it | Switch back to 8-bit; clear `suppressTenBitWarning` in settings if you dismissed the dialog and want it again |
+| H.265 unavailable on Windows | Microsoft's HEVC Video Extensions may be missing | Open the HEVC help in Settings and install the free Store extension first (paid offer if needed). Restart OpenNOW. GPU hardware HEVC decode is still required |
+| High GPU use with upscaling | MetalFX (macOS) or FSR 1 (Windows/Linux) costs extra GPU time | Turn upscaling **Off**, or lower stream resolution/FPS if the local GPU is saturated |
+| Flatpak cannot auto-update | Flatpak builds disable the in-app self-updater | Update with `flatpak update io.github.opencloudgaming.OpenNOW` from a Flatpak remote, or rebuild/reinstall a local `.flatpak` bundle |
 | Entire app window is black vs only the video surface | Note which one you see before changing settings | Export diagnostics and include both `native-streamer.log` and `qt-native.log` |
 
 <Callout type="warn" title="Change one variable at a time">

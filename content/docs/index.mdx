@@ -20,12 +20,12 @@ For macOS users looking for a separate performance-focused build, Jayian1890 mai
 OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of NVIDIA Corporation.
 </Callout>
 
-<Callout type="info" title="Desktop 1.0.0 is Qt/native">
-OpenNOW **1.0.0** on `main` rebuilds the desktop client with Qt Quick and an in-process native NVST streamer. It replaces the retired Electron/`opennow-stable` app and has no Chromium/WebRTC fallback. See the [announcement post](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
+<Callout type="info" title="Desktop is Qt/native">
+OpenNOW's desktop client on `main` uses Qt Quick and an in-process native NVST streamer. It replaces the retired Electron/`opennow-stable` app and has no Chromium/WebRTC fallback. See the [announcement post](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
 </Callout>
 
-<Callout type="warn" title="Binary publication is separate">
-Source on `main` is the Qt 1.0.0 line. A signed stable **v1.0.0** GitHub release may not exist yet. Prefer packages whose names start with `OpenNOW-Qt-` from [Releases](https://github.com/OpenCloudGaming/OpenNOW/releases) (including Qt nightlies) or artifacts from a successful [`qt-ci` run on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev). Older “Latest” releases can still contain Electron packages.
+<Callout type="info" title="Published packages vs source on main">
+The GitHub Latest release is **v1.0.0** (`OpenNOW-Qt-…` packages, published 2026-09-11). Source on `main` is preparing the **v1.0.1** line and already includes features that are not in that published tag yet. Download stable builds from [Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest), or use Qt nightlies / artifacts from a successful [`qt-ci` run on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev) when you need post-1.0.0 changes. Do not invent v1.0.1 download URLs until that release is published. Historical tags such as v0.5.5 may still contain Electron packages.
 </Callout>
 
 <Cards>
@@ -46,7 +46,7 @@ Source on `main` is the Qt 1.0.0 line. A signed stable **v1.0.0** GitHub release
     **Download** an `OpenNOW-Qt-…` package from the [OpenNOW download picker](/#downloads) or [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
   </Step>
   <Step>
-    **Install** the artifact for your platform: Windows `.msi` or portable `.zip`, Linux `.AppImage` (recommended) or `.deb`, macOS Apple Silicon `.dmg`. Android, Nintendo Switch, and iOS remain separate projects.
+    **Install** the artifact for your platform: Windows `.msi` or portable `.zip`, Linux `.AppImage` (recommended), `.deb`, or an optional Flatpak build, macOS Apple Silicon `.dmg`. Android, Nintendo Switch, and iOS remain separate projects.
   </Step>
   <Step>
     **Sign in** through browser OAuth or QR/device authorization and let OpenNOW persist the session locally.
