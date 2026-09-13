@@ -35,7 +35,9 @@ Override the data directory with `OPENNOW_DATA_DIR` when needed. Diagnostics liv
 | `audioOutputDevice` | `string` | `""` | Opaque audio output ID; empty means system default |
 | `windowsGpuDeviceId` | `string` | `""` | Windows GPU device selection |
 | `enableHdr` | `boolean` | `false` | HDR preference |
-| `upscaling` | `string` | `"off"` | macOS MetalFX upscaling when available |
+| `upscaling` | `string` | `"off"` | Spatial upscaling: `off`, macOS `metalfx`, or Windows/Linux `fsr1` |
+| `upscalingSharpness` | `number` | `10` | Clarity 0–15 when upscaling is enabled (MetalFX sharpening before upscale; FSR 1 after) |
+| `upscalingDenoise` | `number` | `0` | Noise reduction 0–20 before MetalFX on macOS; unused for FSR 1 |
 | `frameGeneration` | `string` | `"off"` | Frame-generation preference |
 | `region` | `string` | `""` | Preferred region URL; empty means auto |
 | `sessionProxyEnabled` | `boolean` | `false` | Use an explicit proxy for session/signaling traffic |
@@ -43,7 +45,10 @@ Override the data directory with `OPENNOW_DATA_DIR` when needed. Diagnostics liv
 | `enableL4S` | `boolean` | `false` | Request L4S behavior where supported |
 | `enableCloudGsync` | `boolean` | `false` | Cloud G-Sync/VRR preference |
 | `identifyAsSteamDeck` | `boolean` | `false` | Advertise Steam Deck-style client identity where NVIDIA allows it |
-| `enablePersistingInGameSettings` | `boolean` | `false` | Request NVIDIA per-game settings persistence on new sessions |
+| `enablePersistingInGameSettings` | `boolean` | `true` | Keep in-game graphics settings between sessions for supported games and memberships (applies to new sessions) |
+| `muteWhenOutOfFocus` | `boolean` | `false` | Mute stream audio while OpenNOW is in the background |
+| `backgroundStreamReminder` | `boolean` | `false` | Request taskbar/dock attention every 5 minutes while a stream runs in the background |
+| `suppressTenBitWarning` | `boolean` | `false` | Hide the one-time 10-bit color stuttering warning after dismissal |
 
 ## Capture and recording
 
@@ -77,8 +82,8 @@ Recordings are written as Matroska (`.mkv`) under the OpenNOW Pictures media roo
 | `shortcutToggleMicrophone` | `string` | `"Ctrl+Shift+M"` | Toggle microphone |
 | `allowEscapeToExitFullscreen` | `boolean` | `false` | Let Escape exit fullscreen when enabled |
 | `microphoneMode` | `string` | `"disabled"` | Microphone mode |
-| `controllerLeftStickDeadzone` | `number` | `24` | Left-stick dead zone |
-| `controllerRightStickDeadzone` | `number` | `27` | Right-stick dead zone |
+| `controllerLeftStickDeadzone` | `number` | `5` | Left-stick dead zone (percent, 0–50) |
+| `controllerRightStickDeadzone` | `number` | `5` | Right-stick dead zone (percent, 0–50) |
 | `controllerVibrationIntensity` | `number` | `100` | Rumble intensity |
 
 ## Shell, console, and app behavior
