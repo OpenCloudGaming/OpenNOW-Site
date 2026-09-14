@@ -89,14 +89,15 @@ export const gstreamerRuntimeStrategies: GStreamerRuntimeStrategy[] = [
     platform: 'Linux x64 / ARM64',
     referenceStrategy: 'Same embedded FFI; packages may include bundled FFmpeg fallback while GPU interfaces stay dynamic',
     releaseBehavior:
-      'AppImage recommended; bundled release DEBs ship Qt/SDL under `/opt/opennow` (published v1.0.0 DEBs still need distro Qt 6.8+ and SDL3). Optional Flatpak (`io.github.opencloudgaming.OpenNOW`) disables in-app updates',
+      'AppImage recommended; v1.0.1 and nightly DEBs ship Qt/SDL under `/opt/opennow` (older v1.0.0 DEBs still need distro Qt 6.8+ and SDL3). Optional Flatpak (`io.github.opencloudgaming.OpenNOW`) disables in-app updates',
     artifacts: '`OpenNOW-Qt-…-Linux-*.AppImage`, `.deb`; Flatpak via workflow/local build',
   },
   {
     platform: 'macOS Apple Silicon',
-    referenceStrategy: 'Embedded FFI inside the app bundle; published packages are not notarized (Gatekeeper Open Anyway). Notarization is being prepared for the v1.0.1 candidate',
-    releaseBehavior: 'DMG installs to Applications; Intel Macs are not included',
-    artifacts: '`OpenNOW-Qt-…-Darwin-arm64.dmg`',
+    referenceStrategy:
+      'Embedded FFI inside the app bundle; v1.0.1 Apple Silicon packages are Developer ID–signed, notarized, and stapled. Historical v1.0.0 packages were not notarized (Gatekeeper Open Anyway)',
+    releaseBehavior: 'DMG or ZIP installs to Applications; Intel Macs are not included',
+    artifacts: '`OpenNOW-Qt-…-Darwin-arm64.dmg`, `.zip`',
   },
 ];
 
