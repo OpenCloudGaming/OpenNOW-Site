@@ -14,22 +14,22 @@ OpenNOW's desktop client replaces the retired Electron/`opennow-stable` app. The
 
 ## Download a release
 
-The published GitHub Latest release is **v1.0.0** with `OpenNOW-Qt-…` packages. Source on `main` is preparing **v1.0.1** and already includes features that are not in that tag yet — use nightlies or [`qt-ci` on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev) when you need those builds. Look for packages starting with `OpenNOW-Qt-` in [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases). Historical tags such as v0.5.5 may still contain the retired Electron app.
+The published GitHub Latest release is **v1.0.1** with `OpenNOW-Qt-1.0.1-…` packages (published 2026-09-13). Look for packages starting with `OpenNOW-Qt-` in [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases) or use the [download picker](/#downloads). Use nightlies or [`qt-ci` on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev) when you need post-1.0.1 builds. **v1.0.0** remains a historical release. Historical tags such as v0.5.5 may still contain the retired Electron app.
 
 | Platform | Qt package | How to run it |
 | --- | --- | --- |
 | Windows x64 / ARM64 | `.msi`, portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe` |
 | Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it |
-| Linux x64 / ARM64 | `.deb` | Newer release DEBs (nightlies and the upcoming v1.0.1 line) bundle Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. The published **v1.0.0** DEB still expects distro Qt 6.8+ and SDL3 — prefer the AppImage for that release on stock Ubuntu 24.04 |
+| Linux x64 / ARM64 | `.deb` | **v1.0.1** and nightly DEBs bundle Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. Older **v1.0.0** DEBs still expect distro Qt 6.8+ and SDL3 — prefer the AppImage for that historical release on stock Ubuntu 24.04 |
 | Linux x86_64 | Flatpak (optional) | Build/install locally from `opennow-qt/packaging/flatpak` (app id `io.github.opencloudgaming.OpenNOW`) or the **Qt Flatpak build** workflow artifact. Not published on Flathub. Flatpak installs disable the in-app self-updater |
-| macOS Apple Silicon, macOS 13+ | `.dmg` | Open the DMG and drag OpenNOW into Applications. Intel Macs are not included |
+| macOS Apple Silicon, macOS 13+ | `.dmg`, `.zip` | Open the DMG and drag OpenNOW into Applications, or extract the ZIP. Intel Macs are not included |
 | macOS (OpenNOW Mac) | [Release `.zip`](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) | Separate performance-focused macOS build maintained by Jayian1890 |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release; separate from the Qt desktop app |
 | Android beta | [Direct `.apk`](https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9) | Sideload the beta only when testing pre-release Android builds |
 | iOS | [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2) | Install through Apple's TestFlight while the iOS build is in beta |
 | Nintendo Switch | [`SwitchNOW.nro`](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) | Native Horizon OS homebrew client for modded Switch systems; follow the [Switch installation guide](/docs/guides/nintendo-switch) |
 
-Published **v1.0.0** packages are unsigned. Windows may show an unknown-publisher / SmartScreen warning. The published macOS DMG is not notarized; if Gatekeeper blocks it, use System Settings → Privacy & Security → Open Anyway when offered. Do not disable Gatekeeper globally. Nightlies are also unsigned. The v1.0.1 candidate line is preparing Apple Silicon notarization/stapling and Ed25519-signed update manifests (Windows packages may still ship unsigned by default). Until a release notes notarized macOS downloads or signed Windows installers, keep the Gatekeeper / SmartScreen guidance above. Updates for unsigned packages are manual. Flatpak builds have no native auto-update path. `SHA256SUMS` detects corrupted downloads; it does not verify who published a package.
+**v1.0.1** ships Ed25519-signed update manifests for every package. Apple Silicon DMG/ZIP builds are Developer ID–signed, notarized, and stapled. Windows MSI/ZIP packages are not Authenticode-signed, so SmartScreen or an unknown-publisher warning may appear. If you are coming from **v1.0.0** (or another build without the pinned update key), install **v1.0.1** manually once to establish trust for future signed updates. Automatic checks and optional downloads still require confirmation before install/restart. Nightlies may still be unsigned/not notarized. Flatpak builds have no native auto-update path. `SHA256SUMS` detects corrupted downloads; it does not verify who published a package. For historical **v1.0.0** packages (unsigned, non-notarized macOS), use System Settings → Privacy & Security → Open Anyway when Gatekeeper blocks the app — do not disable Gatekeeper globally.
 
 ## First launch
 
