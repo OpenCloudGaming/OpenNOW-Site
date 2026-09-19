@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
 import { track } from '@/lib/analytics';
+import { DesktopDownloads } from '@/components/desktop-downloads';
 
 const quickLinks: { title: string; description: string; splat: string }[] = [
   {
@@ -225,6 +226,7 @@ function Home() {
               Nintendo Switch requires custom firmware and Homebrew Menu.{' '}
               <Link to="/docs/$" params={{ _splat: 'guides/nintendo-switch' }} className="font-semibold text-fd-primary hover:opacity-80">Read the installation guide</Link>.
             </p>
+            <DesktopDownloads />
           </div>
         </section>
 
