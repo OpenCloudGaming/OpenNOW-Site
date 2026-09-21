@@ -27,7 +27,45 @@ All shortcuts can be changed in Settings. On macOS the UI may display modifier l
 
 ## Keyboard
 
-Keyboard events are translated for the remote session using the selected `keyboardLayout`. Regional layouts such as German QWERTZ depend on that setting rather than forcing a US physical-key mapping.
+Choose **Settings → Controls → Keyboard layout** (desktop and console share one list). The control matches your physical keyboard and is sent to GeForce NOW when a session starts. The setting key is `keyboardLayout` (default `"en-US"`).
+
+The layout is stored in the session snapshot at session start. Editing preferences mid-session does not remap an active stream — restart or resume the session after changing it.
+
+### Platform behavior
+
+| Platform | Behavior |
+| --- | --- |
+| Linux (X11 / Wayland) | Gameplay keys map from physical key positions to the selected regional Windows layout, including AltGr / right-Alt. AltGr must not trigger local shortcuts. |
+| Windows | Continues to use native virtual keys. |
+| macOS | Logical-key path is unchanged. |
+
+Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; they do not transmit locally composed IME text. Unsupported as separate choices: Dvorak, Turkish F, French BÉPO, and similar alternatives.
+
+### Supported layouts
+
+| Label | Value |
+| --- | --- |
+| English (US) | `en-US` |
+| English (UK) | `en-GB` |
+| Türkçe (Q) | `tr-TR` |
+| Deutsch | `de-DE` |
+| Français | `fr-FR` |
+| Español | `es-ES` |
+| Español (Latinoamérica) | `es-MX` |
+| Italiano | `it-IT` |
+| Português (Portugal) | `pt-PT` |
+| Português (Brasil) | `pt-BR` |
+| Polski | `pl-PL` |
+| Dansk | `da-DK` |
+| Norsk | `nb-NO` |
+| Svenska | `sv-SE` |
+| Suomi | `fi-FI` |
+| Русский | `ru-RU` |
+| Українська | `uk-UA` |
+| 日本語 | `ja-JP` |
+| 한국어 | `ko-KR` |
+| 中文（简体） | `zh-CN` |
+| 中文（繁體） | `zh-TW` |
 
 ## Pointer lock and mouse
 
