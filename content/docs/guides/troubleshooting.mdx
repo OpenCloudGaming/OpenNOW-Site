@@ -58,7 +58,7 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
     Start a new QR attempt and complete it before its timer expires. If NVIDIA responds with `slow_down`, leave the page open; OpenNOW adjusts its polling interval automatically. Make sure the phone and OpenNOW use the same intended NVIDIA or alliance-provider account.
   </Accordion>
   <Accordion title="OpenNOW asks you to sign in again">
-    The saved access and refresh tokens may have expired or been rejected. Sign in again first. If every restart loses a valid session, close OpenNOW, back up auth/session files under the OpenNOW data directory, remove them, and retry so the app can create clean authentication state.
+    The saved access and refresh tokens may have expired or been rejected. Sign in again first. If every restart loses a valid session, close OpenNOW, back up auth/session files under the OpenNOW data directory, remove them, and retry so the app can create clean authentication state. When the OS keychain is unavailable, OpenNOW warns that session tokens are saved unencrypted on disk — unlock the keychain and restart when you can.
   </Accordion>
   <Accordion title="A game is missing after linking a store">
     Open **Settings → Accounts** (or Stores), link or resync the supported store, then refresh the library. OpenNOW invalidates account-scoped catalog caches after link, unlink, and resync actions, but NVIDIA still decides which owned games appear in GeForce NOW.
@@ -71,8 +71,10 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
 | --- | --- | --- |
 | Upgrade or insufficient playability message | NVIDIA reports that the selected game or stream profile requires a higher membership tier | Choose an entitled game/profile or change the GeForce NOW membership |
 | Active session conflict | NVIDIA believes another stream is still active | Stop the other session, wait for cleanup, then launch again |
-| Queue does not advance | The selected region is at capacity, the queue request expired, or service state changed | Leave and relaunch; if available, choose another region |
+| Queue does not advance | The selected region is at capacity, the queue request expired, or service state changed | Leave and relaunch; if available, choose another region or use the free-tier queue selector (PrintedWaste-backed estimates when available) |
+| Launch stalls on “Configuring your cloud gaming rig” / “Waiting for video” | Cloud seat setup or native first-frame handoff is still in progress | Wait for the named step to finish; cancel once and relaunch if it never advances |
 | Game opens from the public catalog but not the library | The required store account is not linked or synced | Link/resync the store under Settings, then refresh |
+| Favorites look incomplete | GeForce NOW favorites coverage can be partial; home pins are separate | Refresh the library; re-add the favorite if needed |
 | Wrong storefront launches for a multi-store title | The selected platform variant does not match the owned copy | Before launch, choose the correct store variant (Steam, Xbox, Epic, and so on) on the game detail / platform picker |
 | Catalog browse hangs or fails only with a session proxy enabled | Catalog requests that go through a failing proxy can time out, then retry direct | Wait for the direct retry; disable the proxy if catalog never recovers |
 | Community proxy toggle fails or takes a long time | Community provision can cold-start; OpenNOW allows a longer wait and retries transient failures | Keep Settings open until provision finishes |
@@ -82,18 +84,20 @@ Do not repeatedly relaunch while an earlier CloudMatch session is still being re
 
 ## Stream quality and video
 
-Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can sustain. H.265, AV1, 10-bit color, 4:4:4 chroma, high frame rates, and ultrawide profiles require compatible subscription profiles plus local GPU, driver, and display support.
+Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can sustain. Prefer **8-bit 4:2:0** color quality. The Settings UI labels **4:4:4** chroma profiles as **Coming soon** — do not expect them to work yet. H.265, AV1, 10-bit **4:2:0**, high frame rates, and ultrawide profiles still require compatible subscription profiles plus local GPU, driver, and display support. Codec **Auto** may select AV1 only when the probed platform/stream limits allow it.
 
 | Symptom | Isolation step | Next action |
 | --- | --- | --- |
 | Black screen with audio | Switch to H.264 and 8-bit 4:2:0, then restart the stream | Update the GPU driver; leave native video backend on Auto unless diagnosing |
-| Regular stutter or rising latency | Lower bitrate first, then FPS | Use wired Ethernet or stronger Wi-Fi; stop competing traffic and try a closer region |
+| Regular stutter or rising latency | Lower bitrate first, then FPS; try enabling **Save bandwidth** for a steadier frame rate on constrained links | Use wired Ethernet or stronger Wi-Fi; stop competing traffic and try a closer region |
 | Blocky image but stable input | Increase bitrate gradually | Keep the highest value that remains stable rather than the maximum available value |
-| Colors look wrong | Return color quality to 8-bit 4:2:0 and disable experimental combinations | Re-enable 10-bit or 4:4:4 separately to identify the unsupported mode |
+| Colors look wrong | Return color quality to 8-bit 4:2:0 | Avoid 4:4:4 profiles (Coming soon); re-enable 10-bit 4:2:0 separately if needed |
+| One-time “stream color format changed” notice | The negotiated/output format differed from the requested profile | Playback continues; keep 4:2:0 unless you intentionally selected another supported profile |
 | Stutter after enabling 10-bit | 10-bit color can stutter on some systems; Settings warns when you select it | Switch back to 8-bit; clear `suppressTenBitWarning` in settings if you dismissed the dialog and want it again |
 | H.265 unavailable on Windows | Microsoft's HEVC Video Extensions may be missing | Open the HEVC help in Settings and install the free Store extension first (paid offer if needed). Restart OpenNOW. GPU hardware HEVC decode is still required |
 | High GPU use with upscaling | MetalFX (macOS) or FSR 1 (Windows/Linux) costs extra GPU time | Turn upscaling **Off**, or lower stream resolution/FPS if the local GPU is saturated |
 | Flatpak cannot auto-update | Flatpak builds disable the in-app self-updater | Update with `flatpak update io.github.opencloudgaming.OpenNOW` from a Flatpak remote, or rebuild/reinstall a local `.flatpak` bundle |
+| In-app update discovery or portable install fails | Updater discovery, portable ZIP replacement, or failure reporting is incomplete on older builds | Prefer published **v1.0.1** signed updates when available; on nightlies / `main`, retry Check for updates and note the surfaced failure message. Flatpak still has no self-updater |
 | Entire app window is black vs only the video surface | Note which one you see before changing settings | Export diagnostics and include both `native-streamer.log` and `qt-native.log` |
 
 <Callout type="warn" title="Change one variable at a time">
@@ -103,8 +107,8 @@ Changing codec, resolution, FPS, bitrate, backend, and region together makes the
 ## Input, controller, and microphone
 
 - **Mouse does not control the game:** click the stream to acquire pointer lock. Use the configured release shortcut (default `F8`) before interacting with OpenNOW again.
-- **Keyboard mapping is wrong:** set **Settings → Controls → Keyboard layout** to match your physical keyboard, then restart or resume the session. Mid-session preference edits do not remap an active stream.
-- **Controller is not detected:** connect it before launching, verify the operating system sees it, then restart OpenNOW. Close remapping software temporarily if it creates duplicate virtual controllers.
+- **Keyboard mapping is wrong:** set **Settings → Controls → Keyboard layout** to match your physical keyboard, then restart or resume the session. Mid-session preference edits do not remap an active stream. Linux gameplay keys follow physical positions (including German/Swedish OEM fixes); see [Input](/docs/reference/input).
+- **Controller is not detected:** connect it before launching, verify the operating system sees it, then restart OpenNOW. Close remapping software temporarily if it creates duplicate virtual controllers. An exclusive controller selection is preserved across disconnects when possible; the Settings label shows **Selected controller disconnected** until that pad returns.
 - **Console / couch mode is hard to leave:** use the console exit control, pointer interaction when `leaveConsoleOnPointer` is enabled, or Settings to change shell preferences. Console mode changes the browsing UI but does not change NVIDIA account state.
 - **Clipboard paste does nothing:** enable clipboard paste in Settings → Controls, make sure keyboard input is active in the stream, and use the configured paste path rather than assuming the OS shortcut alone is enough.
 - **Microphone is silent:** grant microphone permission to OpenNOW at the operating-system level, select the intended mode in Settings, and reconnect the stream so capture is negotiated again.
