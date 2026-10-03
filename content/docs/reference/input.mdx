@@ -11,6 +11,7 @@ OpenNOW captures gameplay input in the Qt desktop app and sends it through the i
 
 | Shortcut | Action |
 | --- | --- |
+| `Ctrl+K` | Command palette (local commands and remote game search) |
 | `Ctrl+N` | Cycle stats HUD |
 | `F8` | Toggle pointer lock |
 | `F11` | Toggle fullscreen |
@@ -21,7 +22,7 @@ OpenNOW captures gameplay input in the Qt desktop app and sends it through the i
 | `Ctrl+Shift+K` | Toggle anti-AFK |
 | `Ctrl+Shift+M` | Toggle microphone |
 
-All shortcuts can be changed in Settings. On macOS the UI may display modifier labels differently while the stored binding uses the same setting string.
+All stream shortcuts can be changed in the redesigned **Settings → Shortcuts** page. On macOS the UI may display modifier labels differently while the stored binding uses the same setting string.
 
 `allowEscapeToExitFullscreen` defaults to `false`. Escape is still used for pointer-lock release behavior; opting into Escape fullscreen exit makes fullscreen easier to leave but can conflict with in-game Escape usage.
 
@@ -35,9 +36,9 @@ The layout is stored in the session snapshot at session start. Editing preferenc
 
 | Platform | Behavior |
 | --- | --- |
-| Linux (X11 / Wayland) | Gameplay keys map from physical key positions to the selected regional Windows layout, including AltGr / right-Alt. AltGr must not trigger local shortcuts. |
-| Windows | Continues to use native virtual keys. |
-| macOS | Logical-key path is unchanged. |
+| Linux (X11 / Wayland) | Gameplay keys map from physical key positions to the selected regional Windows layout, including AltGr / right-Alt and OEM punctuation fixes (for example German and Swedish). AltGr must not trigger local shortcuts. |
+| Windows | Continues to use native virtual keys / platform physical-key mapping. |
+| macOS | Retains platform-specific physical-key mapping (including native keycode zero). |
 
 Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; they do not transmit locally composed IME text. Unsupported as separate choices: Dvorak, Turkish F, French BÉPO, and similar alternatives.
 
@@ -76,7 +77,7 @@ Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; the
 
 ## Gamepad
 
-OpenNOW uses SDL3 for controller discovery and input. Stick dead zones default to **5%** for both sticks (0–50) and vibration intensity is configurable. Controllers can drive the console shell's focus navigation.
+OpenNOW uses SDL3 for controller discovery and input. Stick dead zones default to **5%** for both sticks (0–50) and vibration intensity is configurable. Controllers can drive the console shell's focus navigation. Settings can select an exclusive controller; that selection is preserved across disconnects when possible, and the UI shows **Selected controller disconnected** until the pad returns.
 
 | Setting | Description |
 | --- | --- |

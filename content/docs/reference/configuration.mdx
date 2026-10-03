@@ -12,6 +12,10 @@ OpenNOW persists user settings as JSON in the OpenNOW data directory as `setting
 Desktop streaming defaults to native NVST (`streamClientMode: "native"`, `transportMode: "nvst"`). There is no web streamer setting to return to in the Qt app.
 </Callout>
 
+<Callout type="warn" title="Color quality on main / upcoming v1.0.2">
+Prefer a **4:2:0** color profile. YUV **4:4:4** choices are labeled **Coming soon** because they are not working correctly. Alliance Partner sign-in remains available, but Alliance Partners may not work correctly in current builds — keep NVIDIA as the fallback when an Alliance stream fails.
+</Callout>
+
 ## File locations
 
 <LocalDataLocationsTable pathHeader="Path" />
@@ -25,10 +29,11 @@ Override the data directory with `OPENNOW_DATA_DIR` when needed. Diagnostics liv
 | `resolution` | `string` | `"1920x1080"` | Stream resolution |
 | `aspectRatio` | `string` | `"16:9"` | Aspect-ratio preference |
 | `fps` | `number` | `60` | Target frame rate |
-| `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate in Mbps |
-| `codec` | `string` | `"auto"` | Stream codec preference |
+| `maxBitrateMbps` | `number` | `75` | Maximum stream bitrate / bandwidth ceiling in Mbps |
+| `saveBandwidth` | `boolean` | `false` | When on, asks the server to trade resolution/image quality for a steadier frame rate if the link cannot sustain the selected profile (new sessions) |
+| `codec` | `string` | `"auto"` | Stream codec preference (`auto`, `h264`, `h265`, `av1`). Auto AV1 is gated on probed platform/stream limits |
 | `fallbackCodec` | `string` | `"auto"` | Bounded fallback when the preferred codec cannot produce video |
-| `colorQuality` | `string` | `"8bit_420"` | Bit-depth/chroma preference |
+| `colorQuality` | `string` | `"8bit_420"` | Bit-depth/chroma preference. Prefer `8bit_420` / `10bit_420`. UI labels `8bit_444` and `10bit_444` as **Coming soon** — do not claim they work |
 | `streamClientMode` | `string` | `"native"` | Desktop streaming mode |
 | `transportMode` | `string` | `"nvst"` | Native media transport |
 | `nativeVideoBackend` | `string` | `"auto"` | Platform video/API preference |
@@ -49,6 +54,7 @@ Override the data directory with `OPENNOW_DATA_DIR` when needed. Diagnostics liv
 | `muteWhenOutOfFocus` | `boolean` | `false` | Mute stream audio while OpenNOW is in the background |
 | `backgroundStreamReminder` | `boolean` | `false` | Request taskbar/dock attention every 5 minutes while a stream runs in the background |
 | `suppressTenBitWarning` | `boolean` | `false` | Hide the one-time 10-bit color stuttering warning after dismissal |
+| `hideQueueSelector` | `boolean` | `false` | Hide the free-tier queue selector (PrintedWaste-backed estimates when capability allows) |
 
 ## Capture and recording
 
@@ -64,6 +70,8 @@ Override the data directory with `OPENNOW_DATA_DIR` when needed. Diagnostics liv
 Recordings are written as Matroska (`.mkv`) under the OpenNOW Pictures media root. See [Media](/docs/reference/media/).
 
 ## Input and shortcuts
+
+Stream shortcuts are edited in the redesigned **Settings → Shortcuts** UI (search, reset-to-default, clear so the key reaches the game). Defaults:
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -97,14 +105,14 @@ Recordings are written as Matroska (`.mkv`) under the OpenNOW Pictures media roo
 | `consoleProfilePickerOnLaunch` | `boolean` | `true` | Show Who's playing? when console mode starts |
 | `autoFullScreen` | `boolean` | `true` | Auto-enter fullscreen when console flows request it |
 | `appTheme` | `string` | `"auto"` | UI theme |
-| `appLanguage` | `string` | `"system"` | App language preference |
+| `appLanguage` | `string` | `"system"` | Interface language preference; validated and shared with stream-profile/language Settings across desktop and console shells |
 | `themePack` | `string` | `"nocturne"` | Built-in theme pack |
 | `appAccentColor` | `string` | `"green"` | Accent preset |
 | `autoCheckForUpdates` | `boolean` | `true` | Check for app updates automatically |
 | `autoDownloadUpdates` | `boolean` | `false` | Download updates automatically when supported |
 | `updateChannel` | `string` | build-dependent | `stable` or `nightly` based on build identity |
 | `showSessionReport` | `boolean` | `true` | Show a privacy-safe quality summary after streams |
-| `discordRichPresence` | `boolean` | `false` | Enable Discord Rich Presence |
+| `discordRichPresence` | `boolean` | `false` | Show the streamed game as Discord activity (elapsed time included); default off |
 | `errorReportingConsent` | `string` | `"unset"` | Anonymous diagnostics consent |
 
 ## Diagnostics

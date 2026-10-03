@@ -34,8 +34,8 @@ There is no separate streamer window, helper application, or packaged standalone
 | `audioOutputDevice` | `""` | Opaque output device ID from native enumeration; empty means system default |
 | `showNativeStreamerStats` | `false` | Native stats overlay preference |
 | `enableCloudGsync` | `false` | Cloud G-Sync/VRR preference |
-| `codec` / `fallbackCodec` | `"auto"` | Capability-aware codec preference before CloudMatch allocation |
-| `colorQuality` | `"8bit_420"` | Bit-depth/chroma preference |
+| `codec` / `fallbackCodec` | `"auto"` | Capability-aware codec preference before CloudMatch allocation; Auto AV1 is gated on probed platform/stream limits |
+| `colorQuality` | `"8bit_420"` | Bit-depth/chroma preference; prefer 4:2:0 — UI marks 4:4:4 as Coming soon |
 
 On Windows, the embedded presenter currently uses D3D11; explicit DX12/Vulkan interop for the embedded path may be unavailable even when standalone experiments exist. Leave **Auto** selected unless isolating a known GPU issue.
 

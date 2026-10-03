@@ -54,7 +54,7 @@ The login screen also exposes a **Sign in with QR** path for users who prefer au
 
 ## Token management
 
-Auth state is persisted under the OpenNOW data directory as `accounts.json` plus `sessions/*.json`. Legacy Electron `auth-state.json` may still be migrated. Session secrets can also be mirrored through the OS credential store when available.
+Auth state is persisted under the OpenNOW data directory as `accounts.json` plus `sessions/*.json`. Legacy Electron `auth-state.json` may still be migrated. Session secrets prefer the OS credential store (keychain) when available. If the OS keychain is unavailable, OpenNOW falls back to a private local JSON session store and warns that tokens are saved unencrypted on disk — unlock the keychain and restart when you can.
 
 Persisted session data includes:
 
@@ -62,7 +62,7 @@ Persisted session data includes:
 - Access, refresh, and client tokens with expiry timestamps
 - Resolved user profile
 
-The core refreshes tokens before they expire. If refresh fails and the token is expired, the saved session is cleared and the user must log in again.
+The core refreshes tokens before they expire. If refresh fails and the token is expired, the saved session is cleared and the user must log in again. Session recovery keeps seat ownership across reconnect paths where the server still owns the session; closing OpenNOW with an active stream disconnects that cloud session after confirmation.
 
 ## User profile
 

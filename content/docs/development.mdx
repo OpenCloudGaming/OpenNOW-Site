@@ -64,7 +64,7 @@ See [Native Streamer](/docs/reference/native-streamer/) for runtime behavior, GP
 
 ## CI and releases
 
-Qt work uses the `qt-ci` / related Qt workflows on GitHub Actions. Public Qt packages use names like `OpenNOW-Qt-<version>-…`. The published Latest release is **v1.0.1** with Qt packages (`OpenNOW-Qt-1.0.1-…`). Nightlies are typically published from `dev` as prereleases. Promoting `main` alone does not publish release artifacts.
+Qt work uses the `qt-ci` / related Qt workflows on GitHub Actions. Public Qt packages use names like `OpenNOW-Qt-<version>-…`. The published Latest release is **v1.0.1** with Qt packages (`OpenNOW-Qt-1.0.1-…`). Source on `main` is preparing the **v1.0.2** line; that promotion does not publish release artifacts by itself. Nightlies (for example `v1.0.2-nightly.*`) are typically published from `dev` as prereleases. Stable publication still requires the approved `qt-release-candidate` → `qt-stable-release` flow.
 
 Current package matrix:
 

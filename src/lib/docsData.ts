@@ -89,7 +89,7 @@ export const gstreamerRuntimeStrategies: GStreamerRuntimeStrategy[] = [
     platform: 'Linux x64 / ARM64',
     referenceStrategy: 'Same embedded FFI; packages may include bundled FFmpeg fallback while GPU interfaces stay dynamic',
     releaseBehavior:
-      'AppImage recommended; v1.0.1 and nightly DEBs ship Qt/SDL under `/opt/opennow` (older v1.0.0 DEBs still need distro Qt 6.8+ and SDL3). Optional Flatpak (`io.github.opencloudgaming.OpenNOW`) disables in-app updates',
+      'AppImage recommended; v1.0.1, nightly, and upcoming v1.0.2-line DEBs ship Qt/SDL under `/opt/opennow` (older v1.0.0 DEBs still need distro Qt 6.8+ and SDL3). Optional Flatpak (`io.github.opencloudgaming.OpenNOW`) disables in-app updates',
     artifacts: '`OpenNOW-Qt-…-Linux-*.AppImage`, `.deb`; Flatpak via workflow/local build',
   },
   {
