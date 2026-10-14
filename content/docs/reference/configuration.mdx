@@ -138,7 +138,6 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `launchInConsoleMode` | `boolean` | `false` | Starts OpenNOW in console mode. Turning it off also turns off `switchToConsoleOnPad`. **Settings → Console mode → Start in console mode** |
 | `switchToConsoleOnPad` | `boolean` | `false` | Enters console mode when a gamepad is the only input. Ignored while a mouse has moved in the last 30 seconds. **Settings → Console mode** |
 | `leaveConsoleOnPointer` | `boolean` | `true` | Leaves console mode on keyboard or mouse input. **Settings → Console mode** |
-| `consoleProfilePickerOnLaunch` | `boolean` | `true` | **Settings → Console mode → Controller profile picker** ("Choose a saved profile when console mode starts"). v1.0.2 stores the toggle but nothing reads it |
 | `startAsLastUsedAccount` <Nightly since="v1.0.3-nightly.1046.1" /> | `boolean` | `false` | Skips **Who's playing?** at launch and starts as the last-used account. **Settings → Account → Skip "Who's playing?"** |
 | `autoFullScreen` | `boolean` | `true` | Enters fullscreen when the session is ready. **Settings → Stream → Fullscreen when session is ready** |
 | `appTheme` | `string` | `"auto"` | `auto`, `dark`, or `light`. Choosing a theme pack sets this value. **Settings → Appearance → Appearance** |
@@ -166,6 +165,8 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 ### Stored but unused in v1.0.2
 
 These keys exist in `settings.json` and are normalized, but no v1.0.2 Settings page or stream path reads them: `aspectRatio` (`"16:9"`), `recordingResolution`, `recordingFps`, `recordingBitrateMbps`, `allowEscapeToExitFullscreen` (`false`), `hideStreamButtons` (`false`), and `hideServerSelector` (`false`). `mouseAcceleration` (`1`, range 1–150) and `nativeCursorOverlay` (`true`, **Settings → Controls → Advanced → Cursor overlay**) are read only by the external renderer process. The embedded stream view that the packaged app uses does not read them.
+
+`consoleProfilePickerOnLaunch` (default `true`) is a v1.0.2 setting. **Settings → Console mode → Controller profile picker** ("Choose a saved profile when console mode starts") stores it, and nothing reads it. From v1.0.3-nightly.1046.1 it is no longer a setting. If `startAsLastUsedAccount` is missing and the saved value is `false`, load sets `startAsLastUsedAccount` to `true`. The old key stays in the file and is not shown.
 
 ## Diagnostics
 
