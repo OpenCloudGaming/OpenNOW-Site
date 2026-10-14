@@ -89,6 +89,58 @@ html > body[data-scroll-locked] {
   outline-offset: 2px;
 }
 
+/* ---------- Console shell (DocsLayout container slot) ---------- */
+.console-grid {
+  display: grid;
+  min-height: 100dvh;
+  grid-template:
+    'header' auto
+    'crumbs' auto
+    'main' 1fr
+    'status' auto / minmax(0, 1fr);
+  background: var(--color-ground);
+}
+
+@media (min-width: 1024px) {
+  .console-grid {
+    grid-template:
+      'header header' auto
+      'sidebar main' 1fr
+      'status status' auto / 232px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .console-grid {
+    grid-template:
+      'header header header header header' auto
+      'sidebar . main toc .' 1fr
+      'status status status status status' auto / 232px minmax(0, 1fr) minmax(0, 936px) 272px minmax(0, 1fr);
+  }
+}
+
+.console-skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 60;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--color-mint);
+  color: var(--color-mint-ink);
+  font-weight: 800;
+  font-size: 14px;
+  transform: translateY(-200%);
+}
+
+.console-skip-link:focus {
+  transform: none;
+}
+
+#nd-page :is(h2, h3, [id]) {
+  scroll-margin-top: 88px;
+}
+
 .hero-grid {
   background:
     linear-gradient(180deg, color-mix(in oklab, var(--color-fd-card) 80%, transparent), transparent 80%),
