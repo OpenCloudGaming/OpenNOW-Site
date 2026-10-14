@@ -8,6 +8,12 @@ const SIZES: Record<string, { width: number; height: number }> = {
   'troubleshooting-ctrlg': { width: 720, height: 900 },
   'input-controllers': { width: 720, height: 900 },
   'authentication-providers': { width: 720, height: 780 },
+  'configuration-streaming': { width: 1136, height: 669 },
+  'input-settings': { width: 1136, height: 669 },
+  'troubleshooting-queue': { width: 1136, height: 639 },
+  'troubleshooting-connecting': { width: 1136, height: 639 },
+  'troubleshooting-console-guide': { width: 1136, height: 639 },
+  'troubleshooting-console-controllers': { width: 720, height: 900 },
 };
 
 /**

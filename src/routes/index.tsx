@@ -199,7 +199,7 @@ const pillPrimary =
 const pillGlass =
   'inline-flex h-14 items-center justify-center gap-3 rounded-full border border-seam bg-[rgb(14_16_24/82%)] px-7 text-[18px] font-extrabold leading-6 text-white transition-colors hover:bg-[rgb(30_36_52/92%)] sm:h-16';
 
-/** A real app screen from the OpenNOW Paper master file, framed like the docs' app figures. */
+/** A real app screen from the OpenNOW Paper files (master file, console mode from Game Mode v4), framed like the docs' app figures. */
 function AppWindow({ src, label, alt }: { src: string; label: string; alt: string }) {
   return (
     <figure className="overflow-hidden rounded-xl border border-seam-soft bg-surface">
@@ -287,7 +287,7 @@ function Home() {
           <AppWindow
             src="console"
             label="In the app · Console mode · My games"
-            alt="OpenNOW console mode: the My games grid of large game tiles with store badges and a focus ring on Cyberpunk 2077, the account and region pills along the top and the controller dock along the bottom."
+            alt="OpenNOW console mode, My games: Cyberpunk 2077 focused as a wide tile at the start of a grid of large game tiles with store badges and an Add a game tile, the profile, region, clock and battery pills along the top, and the controller dock with Search, Edit tile and Details hints along the bottom."
           />
         </div>
 
