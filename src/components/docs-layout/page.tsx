@@ -57,7 +57,7 @@ function SectionList({ onNavigate }: { onNavigate?: () => void }) {
               className="group flex items-start gap-2.5 rounded-sm py-[5px] pe-3.5"
             >
               <span aria-hidden="true" className={cn('w-0.5 self-stretch rounded-sm', isActive && 'bg-mint')} />
-              <span aria-hidden="true" className={cn('w-5 shrink-0 font-mono text-[11px] leading-5 font-medium', isActive ? 'text-mint' : 'text-faint')}>{two(i + 1)}</span>
+              <span aria-hidden="true" className={cn('w-5 shrink-0 font-mono text-[11px] leading-5 font-medium', isActive ? 'text-mint' : 'text-muted')}>{two(i + 1)}</span>
               <span
                 className={cn(
                   'min-w-0 flex-1 text-[13px] leading-5',
