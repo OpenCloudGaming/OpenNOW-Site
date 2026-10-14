@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { BrandMark } from '@/components/console/brand';
 import { Kbd, MonoLabel } from '@/components/console/primitives';
 
-/** Sign-in key art with the "IN THE APP · SIGN-IN" chip. LCP on /docs, so it loads eagerly with high priority. */
+/** The desktop sign-in screen with the "IN THE APP · SIGN-IN" chip. LCP on /docs, so it loads eagerly with high priority. */
 export function DocsHero() {
   return (
     <figure className="relative overflow-hidden rounded-xl border border-seam lg:rounded-2xl">
@@ -17,7 +17,7 @@ export function DocsHero() {
           src="/brand/signin-hero-832.webp"
           width={832}
           height={269}
-          alt="Key art from the OpenNOW sign-in screen"
+          alt="The OpenNOW desktop sign-in screen: the OpenNOW logo over the Sign in to continue card with the provider picker set to NVIDIA GeForce NOW"
           fetchPriority="high"
           decoding="async"
           className="h-[132px] w-full object-cover lg:h-[268px]"

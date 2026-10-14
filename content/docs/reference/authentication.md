@@ -64,7 +64,7 @@ Persisted session data includes:
 
 The core refreshes tokens before they expire. If refresh fails and the token is expired, the saved session is cleared and the user must log in again. Session recovery keeps seat ownership across reconnect paths where the server still owns the session; closing OpenNOW with an active stream disconnects that cloud session after confirmation.
 
-![OpenNOW Who's playing? account picker: four account tiles with membership tier chips (Ultimate, Performance, Free), an LG U+ alliance chip on one account, a lock badge on another, the last-used account highlighted, and an Add account tile.](/illustrations/authentication-whos-playing.webp "In the app · Who's playing? account picker")
+![OpenNOW sign-in screen with the provider list open: NVIDIA GeForce NOW as the global default, then alliance partners such as LG U+, Taiwan Mobile, bro.game, Zain and Rain with their regions, and an unreachable provider dimmed.](/illustrations/authentication-providers.webp "In the app · Sign in › Provider")
 
 ## User profile
 
