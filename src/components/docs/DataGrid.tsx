@@ -24,15 +24,16 @@ export interface DataGridProps {
 
 /**
  * Design B data grid: mono caps header row, key column in mint mono (when it holds code), row hover.
- * Platform tables (first header names a platform, rows span 2+ desktop OSes) get filter chips; every
+ * Platform tables (first header names a platform, rows span 2+ desktop OSes, one OS has several rows) get filter chips; every
  * row is server-rendered and only hidden after a filter is picked. Below 640px rows stack into cards.
  */
 export function DataGrid({ headers, rows }: DataGridProps) {
   const id = useId();
   const [filter, setFilter] = useState<PlatformId | 'all'>('all');
   const platforms = rows.map((row) => platformOf(row[0]));
-  const filterable = /platform/i.test(nodeText(headers[0])) && new Set(platforms.filter(Boolean)).size > 1;
   const counts = Object.fromEntries(PLATFORMS.map((p) => [p.id, platforms.filter((x) => x === p.id).length]));
+  const filterable =
+    /platform/i.test(nodeText(headers[0])) && new Set(platforms.filter(Boolean)).size > 1 && Object.values(counts).some((n) => n > 1);
   const visible = filter === 'all' ? rows.length : counts[filter];
   const labels = headers.map((h) => nodeText(h));
 
