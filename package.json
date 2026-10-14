@@ -5,14 +5,17 @@
   "version": "0.0.1",
   "sideEffects": false,
   "scripts": {
-    "dev": "vite dev",
+    "dev": "npm run generate:releases && vite dev",
     "start": "vite preview",
-    "generate:docs-data": "fumadocs-mdx && vite-node --config vite.generate.config.ts scripts/generate-docs-static-data.vite.ts",
+    "generate:docs-data": "fumadocs-mdx && vite-node --config vite.generate.config.ts scripts/generate-docs-static-data.vite.ts && npm run generate:releases",
     "build": "npm run generate:docs-data && vite build && rm -rf dist && cp -R .output/public dist && cp dist/_shell.html dist/index.html",
     "preview": "vite preview",
-    "types:check": "fumadocs-mdx && npm run generate:docs-data && tsc --noEmit"
+    "types:check": "fumadocs-mdx && npm run generate:docs-data && tsc --noEmit",
+    "generate:releases": "vite-node --config vite.generate.config.ts scripts/generate-releases-data.vite.ts"
   },
   "dependencies": {
+    "@fontsource-variable/nunito": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "@orama/orama": "^3.1.18",
     "@tanstack/react-router": "1.170.10",
     "@tanstack/react-router-devtools": "1.167.0",
