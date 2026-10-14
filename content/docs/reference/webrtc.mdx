@@ -1,27 +1,69 @@
 ---
-title: Protocol notes (historical WebRTC)
-description: Historical Chromium/WebRTC signaling notes; not the default Qt desktop path
+title: Protocol notes (WebRTC)
+description: Electron-era Chromium/WebRTC signaling history, the native WebRTC compatibility mode in nightly builds, and how NVIDIA's official client uses WebRTC pieces
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import DataChannelsTable from '@/components/docs/DataChannelsTable';
+import { Nightly } from '@/components/docs/Nightly';
 
 <Callout type="warn" title="Not the default desktop path">
-OpenNOW's Qt desktop client streams through the in-process native NVST runtime. It does **not** embed Chromium, does not use renderer `RTCPeerConnection`, and has no WebRTC fallback. This page keeps historical Electron-era signaling notes that can still help when reading older issues or comparing protocol concepts. For current desktop behavior, use [Native Streamer](/docs/reference/native-streamer/).
+OpenNOW's Qt desktop client streams through the in-process native NVST runtime. It does **not** embed Chromium and does not use a renderer `RTCPeerConnection`. In v1.0.2 every desktop session uses NVST. Nightly builds add an opt-in native WebRTC transport, described below. For current desktop behavior, use [Native Streamer](/docs/reference/native-streamer/).
 </Callout>
 
-## Historical Electron dual-path model
+This page has three parts:
+
+- **WebRTC compatibility mode**: a native WebRTC transport in the Qt app, in nightly builds only.
+- **Electron era**: how the retired Electron client used Chromium WebRTC. It helps when reading older issues.
+- **NVIDIA's official client**: what research shows about the WebRTC-named parts of the official client.
+
+## WebRTC compatibility mode
+
+<Nightly since="v1.0.3-nightly.875.1">
+
+**Settings → Network → Advanced → WebRTC compatibility mode** chooses the transport for new sessions. The setting is `webrtcCompatibilityMode`:
+
+| Value | Label | Transport |
+| --- | --- | --- |
+| `auto` (default) | Automatic | WebRTC for signed-in alliance-partner accounts, NVST for NVIDIA accounts |
+| `on` | WebRTC | WebRTC for every account |
+| `off` | NVST | NVST for every account |
+
+The core decides the transport before it validates the codec and allocates the seat. A running session keeps its transport when the setting changes. An older `allianceWebrtcCompatibility: true` preference becomes `on`.
+
+The WebRTC path is for compatibility and is slower than NVST. The core limits each WebRTC session:
+
+- H.264 (also used when the codec is Auto or AV1): at most 1920×1080 at 60 FPS, 8-bit 4:2:0.
+- H.265 <Nightly since="v1.0.3-nightly.983.1" />: keeps the selected resolution and frame rate (30 to 360 FPS) and allows 8-bit or 10-bit 4:2:0.
+- Always SDR and stereo. No microphone, no clipboard text, and no Cloud G-Sync.
+- Needs direct UDP connectivity.
+
+The streamer runs the whole exchange itself and passes compressed frames to the same decoders and GPU presentation as NVST:
+
+1. It opens a secure WebSocket to the session's `signalingUrl` at the `/sign_in` path, with `peer_id`, `version=2`, `peer_role=1`, and `pairing_id` query parameters. The request sends `Origin: https://play.geforcenow.com` and the subprotocol `x-nv-sessionid.{sessionId}`.
+2. It sends a `peer_info` message and a `{"hb":1}` heartbeat every 5 seconds.
+3. It answers the server's SDP offer, adds an NVIDIA quality SDP (viewport, frame rate, bit depth, bitrates, input options), and exchanges ICE candidates.
+4. It opens three data channels:
+
+| Channel | Reliability | Traffic |
+| --- | --- | --- |
+| `input_channel_v1` | ordered, reliable | Keyboard and control input |
+| `input_channel_partially_reliable` | unordered, lifetime from the offer's `ri.partialReliableThresholdMs` (30 ms if absent) | Partially reliable input |
+| `stats_channel` | unordered, no retransmits | Statistics |
+
+</Nightly>
+
+## Electron era (historical)
 
 The retired Electron client had two streaming clients that shared main-process session lifecycle and NVST signaling:
 
 - **Web mode** (`streamClientMode: "web"`, default in Electron): the renderer owned Chromium `RTCPeerConnection`, media elements, data channels, stats, microphone, screenshots, and recordings.
 - **Native mode** (experimental child process): a Rust/GStreamer process answered the server offer. Electron could fall back to web mode when native checks failed.
 
-That dual-path design is gone from the Qt app.
+That dual-path design is gone from the Qt app. The Qt app rewrites a saved `transportMode` of `"webrtc"`, `"browser"`, or `"auto"` to `"nvst"`.
 
-## Signaling shape (still useful context)
+### Signaling shape
 
-Historical OpenNOW desktop builds connected to the session signaling server like this:
+Electron builds connected to the session signaling server like this:
 
 ```text
 wss://{signalingServer}/nvst/sign_in?peer_id={name}&version=2
@@ -33,7 +75,7 @@ wss://{signalingServer}/nvst/sign_in?peer_id={name}&version=2
 
 After the `peer_info` init message, incoming signaling messages were classified as SDP offers, ICE candidates, or peer messages that may need ACKs.
 
-## Historical renderer peer connection
+### Renderer peer connection
 
 In Electron web mode, the renderer:
 
@@ -45,9 +87,9 @@ In Electron web mode, the renderer:
 6. Injected the manual media endpoint candidate from `mediaConnectionInfo` when present.
 7. Attached video/audio tracks to `<video>` and `<audio>` elements.
 
-## NVST SDP attributes
+### NVST SDP attributes
 
-OpenNOW historically sent standard WebRTC SDP plus an NVIDIA NVST SDP blob. NVST SDP carries stream-quality attributes such as resolution, viewport, FPS, bitrate, codec, color quality, QoS/FEC, bandwidth estimation, and ICE credentials.
+Electron sent standard WebRTC SDP plus an NVIDIA NVST SDP blob. The NVST SDP carries stream-quality attributes such as resolution, viewport, FPS, bitrate, codec, color quality, QoS/FEC, bandwidth estimation, and ICE credentials.
 
 | m-line | Direction | Purpose |
 | --- | --- | --- |
@@ -56,17 +98,27 @@ OpenNOW historically sent standard WebRTC SDP plus an NVIDIA NVST SDP blob. NVST
 | `mic` | send-only | Microphone audio when enabled |
 | `application` | bidirectional | Input data channels |
 
-## Data channels
+Input used two data channels: `input_channel_v1` (ordered, reliable) for keyboard and control messages, and `input_channel_partially_reliable` (unordered, partially reliable) for mouse deltas and gamepad state. The partially reliable threshold came from the negotiated `a=ri.partialReliableThresholdMs` SDP attribute.
 
-<DataChannelsTable />
+The native NVST bundle in the Qt app opens a different set of channels. See [Native Streamer Architecture](/docs/advanced/streamer-investigation/#session-and-transport).
 
-The partially reliable threshold was read from the negotiated `a=ri.partialReliableThresholdMs` SDP attribute.
+## Observed in NVIDIA's official client
+
+This section describes NVIDIA's official GeForce NOW client, not OpenNOW. It comes from static analysis of the Windows client 2.0.89.141 and the macOS client 2.0.87.131, plus logs from one user's Windows sessions. No official binary was run for this research.
+
+- The official desktop client links WebRTC-named components, but its signaling is RTSP over a secure WebSocket, not a browser SDP offer/answer. (Windows log; macOS code.)
+- A "WebRTC" transport object sets up ICE, DTLS, SRTP, and SCTP. In the logged Windows session it carried audio, microphone, and data channels, while video used a separate SRTP socket. In unified-socket mode the same object carries NVIDIA's own Mjolnir video packets, so the name does not identify the media format. (Code and log.)
+- The client skips the RTSP SETUP for audio and microphone and logs that it defers them to the WebRTC transport. (Windows log.)
+- Microphone capture uses a bundled WebRTC audio module for capture and echo cancellation. (Code.)
+
+Unknown: the complete SDP schema, ICE candidate gathering and relay selection, and how alliance-partner seats choose their transport.
 
 ## Where to go instead
 
 | Need | Page |
 | --- | --- |
 | Current desktop streaming path | [Native Streamer](/docs/reference/native-streamer/) |
+| Transport internals and official-client research | [Native Streamer Architecture](/docs/advanced/streamer-investigation/) |
 | Process boundaries | [Architecture](/docs/architecture/overview/) |
 | Settings and local data | [Configuration](/docs/reference/configuration/) |
 | Black screen / decode isolation | [Troubleshooting](/docs/guides/troubleshooting/) |

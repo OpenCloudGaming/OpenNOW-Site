@@ -14,16 +14,16 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 The Switch client is still maturing and may have platform-specific bugs. It requires a modded Nintendo Switch with custom firmware, Homebrew Menu, an internet connection, and a valid GeForce NOW account.
 </Callout>
 
-The current release keeps the inherited `SwitchNOW.nro` filename and `sdmc:/switch/SwitchNOW/` data path so upgrades preserve existing accounts and settings.
+The latest release is **v0.0.8** (published 2026-08-23). It keeps the inherited `SwitchNOW.nro` filename and `sdmc:/switch/SwitchNOW/` data path so upgrades preserve existing accounts and settings.
 
 ## Install the client
 
 <Steps>
   <Step>
-    **Download** `SwitchNOW.nro` from the [latest OpenNOW-Switch release](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest).
+    **Download** `SwitchNOW-<version>.zip` (for example `SwitchNOW-0.0.8.zip`) from the [latest OpenNOW-Switch release](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest). The release also has a bare `SwitchNOW-<version>.nro`.
   </Step>
   <Step>
-    **Copy** the file to the `sdmc:/switch/SwitchNOW/` folder on the Switch SD card and keep the filename `SwitchNOW.nro`.
+    **Copy** the `switch` folder from the ZIP to the root of the SD card. This places the app at `sdmc:/switch/SwitchNOW/SwitchNOW.nro`. If you use the bare `.nro`, copy it to `sdmc:/switch/SwitchNOW/` and rename it to `SwitchNOW.nro`; HOME-screen forwarders look for that exact path.
   </Step>
   <Step>
     **Start Homebrew Menu in application mode** by holding `R` while opening an installed game. This gives the client full memory and is required by the HOME-screen installer.
@@ -44,15 +44,15 @@ The Store and Library support incremental catalog loading, cover caching, search
 | Left stick / D-pad | Move focus through controls and game tiles |
 | `A` | Select the focused item |
 | `B` | Go back or close a dialog |
-| `L` / `R` | Switch between Store, Library, and Settings |
+| `L` / `R` | Switch to the previous or next top-bar tab |
 | `Y` | Search the Store or Library |
-| `ZL` / `ZR` / `X` | Run the context action shown in the toolbar |
+| `ZL` / `ZR` / `X` | Store filter, sort, and more or refresh in the Store and Library. The toolbar shows the actions for the current screen |
 
 Launching a game shows the queue, rig setup, and connection stages before opening the stream. Game availability, queue times, and session limits still depend on the selected GeForce NOW membership and region.
 
 ## Tune the stream
 
-Open **Settings > Stream** to choose a server location, resolution, frame rate, bitrate, decoder, and picture-processing mode. The default Balanced preset is 720p60 at 12 Mbps.
+Open **Settings > Stream** to choose a server location, resolution, frame rate, bitrate, decoder, and picture-processing mode. Press `X` to save changes or `Y` to revert them. The default Balanced preset is 720p60 at 12 Mbps.
 
 | Preset | Resolution and FPS | Maximum bitrate |
 | --- | --- | --- |
@@ -64,19 +64,19 @@ Resolution, FPS, and bitrate can also be changed independently. The available bi
 
 <Tabs items={['Decoder', 'Picture processing', 'Audio']}>
   <Tab>
-    **Auto** prefers Tegra X1 NVDEC hardware decoding and falls back to the FFmpeg software decoder if hardware setup fails. If an NVDEC session did not shut down cleanly, the next automatic session starts in software safe mode instead of repeating the crash.
+    The **Decoder** setting has **Auto**, **Hardware**, and **Software**. **Auto** prefers Tegra X1 NVDEC hardware decoding and falls back to the FFmpeg software decoder if hardware setup fails. If an NVDEC session did not shut down cleanly, the next automatic session starts in software safe mode instead of repeating the crash.
   </Tab>
   <Tab>
     **Adaptive** is the recommended default and balances motion resilience with light image processing. **Clarity** applies stronger detail recovery, while **Original** leaves the decoded server image unchanged.
   </Tab>
   <Tab>
-    Stream audio uses Opus. Settings expose mute and an 8×–16× volume boost; the audio pipeline uses a bounded 30–100 ms buffer and defaults to 40 ms.
+    Stream audio uses Opus. **Settings > Stream** has an audio output switch (enabled or muted) and a volume boost from 8× to 16× (default 12×). The audio pipeline uses a bounded 30–100 ms buffer and defaults to 40 ms.
   </Tab>
 </Tabs>
 
 ## In-stream controls
 
-The client sends an Xbox-compatible virtual controller to GeForce NOW. With the default **Xbox** face-button layout, physical Switch positions are translated as `A → B`, `B → A`, `X → Y`, and `Y → X`; choose **Switch** under **Settings > Game & controls** to send matching letters.
+The client sends an Xbox-compatible virtual controller to GeForce NOW. With the default **Xbox** face-button layout, physical Switch positions are translated as `A → B`, `B → A`, `X → Y`, and `Y → X`; set **Face buttons** to **Switch** under **Settings > Preferences > Game & controls** to send matching letters.
 
 | Switch input | Stream action |
 | --- | --- |
@@ -88,7 +88,9 @@ The client sends an Xbox-compatible virtual controller to GeForce NOW. With the 
 | Short `+` press | Menu / Start |
 | Hold `+` for at least 500 ms | Nexus / Guide |
 | `ZL + ZR + -` | Stop streaming and return to the game page |
+| `- + +` | Open or close the in-stream menu, which lists these shortcuts |
 | `- + Y` | Open the transparent in-stream keyboard |
+| `- + ZL` / `- + L` / `- + R` / `- + ZR` | Send `Esc` / `Tab` / `Alt+Tab` / `Win` |
 | Touch / touch drag | Move the remote pointer and click / drag |
 
 Game input is paused while the on-screen keyboard owns input, so typing does not trigger controller actions in the game.
@@ -123,6 +125,6 @@ When replacing an older OpenNOW or SwitchNOW HOME entry, delete only the old sof
 - **A stream falls back to software decoding:** leave the decoder on **Auto** unless diagnosing a problem. Auto uses software when NVDEC initialization fails or the previous hardware session ended uncleanly.
 - **Wi-Fi cannot sustain the stream:** try the Safe preset or lower FPS and bitrate separately. A lower setting prevents the decode queue from accumulating stale frames.
 - **A saved login expires:** reconnect the account with a new QR code; OpenNOW refreshes valid saved sessions automatically.
-- **Support needs logs:** enable diagnostics under Settings before reproducing the issue. Diagnostic files are written under `sdmc:/switch/SwitchNOW/` and detailed logging is off during normal play.
+- **Support needs logs:** a failed start writes `boot.log`, and session failures point to `session_trace.log`; both are in `sdmc:/switch/SwitchNOW/`. Detailed stream diagnostics are off during normal play. v0.0.8 has no menu toggle for them; they are controlled by `debug_diagnostics` (default `false`) in `sdmc:/switch/SwitchNOW/stream_settings.json`.
 
 Report Switch-specific problems in the [OpenNOW-Switch issue tracker](https://github.com/OpenCloudGaming/OpenNOW-Switch/issues) or the [OpenNOW Discord](https://discord.gg/8EJYaJcNfD).

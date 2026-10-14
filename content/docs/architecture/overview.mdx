@@ -1,0 +1,101 @@
+---
+title: Architecture Overview
+description: How the Qt shell, Rust core, and in-process native streamer fit together
+---
+
+import { Nightly } from '@/components/docs/Nightly';
+
+OpenNOW's desktop client is a Qt 6 Quick application with an out-of-process Rust core and an in-process native NVST streamer. The Electron/`opennow-stable` desktop runtime is retired. The Qt app does not embed a browser and has no Chromium/WebRTC fallback.
+
+<Nightly since="v1.0.3-nightly.875.1">
+
+The native streamer also has a WebRTC compatibility transport. It runs in the same Rust engine; no browser is involved. **Settings → Network → Advanced → WebRTC compatibility mode** chooses it. By default it is used for alliance partner accounts, and NVST stays the default for NVIDIA accounts.
+
+</Nightly>
+
+## Source layout
+
+```text
+opennow-qt/                  Qt Quick desktop app: C++ in src/, QML in qml/, packaging/, tests/
+native/opennow-core/         Rust core: settings, credentials, accounts, catalog, CloudMatch, diagnostics, updates
+native/opennow-streamer/     Native NVST runtime: protocol, transport, platform decode/audio/input, engine, C FFI
+locales/                     English source strings and Crowdin-managed translations
+docs/                        Protocol, migration, acceptance, and streamer-comparison references
+scripts/                     Repository tooling
+playnite/                    Playnite library plugin that launches games through OpenNOW
+```
+
+## Process responsibilities
+
+| Layer | Responsibilities |
+| --- | --- |
+| Qt Quick shell | Windows, navigation, focus, overlays, accessibility, fullscreen state, desktop and console layouts, stream chrome, settings UI, screenshots |
+| Rust core (separate process) | Authentication, credentials, settings, catalog, CloudMatch session lifecycle, updates, diagnostics, local storage |
+| Native streamer (in-process FFI) | NVST transport, decode, audio, microphone, gameplay input, recording, GPU frame publication into Qt |
+
+Qt talks to the core over a [versioned JSON protocol](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/core-protocol.md). Qt loads the streamer through a [versioned C ABI](https://github.com/OpenCloudGaming/OpenNOW/blob/main/native/opennow-streamer/crates/opennow-streamer-ffi/README.md). Video stays on the GPU, and Qt draws menus over it in the same window.
+
+## Qt C++ modules
+
+Paths are relative to `opennow-qt/src/`.
+
+| Location | Ownership |
+| --- | --- |
+| `main.cpp` | Minimal entry point into `runApplication` |
+| `app/` | `ApplicationStartup` composes application-lifetime services and QML bindings; `AppController` owns shell navigation and OS actions; `SingleInstance` forwards launches |
+| `app/platform/` | Windows GPU selection and the macOS AWDL controller |
+| `core/` | `CoreClient` owns the versioned JSON process connection to the core, request tracking, and restart handling |
+| `input/` | `ControllerInput` (SDL3 controller discovery and routing) and shell input-mode tracking |
+| `input/platform/` | Native Wayland and macOS pointer capture |
+| `streaming/` | `NativeStreamRuntime` (bounded FFI wrapper), `StreamVideoItem` (stream presentation and keyboard/mouse capture), physical key maps |
+| `streaming/rendering/` | Render callback contract, native GPU callback, scene-graph node, texture renderer, Vulkan device integration |
+| `localization/` | Source-text translation and locale selection |
+| `media/` | Pictures-folder paths and recording thumbnail generation |
+| `diagnostics/` | Shared diagnostics path policy |
+| `acceptance/` | Acceptance, smoke, motion, and profiling harnesses, kept out of production startup |
+
+QML is one `OpenNOW` module. `qml/Main.qml` composes the desktop and console surfaces and the application-level shortcuts. `qml/desktop/` holds the desktop shell, settings, and stream screens. `qml/screens/`, `qml/overlays/`, and `qml/components/` hold the console-oriented screens and shared parts. `qml/state/ShellStore.qml` is the shell-state singleton that owns session orchestration.
+
+## Native streamer crates
+
+| Crate | Role |
+| --- | --- |
+| `opennow-streamer-protocol` | Versioned local command and session types |
+| `opennow-streamer-core` | NVST lifecycle, command routing, media feedback, recording |
+| `opennow-streamer-transport` | Mjolnir SRTP video plus the ICE/DTLS/SCTP bundle for audio, microphone, RTCP, and input |
+| `opennow-streamer-platform` | Bounded media queues, decode and audio output, recording, GPU frame publication |
+| `opennow-streamer-platform-windows`, `-macos`, `-linux` | Platform decoders and native GPU texture producers |
+| `opennow-streamer-hid` | Native HID sessions for Sony controllers |
+| `opennow-streamer-ffi` | Bounded C ABI that Qt loads in process |
+| `opennow-streamer` | Development JSON-lines host for the same engine; not included in Qt packages |
+| `opennow-awdl-helper` <Nightly since="v1.0.3-nightly.1046.1" /> | Privileged macOS helper that suppresses AWDL while streaming |
+
+## Streaming data flow
+
+| Flow | Rust core | Qt shell | Native streamer |
+| --- | --- | --- | --- |
+| Auth | Runs the device sign-in flow, stores tokens and saved accounts | Starts sign-in and sign-out, shows the QR code and auth state | Not involved |
+| Launch | Creates session, polls queue, claims session, normalizes CloudMatch errors | Shows launch/queue state and membership errors | Receives complete session context at start |
+| Streaming | Prepares session and capabilities | Composes QML overlays on the video surface | Handles NVST transport, decode, audio, input, recording |
+| Input | Persists input-related settings | Handles local shortcuts first, then forwards gameplay keyboard, mouse, and controller input to the streamer | Sends encoded input on negotiated channels |
+| Media | Resolves the media folders, names recordings, lists captures | Takes screenshots, shows the Captures screen and shortcuts | Writes source-stream Matroska recordings and replay clips |
+| Settings | Loads, migrates, normalizes, persists `settings.json` | Renders Settings pages for desktop and console shells | Receives selected stream/audio settings as session context |
+
+## Native streamer path
+
+The production desktop path is always native. Qt lends its QRhi graphics objects to the embedded Rust engine. Platform decode publishes a native GPU frame; Qt imports the converted texture into the scene graph so overlays compose above video. The packaged app does not ship a separate streamer executable, helper window, or browser video path.
+
+See [Native Streamer](/docs/reference/native-streamer) for packaging, diagnostics, and protocol details. Electron-era WebRTC notes and the nightly WebRTC compatibility mode are on [Protocol notes](/docs/reference/webrtc).
+
+## Key source areas
+
+| Path | Purpose |
+| --- | --- |
+| `opennow-qt/` | Qt Quick UI, C++ bridge, packaging, and Qt tests |
+| `native/opennow-core/` | Auth, CloudMatch, settings, catalog, updater, diagnostics |
+| `native/opennow-streamer/` | NVST runtime crates and FFI |
+| `native/opennow-streamer/crates/opennow-streamer-ffi/` | In-process C ABI used by Qt |
+| `docs/core-protocol.md` | Shell ↔ core JSON protocol |
+| `docs/qt-nightly-release.md` | Qt package inventory and nightly publication |
+| `locales/` | Crowdin-managed UI strings |
+| `AGENTS.md` | Module ownership map and engineering rules |

@@ -11,6 +11,7 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { CircleHelp, Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
+import { Nightly } from '@/components/docs/Nightly';
 
 OpenNOW is an open-source GeForce NOW client. The desktop app uses Qt Quick for the interface and Rust for account services and streaming. Desktop and controller-first console layouts live in the same app. Separate Android, iOS, and [OpenNOW-Switch](/docs/guides/nintendo-switch) builds are available for other platforms.
 
@@ -21,11 +22,11 @@ OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of 
 </Callout>
 
 <Callout type="info" title="Desktop is Qt/native">
-OpenNOW's desktop client on `main` uses Qt Quick and an in-process native NVST streamer. It replaces the retired Electron/`opennow-stable` app and has no Chromium/WebRTC fallback. See the [announcement post](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
+OpenNOW's desktop client uses Qt Quick and an in-process native streamer. It replaces the retired Electron/`opennow-stable` app. There is no Chromium or browser streaming path. See the [announcement post](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
 </Callout>
 
-<Callout type="info" title="Published packages vs source on main">
-The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, published 2026-10-03). Download stable builds from [Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Use Qt nightlies (for example `v1.0.3-nightly.*`) or artifacts from a successful [`qt-ci` run on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev) when you need post-1.0.2 builds. **v1.0.1** and **v1.0.0** remain available as historical releases. Historical tags such as v0.5.5 may still contain Electron packages.
+<Callout type="info" title="Stable release and nightlies">
+The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, published 2026-10-03). These docs describe v1.0.2, which matches the `main` branch. Download it from [Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Nightly prereleases (`v1.0.3-nightly.*`) are built from `dev` and appear on the same Releases page. Features marked **Nightly** are in those builds and not in v1.0.2. Historical tags such as v0.5.5 may still contain Electron packages.
 </Callout>
 
 <Cards>
@@ -46,10 +47,10 @@ The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, publis
     **Download** an `OpenNOW-Qt-…` package from the [OpenNOW download picker](/#downloads) or [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases).
   </Step>
   <Step>
-    **Install** the artifact for your platform: Windows `.msi` or portable `.zip`, Linux `.AppImage` (recommended), `.deb`, or an optional Flatpak build, macOS Apple Silicon `.dmg`. Android, Nintendo Switch, and iOS remain separate projects.
+    **Install** the package for your platform: Windows x64/ARM64 `-setup.exe`, `.msi`, or portable `.zip`; Linux x64/ARM64 `.AppImage` (recommended) or `.deb`; macOS Apple Silicon `.dmg` or `.zip`. A Flatpak is available as a local build only. Android, Nintendo Switch, and iOS remain separate projects.
   </Step>
   <Step>
-    **Sign in** through browser OAuth or QR/device authorization and let OpenNOW persist the session locally.
+    **Sign in** with your provider. Approve the request on the provider page that opens in your browser, or scan a QR code with another device. OpenNOW saves the session locally.
   </Step>
   <Step>
     **Tune** codec, resolution, FPS, bitrate, color quality, region, input, microphone, and capture settings. Switch between desktop and console layouts in the same app.
@@ -72,7 +73,7 @@ The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, publis
   </Tab>
   <Tab>
     - Use [Native Streamer](/docs/reference/native-streamer) for the production NVST path and diagnostics.
-    - Read [Protocol notes](/docs/reference/webrtc) only for historical Chromium/WebRTC context.
+    - Read [Protocol notes](/docs/reference/webrtc) for Electron-era WebRTC history and the nightly WebRTC compatibility mode.
     - Use [Streamer Investigation](/docs/advanced/streamer-investigation) for advanced native-path notes.
   </Tab>
 </Tabs>
@@ -105,13 +106,19 @@ The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, publis
 
 <Accordions type="single">
   <Accordion title="Default streaming path">
-    The Qt desktop app streams through the in-process native NVST streamer. There is no Chromium/WebRTC fallback in the Qt app.
+    The Qt desktop app streams through the in-process native streamer, using NVIDIA's NVST protocol. There is no Chromium or browser streaming path.
+
+    <Nightly since="v1.0.3-nightly.875.1">
+
+    **WebRTC compatibility mode** (Settings → Network) can run a session over a native WebRTC transport instead of NVST. **Automatic** uses WebRTC for signed-in alliance-partner accounts and NVST for NVIDIA accounts. WebRTC is for compatibility only: expect lower performance than NVST, H.264/H.265 with SDR and stereo audio, and no microphone or clipboard text.
+
+    </Nightly>
   </Accordion>
   <Accordion title="Desktop UI">
     Desktop (keyboard/mouse) and console (controller-first) layouts live in the same Qt application.
   </Accordion>
   <Accordion title="Session state">
-    OAuth, token refresh, provider behavior, CloudMatch session lifecycle, settings, and diagnostics are owned by the out-of-process Rust core. Qt talks to it over a versioned JSON protocol.
+    Sign-in, token refresh, provider behavior, CloudMatch session lifecycle, settings, and diagnostics are owned by the out-of-process Rust core. Qt talks to it over a versioned JSON protocol.
   </Accordion>
   <Accordion title="Published binaries">
     Treat GitHub package names and release notes as the source of truth. Look for `OpenNOW-Qt-…` assets. Older Electron packages may still appear on historical tags such as v0.5.5.
