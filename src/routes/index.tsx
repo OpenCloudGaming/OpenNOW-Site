@@ -300,9 +300,9 @@ function Home() {
                     <span className="min-w-0 flex-1">
                       <span className="block text-base font-extrabold leading-[21px] text-ink group-hover:text-mint sm:text-[17px] sm:leading-[22px]">{title}</span>
                       <span className="mt-[3px] block text-sm leading-[21px] text-muted">{description}</span>
-                      <span className="mt-1 block font-mono text-[11px] font-medium text-faint sm:hidden">{splat}</span>
+                      <span className="mt-1 block font-mono text-[11px] font-medium text-muted sm:hidden">{splat}</span>
                     </span>
-                    <span className="hidden w-[200px] font-mono text-xs font-medium text-faint sm:block">{splat}</span>
+                    <span className="hidden w-[200px] font-mono text-xs font-medium text-muted sm:block">{splat}</span>
                     <span className="hidden sm:block">
                       <Kbd>↵</Kbd>
                     </span>
@@ -406,7 +406,7 @@ function Home() {
                     )}
                   </span>
                   <span className="text-sm leading-[22px] text-muted sm:text-[15px] sm:leading-6">{description}</span>
-                  <span className="font-mono text-[11px] font-medium text-faint sm:text-xs">{splat}</span>
+                  <span className="font-mono text-[11px] font-medium text-muted sm:text-xs">{splat}</span>
                   <ArrowRight className="hidden size-4 text-mint transition-transform group-hover:translate-x-1 sm:block" aria-hidden />
                 </Link>
               </li>
