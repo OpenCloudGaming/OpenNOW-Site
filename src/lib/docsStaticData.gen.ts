@@ -35,6 +35,15 @@ export const pageTree = {
             "$ref": "guides/getting-started.mdx"
           },
           {
+            "$id": "guides/ports-and-team.mdx",
+            "type": "page",
+            "name": "Ports &amp; team",
+            "description": "Every OpenNOW port, who maintains it, how far along it is, and where to get it",
+            "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-users\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"></path><path d=\"M16 3.128a4 4 0 0 1 0 7.744\"></path><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
+            "url": "/docs/guides/ports-and-team",
+            "$ref": "guides/ports-and-team.mdx"
+          },
+          {
             "$id": "guides/troubleshooting.mdx",
             "type": "page",
             "name": "Troubleshooting",
@@ -195,6 +204,10 @@ const pages = {
   "guides/nintendo-switch": {
     "path": "guides/nintendo-switch.mdx",
     "markdownUrl": "/docs/guides/nintendo-switch.md"
+  },
+  "guides/ports-and-team": {
+    "path": "guides/ports-and-team.mdx",
+    "markdownUrl": "/docs/guides/ports-and-team.md"
   },
   "guides/troubleshooting": {
     "path": "guides/troubleshooting.mdx",
