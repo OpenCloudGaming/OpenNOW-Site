@@ -97,7 +97,7 @@ Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can s
 | H.265 unavailable on Windows | Microsoft's HEVC Video Extensions may be missing | Open the HEVC help in Settings and install the free Store extension first (paid offer if needed). Restart OpenNOW. GPU hardware HEVC decode is still required |
 | High GPU use with upscaling | MetalFX (macOS) or FSR 1 (Windows/Linux) costs extra GPU time | Turn upscaling **Off**, or lower stream resolution/FPS if the local GPU is saturated |
 | Flatpak cannot auto-update | Flatpak builds disable the in-app self-updater | Update with `flatpak update io.github.opencloudgaming.OpenNOW` from a Flatpak remote, or rebuild/reinstall a local `.flatpak` bundle |
-| In-app update discovery or portable install fails | Updater discovery, portable ZIP replacement, or failure reporting is incomplete on older builds | Prefer published **v1.0.1** signed updates when available; on nightlies / `main`, retry Check for updates and note the surfaced failure message. Flatpak still has no self-updater |
+| In-app update discovery or portable install fails | Updater discovery, portable ZIP replacement, or failure reporting is incomplete on older builds | Prefer published **v1.0.2** signed updates when available; on nightlies / `main`, retry Check for updates and note the surfaced failure message. Flatpak still has no self-updater |
 | Entire app window is black vs only the video surface | Note which one you see before changing settings | Export diagnostics and include both `native-streamer.log` and `qt-native.log` |
 
 <Callout type="warn" title="Change one variable at a time">
