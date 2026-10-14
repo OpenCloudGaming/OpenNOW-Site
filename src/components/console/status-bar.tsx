@@ -31,13 +31,12 @@ function Channel({
       href={release.url}
       onClick={onClick}
       className="group inline-flex min-w-0 items-center gap-2.5 rounded-md max-lg:w-full"
-      aria-label={`${label} release ${release.tag}${release.date ? `, published ${release.date}` : ''}`}
     >
       <StatusDot tone={tone} />
       <MonoLabel className="text-muted max-lg:w-16 max-lg:text-[10px]">{label}</MonoLabel>
       <span className="truncate font-mono text-[12px] leading-4 font-semibold text-ink group-hover:text-mint">{release.tag}</span>
       {release.date ? (
-        <time dateTime={release.date} className="shrink-0 font-mono text-[12px] leading-4 text-faint max-lg:ms-auto max-lg:text-[11px]">
+        <time dateTime={release.date} className="shrink-0 font-mono text-[12px] leading-4 text-muted max-lg:ms-auto max-lg:text-[11px]">
           {release.date}
         </time>
       ) : null}

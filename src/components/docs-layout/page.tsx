@@ -57,7 +57,7 @@ function SectionList({ onNavigate }: { onNavigate?: () => void }) {
               className="group flex items-start gap-2.5 rounded-sm py-[5px] pe-3.5"
             >
               <span aria-hidden="true" className={cn('w-0.5 self-stretch rounded-sm', isActive && 'bg-mint')} />
-              <span className={cn('w-5 shrink-0 font-mono text-[11px] leading-5 font-medium', isActive ? 'text-mint' : 'text-faint')}>{two(i + 1)}</span>
+              <span aria-hidden="true" className={cn('w-5 shrink-0 font-mono text-[11px] leading-5 font-medium', isActive ? 'text-mint' : 'text-faint')}>{two(i + 1)}</span>
               <span
                 className={cn(
                   'min-w-0 flex-1 text-[13px] leading-5',
@@ -217,7 +217,7 @@ function PagerCard({ page, dir }: { page: NavPage; dir: 'prev' | 'next' }) {
         {next ? <ArrowRight aria-hidden="true" className="size-3.5 text-mint" /> : null}
       </span>
       <span className="text-[18px] leading-6 font-extrabold text-ink">{page.title}</span>
-      <span className="font-mono text-[12px] leading-4 font-medium text-faint">{page.section ?? 'Docs'}</span>
+      <span className="font-mono text-[12px] leading-4 font-medium text-muted">{page.section ?? 'Docs'}</span>
     </Link>
   );
 }

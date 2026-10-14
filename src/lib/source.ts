@@ -47,7 +47,16 @@ export function getPageMarkdownUrl(slugs: string[]) {
 }
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {
-  const processed = await page.data.getText('processed');
+  const raw = await page.data.getText('raw');
+  const imageUrls = new Map(Array.from(raw.matchAll(/!\[([^\]]*)\]\((\S+)/g), ([, alt, url]) => [alt, url]));
+  const processed = (await page.data.getText('processed')).replace(
+    /<img alt="([^"]*)" src="__img\d+"(?: title="([^"]*)")? \/>/g,
+    (jsx, alt: string, title?: string) => {
+      const url = imageUrls.get(alt);
+      if (!url) return jsx;
+      return title ? `![${alt}](${url} "${title}")` : `![${alt}](${url})`;
+    },
+  );
 
   return `# ${page.data.title} (${page.url})
 

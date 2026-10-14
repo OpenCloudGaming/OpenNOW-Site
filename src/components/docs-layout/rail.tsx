@@ -47,7 +47,7 @@ function RailItem({ page, active, big }: { page: NavPage; active: boolean; big: 
           {page.label}
         </span>
         {page.subtitle ? (
-          <span className={cn('font-mono text-[10px] leading-[14px] font-medium tracking-[0.08em] uppercase', active ? 'text-mint/85' : 'text-faint')}>
+          <span className={cn('font-mono text-[10px] leading-[14px] font-medium tracking-[0.08em] uppercase', active ? 'text-mint/85' : 'text-muted')}>
             {page.subtitle}
           </span>
         ) : null}

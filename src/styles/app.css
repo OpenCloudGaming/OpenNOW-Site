@@ -3,6 +3,7 @@
 @import 'fumadocs-ui/css/preset.css';
 
 @import './fonts.css';
+@import './console-prose.css';
 
 /* Design B "Console": Nocturne tokens. Dark only; :root mirrors .dark. */
 @theme {
