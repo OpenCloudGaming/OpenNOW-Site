@@ -224,3 +224,32 @@ html > body[data-scroll-locked] {
     min-height: 13rem;
   }
 }
+
+/* Landing art from the OpenNOW Paper master file (Site · 01 Landing): key art under a navy wash.
+   Phones get the wash only, so the hero headline (not a late background image) is the mobile LCP. */
+.home-hero-art {
+  background: linear-gradient(180deg, rgb(14 20 32) 0%, var(--color-ground) 100%);
+}
+.home-cta-art {
+  background: linear-gradient(180deg, var(--color-ground) 0%, rgb(14 20 32) 100%);
+}
+@media (min-width: 800px) {
+  .home-hero-art,
+  .home-cta-art {
+    background-color: var(--color-ground);
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .home-hero-art {
+    background-image:
+      linear-gradient(180deg, rgb(14 20 32 / 85%) 0%, rgb(14 20 32 / 95%) 62%, var(--color-ground) 100%),
+      url('/home/keyart-1600.webp');
+    background-position: 50%, 50% 30%;
+  }
+  .home-cta-art {
+    background-image:
+      linear-gradient(180deg, rgb(14 20 32 / 95%) 0%, rgb(14 20 32 / 80%) 100%),
+      url('/home/keyart-1600.webp');
+    background-position: 50%, 50% 70%;
+  }
+}
