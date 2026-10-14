@@ -1,18 +1,25 @@
 ---
 title: Native Streamer
-description: Production in-process NVST runtime, Qt GPU presentation, packaging, and diagnostics
+description: The in-process NVST streamer in the Qt app, its video backends per platform, and its diagnostics
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
+import { Nightly } from '@/components/docs/Nightly';
 
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
 import ReleasePackageMatrixTable from '@/components/docs/ReleasePackageMatrixTable';
 
-The native streamer is the **production** desktop streaming path. The Qt app loads `opennow-streamer-ffi` as an in-process shared library. It owns NVST transport, decode, audio, gameplay input, source-stream Matroska recording, and GPU frame publication. It does not implement the browser WebRTC offer/answer or trickle-ICE protocol, and the Qt app has no Chromium/WebRTC fallback.
+The native streamer is the **production** desktop streaming path. The Qt app loads `opennow-streamer-ffi` as an in-process shared library. The streamer owns NVST transport, decode, audio, gameplay input, source-stream Matroska recording, and GPU frame publication. NVST transport means RTSPS signaling, a dedicated Mjolnir SRTP video socket, and an ICE/DTLS/SCTP bundle for audio, microphone, RTCP, and input. The Qt app has no Chromium or browser WebRTC fallback.
 
 <Callout type="info" title="No Electron child process">
 Older docs described an experimental Electron-supervised Rust child process with a GStreamer `webrtcbin` backend and web fallback. That path is retired with Electron. Packaged Qt builds embed the streamer library beside the executable and `opennow-core`.
 </Callout>
+
+<Nightly since="v1.0.3-nightly.875.1">
+
+The core can also start a session over a native WebRTC transport, called **WebRTC compatibility mode**. It runs inside the same embedded streamer and uses the same decoders and GPU presentation. See [Protocol notes](/docs/reference/webrtc/).
+
+</Nightly>
 
 ## How Qt uses it
 
@@ -28,20 +35,38 @@ There is no separate streamer window, helper application, or packaged standalone
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `streamClientMode` | `"native"` | Desktop streaming mode; Qt production path is native |
-| `transportMode` | `"nvst"` | Native media transport |
-| `nativeVideoBackend` | `"auto"` | Platform video/API preference; unsupported forced backends fail explicitly |
+| `streamClientMode` | `"native"` | Desktop streaming mode; the Qt app always streams natively |
+| `transportMode` | `"nvst"` | Native media transport. Legacy values such as `"webrtc"` are rewritten to `"nvst"` |
+| `nativeVideoBackend` | `"auto"` | **Settings → Stream → Advanced → Video backend**. Applies to the next stream. A forced backend that is unavailable fails instead of switching to another API |
+| `codec` | `"auto"` | Codec preference. The core resolves Auto against the streamer's capability report before CloudMatch allocates a seat |
+| `colorQuality` | `"8bit_420"` | Bit depth and chroma. Choices the current backend, codec, or membership cannot use are disabled with a reason |
+| `enableHdr` | `false` | HDR request for new sessions; needs an HDR-capable display and a 10-bit HEVC or AV1 decoder |
 | `audioOutputDevice` | `""` | Opaque output device ID from native enumeration; empty means system default |
 | `showNativeStreamerStats` | `false` | Native stats overlay preference |
-| `enableCloudGsync` | `false` | Cloud G-Sync/VRR preference |
-| `codec` / `fallbackCodec` | `"auto"` | Capability-aware codec preference before CloudMatch allocation; Auto AV1 is gated on probed platform/stream limits |
-| `colorQuality` | `"8bit_420"` | Bit-depth/chroma preference; prefer 4:2:0 — UI marks 4:4:4 as Coming soon |
+| `enableCloudGsync` | `false` | Cloud G-Sync/VRR request |
+| `webrtcCompatibilityMode` | `"auto"` | <Nightly since="v1.0.3-nightly.875.1" /> **Settings → Network → Advanced → WebRTC compatibility mode**: Automatic, WebRTC, or NVST for new sessions |
 
-On Windows, the embedded presenter currently uses D3D11; explicit DX12/Vulkan interop for the embedded path may be unavailable even when standalone experiments exist. Leave **Auto** selected unless isolating a known GPU issue.
+On Windows the stream view uses DirectX 11. The picker also lists DirectX 12 and Vulkan, but marks them as not supported by this stream view. On Linux, Auto never falls back to software decoding; pick **Software (CPU)** yourself when no hardware decoder works. Leave **Auto** selected unless you are isolating a known GPU issue.
+
+The color picker lists 4:4:4 choices with the note "Coming soon". They are only enabled on Windows and macOS with an Ultimate membership, and only when the runtime reports a matching hardware decode profile.
 
 ## Platform video paths
 
 <NativePlatformVideoPathsTable />
+
+HDR needs a 10-bit HEVC or AV1 hardware path on the platform and an HDR-capable output. H.264 and software decoding are SDR only. On Linux, HDR output needs a single-screen Wayland session with color management; X11 stays SDR.
+
+## Recovery
+
+The streamer requests retransmission of lost video packets, uses forward error correction data from the server, and asks for a new keyframe (IDR) when a frame cannot be repaired. If video stops, the app retries the session a bounded number of times (8 attempts) before it reports a failure.
+
+<Nightly since="v1.0.3-nightly.1026.1">
+
+- After unrecoverable loss, the streamer reports the lost frame range to the server (reference-frame invalidation) and holds back frames that depend on it until a recovery frame arrives. An IDR request remains the backstop.
+- When the chosen codec, chroma, or HDR mode cannot be decoded, launch falls back to a profile that can be (for example 4:4:4 to 4:2:0, or HDR to SDR) instead of failing. Each fallback is recorded in diagnostics.
+- Game audio passes through a timestamp-ordered jitter buffer (45 to 200 ms), and the microphone can send redundant audio (RED) when the server offers it.
+
+</Nightly>
 
 ## Packaging
 
@@ -49,15 +74,16 @@ The Qt CMake build always compiles `opennow-streamer-ffi` with Cargo's release p
 
 <ReleasePackageMatrixTable />
 
-Look for assets named `OpenNOW-Qt-…` in [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases). Linux packages can use a bundled FFmpeg fallback while optional GPU driver interfaces remain dynamically discovered.
+Look for assets named `OpenNOW-Qt-…` in [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases). Linux packages include a bundled FFmpeg fallback; GPU driver interfaces are discovered at runtime. The AppImage and DEB launcher adds the common VA-API driver directories to the search path when `LIBVA_DRIVERS_PATH` is not set.
 
 ## Local JSON protocol
 
-The embedded engine speaks a versioned local JSON protocol (currently protocol 6) through the FFI command/response/event callbacks. Important user-facing capabilities include:
+The embedded engine speaks a versioned local JSON protocol (protocol 7 in v1.0.2) through the FFI command/response/event callbacks. The FFI ABI version is 11. Important user-facing capabilities include:
 
 - session start/stop and telemetry
 - microphone enable/toggle/state
 - audio device enumeration
+- local playback mute
 - clipboard text submission
 - controller rumble events
 
@@ -65,13 +91,24 @@ See the upstream [streamer README](https://github.com/OpenCloudGaming/OpenNOW/bl
 
 ## Diagnostics
 
-**Settings → About → Copy diagnostics** exports a bounded redacted report. On Windows the diagnostics directory is under `%APPDATA%/OpenNOW/diagnostics` (or `OPENNOW_DATA_DIR/diagnostics`). The export can include both `native-streamer.log` and `qt-native.log`.
+**Settings → About & support → Copy diagnostics → Export** builds a bounded, redacted report. The diagnostics folder is `diagnostics/` inside the data directory:
 
-When reporting black screens, say whether the entire application window is black or only the video surface is black. Include GPU, driver, package name, and the diagnostics export.
+| Platform | Default data directory |
+| --- | --- |
+| Windows | `%APPDATA%\OpenNOW` |
+| macOS | `~/Library/Application Support/OpenNOW` |
+| Linux | `$XDG_CONFIG_HOME/OpenNOW`, or `~/.config/OpenNOW` |
+
+`OPENNOW_DATA_DIR` replaces the data directory. The export can include `native-streamer.log` and `qt-native.log` and their `.previous` copies. Neither log contains SRTP keys, ICE credentials, or packet payloads.
+
+When reporting black screens, say whether the entire application window is black or only the video surface is black. Include GPU, driver, package name, and the diagnostics export. Audio alone does not prove that video is arriving.
+
+For environment overrides and transport internals, see [Native Streamer Architecture](/docs/advanced/streamer-investigation/).
 
 ## Related pages
 
 - [Architecture](/docs/architecture/overview/)
 - [Configuration](/docs/reference/configuration/)
 - [Troubleshooting](/docs/guides/troubleshooting/)
-- [Protocol notes](/docs/reference/webrtc/) (historical Chromium/WebRTC only)
+- [Native Streamer Architecture](/docs/advanced/streamer-investigation/)
+- [Protocol notes](/docs/reference/webrtc/) (Electron-era WebRTC history and the WebRTC compatibility mode)

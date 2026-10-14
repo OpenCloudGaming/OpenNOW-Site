@@ -5,59 +5,77 @@ description: Download Qt packages, first launch, and CMake source builds for Ope
 
 import { Callout } from 'fumadocs-ui/components/callout';
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
+import { Nightly } from '@/components/docs/Nightly';
 
 OpenNOW is an open-source GeForce NOW client. The desktop app is the Qt Quick client in `opennow-qt/`, with a Rust core and an in-process native NVST streamer. Separate native and mobile builds are available for other platforms.
 
 <Callout type="info" title="Desktop is Qt/native">
-OpenNOW's desktop client replaces the retired Electron/`opennow-stable` app. The Qt app has no Chromium/WebRTC fallback. See the [announcement](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
+OpenNOW's desktop client replaces the retired Electron/`opennow-stable` app. The Qt app has no Chromium or browser streaming path. See the [announcement](https://x.com/Zortosdev/status/2093023076191440963) for a first look.
 </Callout>
 
 ## Download a release
 
-The published GitHub Latest release is **v1.0.2** with `OpenNOW-Qt-1.0.2-…` packages (published 2026-10-03). Use Qt nightlies (for example `v1.0.3-nightly.*`) or [`qt-ci` on `dev`](https://github.com/OpenCloudGaming/OpenNOW/actions/workflows/qt-ci.yml?query=branch%3Adev) when you need builds newer than that release. Look for packages starting with `OpenNOW-Qt-` in [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases) or use the [download picker](/#downloads). **v1.0.1** and **v1.0.0** remain historical releases. Historical tags such as v0.5.5 may still contain the retired Electron app.
+The GitHub Latest release is **v1.0.2** (published 2026-10-03). Its packages start with `OpenNOW-Qt-1.0.2-`. Download them from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Nightly prereleases (`v1.0.3-nightly.*`) are built from `dev` and use the same file layout. Features marked **Nightly** on this site are only in those builds. Historical tags such as v0.5.5 may still contain the retired Electron app.
 
 | Platform | Qt package | How to run it |
 | --- | --- | --- |
+| Windows x64 / ARM64 | `-setup.exe` | Installs the portable layout for the current user in `%LOCALAPPDATA%\OpenNOW` without administrator rights. If an MSI copy of OpenNOW is registered, setup offers to uninstall it first |
 | Windows x64 / ARM64 | `.msi`, portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe` |
-| Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it |
-| Linux x64 / ARM64 | `.deb` | **v1.0.1** and later DEBs (including **v1.0.2** and nightlies) bundle Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. Older **v1.0.0** DEBs still expect distro Qt 6.8+ and SDL3 — prefer the AppImage for that historical release on stock Ubuntu 24.04 |
-| Linux x86_64 | Flatpak (optional) | Build/install locally from `opennow-qt/packaging/flatpak` (app id `io.github.opencloudgaming.OpenNOW`) or the **Qt Flatpak build** workflow artifact. Not published on Flathub. Flatpak installs disable the in-app self-updater |
+| Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it. A `.AppImage.zsync` sidecar is published for external delta-update tools |
+| Linux x64 / ARM64 | `.deb` | Bundles Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. Install with `sudo apt install ./OpenNOW-Qt-1.0.2-Linux-x64.deb` (or `-arm64.deb`) so APT installs the remaining system dependencies |
+| Linux x86_64 | Flatpak (local build) | Build and install from `opennow-qt/packaging/flatpak` (app ID `io.github.opencloudgaming.OpenNOW`) or the **Qt Flatpak build** workflow artifact. Not published on Flathub or GitHub Releases. Flatpak installs disable the in-app updater. ARM64 (`aarch64`) bundles and shareable bundles: <Nightly since="v1.0.3-nightly.983.1" /> |
 | macOS Apple Silicon, macOS 13+ | `.dmg`, `.zip` | Open the DMG and drag OpenNOW into Applications, or extract the ZIP. Intel Macs are not included |
 | macOS (OpenNOW Mac) | [Release `.zip`](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) | Separate performance-focused macOS build maintained by Jayian1890 |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release; separate from the Qt desktop app |
 | Android beta | [Direct `.apk`](https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9) | Sideload the beta only when testing pre-release Android builds |
 | iOS | [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2) | Install through Apple's TestFlight while the iOS build is in beta |
-| Nintendo Switch | [`SwitchNOW.nro`](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) | Native Horizon OS homebrew client for modded Switch systems; follow the [Switch installation guide](/docs/guides/nintendo-switch) |
+| Nintendo Switch | [OpenNOW-Switch release](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) | Native Horizon OS homebrew client for modded Switch systems; follow the [Switch installation guide](/docs/guides/nintendo-switch) |
 
-**v1.0.1** and later releases, including the current **v1.0.2**, ship Ed25519-signed update manifests for every package. Apple Silicon DMG/ZIP builds are Developer ID–signed, notarized, and stapled. Windows MSI/ZIP packages are not Authenticode-signed, so SmartScreen or an unknown-publisher warning may appear. If you are coming from **v1.0.0** (or another build without the pinned update key), install **v1.0.2** manually once to establish trust for future signed updates. Automatic checks and optional downloads still require confirmation before install/restart; portable ZIP replacement and clearer failure reporting are part of the v1.0.2 updater path and nightlies. Nightlies may still be unsigned/not notarized. Flatpak builds have no native auto-update path. `SHA256SUMS` detects corrupted downloads; it does not verify who published a package. For historical **v1.0.0** packages (unsigned, non-notarized macOS), use System Settings → Privacy & Security → Open Anyway when Gatekeeper blocks the app — do not disable Gatekeeper globally.
+### Signing and updates
+
+Every v1.0.2 package has a sibling `<package>.manifest.json` with an Ed25519 signature. The built-in updater verifies that signature before it installs an update. Apple Silicon DMG and ZIP builds are Developer ID–signed and notarized. Windows packages are not Authenticode-signed, so SmartScreen or an unknown-publisher warning can appear. `SHA256SUMS` detects corrupted downloads; it does not verify who published a package.
+
+**Settings → About & support** has **Check for updates**, optional automatic checks and downloads, and an **Update channel** choice (**Stable** or **Nightly**). Installing an update always asks for confirmation. v1.0.1 already trusts the same update key, so it can update in-app. v1.0.0 and other builds without the pinned key need one manual install of v1.0.2. Nightlies are not notarized and use ad-hoc macOS signatures, so install manually once when you switch between the stable and nightly channels on macOS. Flatpak builds have no in-app update path.
 
 ## First launch
 
-1. Open OpenNOW.
-2. Complete first-run onboarding when prompted, or replay it later from **Settings → About → Replay onboarding**.
-3. Sign in through the browser-based NVIDIA OAuth flow, or use **Sign in with QR** to authorize from another device. OpenNOW prefers the OS keychain for saved session tokens; if the keychain is unavailable, tokens fall back to an unencrypted local JSON store with an on-screen warning.
-4. Browse your library or the public catalog. Add or remove **GeForce NOW favorites** from the library (coverage may be partial; home pins are separate). Use Settings to link/resync supported store accounts when GFN requires account connections for owned games. The desktop **command palette** (`Ctrl+K`) can search remote games as well as local commands.
-5. Open Settings to choose bitrate, codec, region, interface language (`appLanguage`), stream profile, console/desktop preferences, and other options. Language and stream-profile choices are validated and shared across desktop and console Settings. Resolution and FPS choices follow the profiles reported by your current GFN subscription. Persistent in-game settings default **on** (`enablePersistingInGameSettings`) so supported games keep graphics preferences across sessions. Prefer **4:2:0** color quality — **4:4:4** profiles are labeled **Coming soon** and are not ready to use (Alliance Partner streams may also still fail; use NVIDIA when an Alliance session misbehaves). Optional **Save bandwidth** requests a steadier frame rate by letting the server trade resolution/image quality when the connection cannot sustain the selected profile.
-6. Use the same app in desktop (keyboard/mouse) or console (controller-first) layout. Console mode is a shell preference, not a separate download.
-7. Launch a game. When a title has multiple store variants, choose the platform (Steam, Xbox, Epic, and so on) before the session starts. Queue and server-selection screens appear when GFN requires them; free-tier queue comparison can include PrintedWaste-backed estimates where the capability allows. During launch, OpenNOW shows cloud session-setup steps (connecting, waiting for a rig, configuring the rig, storage/cleanup) and then native connection progress (initializing the stream, waiting for the first video frame). After a session ends, OpenNOW can show a privacy-safe session quality summary when `showSessionReport` is enabled (default on).
+1. Open OpenNOW and choose your provider: NVIDIA or an alliance partner.
+2. Select **Continue with** *provider* to open the provider's sign-in page in your browser, or **Sign in with a QR code** to approve the request from another device. Both use device authorization: approve the request, and OpenNOW continues on its own. **Stay signed in on this PC** keeps the session after restarts. OpenNOW prefers the OS keychain for saved session tokens; if the keychain is unavailable, tokens are saved unencrypted on disk and the sign-in screen says so. Accounts you signed in to before appear under **Saved accounts**.
+3. After sign-in, first-run setup opens. It has six steps: **Welcome**, **Mode** (desktop or console), **Picture**, **Boost**, **Support**, and **Ready**. Press `Esc` or select **Skip setup** to keep the defaults. Replay it later from **Settings → About & support → Replay onboarding**. On a Mac with an AWDL interface, v1.0.2 setup cannot finish until you disable Apple Wireless Direct Link (AWDL) with administrator authorization. This affects AirDrop, AirPlay, Sidecar, and other Continuity features for all users until you re-enable it.
+4. Browse your library or the public catalog. Add or remove **GeForce NOW favorites** from the library. Link or resync store accounts under **Settings → Account** when GeForce NOW needs a store connection for owned games. In the desktop layout, the command palette (`Ctrl+K`) searches remote games as well as local commands.
+5. Open Settings to tune the stream. **Stream** holds resolution, FPS, codec, bitrate, color quality, **Save bandwidth**, and **Persistent in-game settings** (`enablePersistingInGameSettings`, default **on**). Resolution and FPS choices follow your GeForce NOW membership. **Network** holds the server region, free-tier queue selector, L4S, and the API proxy. **Appearance** holds the interface language (`appLanguage`). Prefer **8-bit, YUV 4:2:0** color quality: **4:4:4** profiles are labeled **Coming soon** and do not work yet. Alliance-partner sessions may also fail; this is a known issue in v1.0.2. **Save bandwidth** (default off) lets the server trade resolution and image quality for a steadier frame rate when your connection cannot sustain the selected profile.
+6. Use the same app in the desktop (keyboard and mouse) or console (controller-first) layout. Console mode is a shell preference, not a separate download. **Settings → Console mode** has **Start in console mode**, **Enter console mode when a gamepad is the only input** (default off), and **Leave console mode on keyboard or mouse input** (default on).
+7. Launch a game. When a title has more than one store variant, choose the platform (Steam, Xbox, Epic, and so on) before the session starts. Queue and server-selection screens appear when GeForce NOW requires them; the free-tier queue selector can show PrintedWaste queue data. During launch, OpenNOW names the cloud setup step (for example **Waiting for an available rig** or **Configuring your cloud gaming rig**) and then the native connection progress. When a session ends, OpenNOW shows a session report if `showSessionReport` is on (default on).
 
-On Windows, if H.265 is unavailable, Settings can point you at Microsoft's HEVC Video Extensions (try the free Store offer first). Choosing 10-bit color shows a one-time stuttering warning. If the negotiated video color format differs from the requested profile, OpenNOW shows a one-time notice and keeps playback going. Background-stream options under Audio can mute the stream when OpenNOW loses focus and optionally request taskbar/dock attention every five minutes. Discord Rich Presence (`discordRichPresence`, default **off**) can show the streamed game as your Discord activity.
+<Nightly since="v1.0.3-nightly.1026.1">
 
-Some GFN catalog entries require a specific membership tier. When NVIDIA reports `INSUFFICIENT_PLAYABILITY`, OpenNOW shows a membership-upgrade launch error instead of treating it as a duplicate-session conflict.
+First-run setup is a guided sequence with one decision per step: **Mode**, **Picture**, **Network**, **Boost**, and **Ready**. **Skip setup** keeps the defaults, and **Finish and open library** saves your choices.
 
-Desktop streaming uses the in-process native NVST streamer. There is no web/Chromium streamer to fall back to. Export a diagnostic report through **Settings → About → Copy diagnostics** when something breaks. Report issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
+</Nightly>
+
+<Nightly since="v1.0.3-nightly.1046.1">
+
+AWDL suppression on macOS is optional. It is off by default and lives in **Settings → Network**; setup no longer requires it. When two or more accounts are saved, a **Who's playing?** picker opens at startup, and you can switch accounts without signing out. Each account keeps its own library, membership, and sign-in. To start as the last-used account instead, turn on **Skip “Who’s playing?”** in **Settings → Account**.
+
+</Nightly>
+
+On Windows, if H.265 is unavailable, Settings links to Microsoft's HEVC Video Extensions (try the free Store offer first). Choosing 10-bit color shows a one-time stuttering warning. If the negotiated video color format differs from the requested profile, OpenNOW shows a one-time **Stream color format changed** notice and keeps playing. **Settings → Audio → Mute when out of focus** silences the stream while you use another app. **Settings → Stream → Background stream reminder** requests taskbar or dock attention every 5 minutes while a stream runs in the background. Discord Rich Presence (`discordRichPresence`, default **off**, under **Settings → Account**) can show the streamed game as your Discord activity.
+
+Some GeForce NOW catalog entries require a specific membership tier. When NVIDIA reports insufficient playability, OpenNOW shows **Membership Upgrade Required** instead of treating it as a duplicate-session conflict.
+
+Desktop streaming uses the in-process native NVST streamer. There is no web/Chromium streamer to fall back to. Export a diagnostic report through **Settings → About & support → Copy diagnostics → Export** when something breaks. Report issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD).
 
 ![OpenNOW onboarding, step 02 Mode (Desk or couch?): the Desktop mode card is selected (compact rail, search, friends panel and a tight library grid, made for a monitor at arm's length) next to the Console mode card (big cover art, focus rings and button glyphs, fullscreen by default), with toggles to switch to console when a gamepad is the only input and to go fullscreen in console mode.](/illustrations/getting-started-mode.webp "In the app · Onboarding › Desk or couch")
 
 ## Build from source
 
-Use `main` for the release source or `dev` for ongoing development. Before building, install:
+Use `main` for the v1.0.2 release source or `dev` for ongoing development. Before building, install:
 
-- Qt 6.8+ with Quick, Multimedia, and ShaderTools
+- Qt 6.8+ with Quick, Quick Controls 2, Multimedia, Network, Test, and ShaderTools
 - CMake 3.24+ and a C++20 toolchain
-- SDL3, Cargo, and the media dependencies for your platform
+- SDL3, Rust with Cargo, and the media dependencies for your platform
 
-Linux also needs `pkg-config`, `libwayland-dev`, and `wayland-protocols`, even for X11 builds. You do not need Node.js or npm to build or run the desktop app.
+Linux also needs `pkg-config`, `libwayland-dev`, and `wayland-protocols`, even for X11 builds, plus the `libva` and `libva-drm` development packages and libclang for the native streamer. ARM64 Linux also needs `libdrm` and `libudev` development packages. You do not need Node.js or npm to build or run the desktop app.
 
 ```bash
 git clone --branch main https://github.com/OpenCloudGaming/OpenNOW.git
@@ -67,7 +85,7 @@ cmake --build build/opennow-qt
 ctest --test-dir build/opennow-qt --output-on-failure
 ```
 
-See the [Qt app guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/opennow-qt/README.md) for platform-specific details, hardware notes, and acceptance checks.
+The development executable is normally `build/opennow-qt/OpenNOW.exe` on Windows and `build/opennow-qt/opennow-qt` on Linux. See the [Qt app guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/opennow-qt/README.md) for platform-specific details, hardware notes, and acceptance checks.
 
 ## Local data
 

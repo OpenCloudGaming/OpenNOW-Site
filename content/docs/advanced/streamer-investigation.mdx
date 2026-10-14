@@ -1,12 +1,15 @@
 ---
 title: Native Streamer Architecture
-description: Advanced notes on the in-process Qt/native NVST streamer path
+description: Internals of the in-process NVST streamer, environment overrides, and what research shows about NVIDIA's official client
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Nightly } from '@/components/docs/Nightly';
+import DataChannelsTable from '@/components/docs/DataChannelsTable';
 import NativeEnvironmentVariablesTable from '@/components/docs/NativeEnvironmentVariablesTable';
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
 
-OpenNOW's desktop client streams through an in-process native NVST runtime loaded by Qt. This is not an experimental Electron child process, and there is no Chromium/WebRTC fallback. Report streaming issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD) with a diagnostics export when possible.
+OpenNOW's desktop client streams through an in-process native NVST runtime loaded by Qt. This is not an experimental Electron child process, and there is no Chromium/WebRTC fallback. This page covers internals. For backends, settings, and diagnostics as a user sees them, use [Native Streamer](/docs/reference/native-streamer/). Report streaming issues on [GitHub Issues](https://github.com/OpenCloudGaming/OpenNOW/issues) or [Discord](https://discord.gg/8EJYaJcNfD) with a diagnostics export when possible.
 
 ## Shipped design
 
@@ -15,7 +18,10 @@ GFN CloudMatch session ── Rust core ── session context ── Qt shell
                                               │
                                               └─ opennow-streamer-ffi (in-process)
                                                        │
-                                                       └─ NVST transport + platform decode
+                                                       ├─ RTSPS signaling (RTSP over secure WebSocket)
+                                                       ├─ Mjolnir SRTP video socket
+                                                       ├─ ICE/DTLS/SCTP bundle: audio, mic, RTCP, input
+                                                       └─ platform decode
                                                               │
                                                               └─ GPU texture → Qt scene graph
 ```
@@ -30,23 +36,128 @@ The Rust core owns authentication and CloudMatch session lifecycle. Qt owns wind
 | Qt shell | UI, overlays, QRhi device lending, desktop/console layouts |
 | Native streamer FFI | NVST lifecycle, decode/audio/input/recording, GPU frame tokens |
 
+The streamer workspace splits into `opennow-streamer-protocol` (local command DTOs), `opennow-streamer-core` (NVST lifecycle and recording), `opennow-streamer-transport` (Mjolnir SRTP, ICE/DTLS/SCTP, RTCP, input), `opennow-streamer-platform` plus per-OS crates (decode, audio, GPU frames), and `opennow-streamer-ffi` (the C ABI Qt loads).
+
+## Session and transport
+
+1. CloudMatch allocates a seat. The request marks WebSocket signaling (`wssignaling=1`).
+2. The streamer carries RTSP over a secure WebSocket: OPTIONS, DESCRIBE, SETUP, ANNOUNCE, PLAY, keepalive, and TEARDOWN. ANNOUNCE sends the client's stream settings as `x-nv-*` SDP attributes.
+3. Video arrives on a dedicated Mjolnir SRTP UDP socket. Audio, microphone, RTCP, and input share one ICE/DTLS/SCTP bundle socket.
+4. Lost video packets are requested with Mjolnir NACK-v2 (control command `0x317`) on `control_channel_partially_reliable`. Reed-Solomon FEC repairs what it can first. If a frame still cannot be decoded, the streamer requests an IDR frame (control command `0x302`).
+
+The bundle opens these SCTP data channels:
+
+<DataChannelsTable />
+
 ## Platform decode/render selection
 
 <NativePlatformVideoPathsTable variant="preferred" />
 
-`nativeVideoBackend` defaults to `auto`. Unsupported forced backends fail explicitly rather than silently selecting a different API.
-
-## Packaging
-
-Qt CMake builds `opennow-streamer-ffi` and installs it beside the executable and `opennow-core`. Look for `OpenNOW-Qt-…` packages. Linux packages may include a bundled FFmpeg fallback while GPU driver interfaces remain dynamically discovered.
+`nativeVideoBackend` defaults to `auto`. Unsupported forced backends fail explicitly rather than silently selecting a different API. The core checks the codec, bit depth, and chroma against the streamer's capability report before CloudMatch allocates a seat, so most unsupported profiles fail before a session starts. On Linux, the Video backend setting is passed per session; it does not change process environment variables.
 
 ## Environment overrides
 
 <NativeEnvironmentVariablesTable variant="advanced" />
 
+The app also sets variables for its own use. Do not set them by hand: `OPENNOW_APP_EXECUTABLE`, `OPENNOW_APP_PID`, `OPENNOW_UPDATE_PLAN`, and `OPENNOW_UPDATE_NONCE` pass state to the updater, and the `OPENNOW_NATIVE_*` input and renderer variables configure the legacy standalone streamer process.
+
+## Changes in nightly builds
+
+<Nightly since="v1.0.3-nightly.875.1">
+
+**WebRTC compatibility mode.** The core can allocate a session that uses a native WebRTC transport (the `str0m` library) instead of NVST. The streamer then runs the signaling WebSocket, SDP offer/answer, and ICE itself, and passes compressed frames to the same decoders. See [Protocol notes](/docs/reference/webrtc/).
+
+</Nightly>
+
+<Nightly since="v1.0.3-nightly.1026.1">
+
+- **Reference-frame invalidation.** After unrecoverable loss, the streamer sends the lost frame range as control command `0x301`, withholds dependent frames, and resumes on the next I, intra-refresh, or reference-picture-invalidation frame. An IDR request is the bounded backstop.
+- **Launch fallback.** Unsupported codec, chroma, or HDR requests degrade before a seat is allocated: missing HDR output clears HDR, software decode becomes 8-bit 4:2:0 SDR, 4:4:4 selects HEVC when it can decode it and otherwise drops to 4:2:0, and undecodable 10-bit SDR drops to 8-bit. Each step is logged as a `stream_profile_fallback` diagnostics event.
+- **Audio.** NVST audio RTP is reordered by timestamp in a jitter buffer that starts at 45 ms and grows by 20 ms per late-arrival burst, up to 200 ms. The microphone wraps Opus in RFC 2198 RED when the server offers it.
+- **Server timers.** Server idle-warning and termination control messages are parsed.
+
+</Nightly>
+
+<Nightly since="v1.0.3-nightly.990.1">
+
+**DroidDeck MediaCodec decode (Linux, opt-in).** With `OPENNOW_NATIVE_VIDEO_BACKEND=mediacodec` inside a DroidDeck session that has the bridge enabled, H.264 decodes on Android's hardware decoder. Decoded NV12 pixels are copied into the Vulkan uploader; this path is not zero-copy.
+
+</Nightly>
+
+<Nightly since="v1.0.3-nightly.1046.1">
+
+**AWDL suppression (macOS, opt-in).** An optional root LaunchDaemon keeps `awdl0` down while streaming. It is off by default, needs administrator approval to install, and can interrupt AirDrop, AirPlay, Sidecar, and Universal Control while active.
+
+</Nightly>
+
+## Observed in NVIDIA's official client
+
+<Callout type="warn" title="Research notes, not OpenNOW behavior">
+This section describes NVIDIA's official GeForce NOW client, not OpenNOW. It comes from static analysis of the Windows client 2.0.89.141 and the macOS client 2.0.87.131 (x86_64 code only), plus logs from one user's Windows sessions on NVIDIA-operated seats. No official binary was run for this research and nothing was measured. "Code" means a decompiled code path that can run, "strings" means a symbol or string in the binary, and "log" means the official client's own log showed it. Anything not listed here is unknown.
+</Callout>
+
+### Processes
+
+- The streaming engine runs inside the official app process. Two native libraries do the work: Geronimo (decode, render, audio, input) and Bifrost (CloudMatch, signaling, transport). (Windows: strings and log. macOS: strings.)
+- The separate `GeForceNOWStreamer` executable on Windows relaunches the main app and loads no streaming code. (Code and strings.)
+
+### Session and signaling
+
+- Signaling is RTSP carried over a secure WebSocket: OPTIONS, DESCRIBE, a video-only SETUP, ANNOUNCE, then PLAY. Responses carry header version `14.2`. (Windows log; macOS code.)
+- The codec is not part of the CloudMatch request. The client picks it locally after the session is allocated. (Windows log.)
+- ANNOUNCE writes a setting only when its value differs from the server's DESCRIBE offer. (Code.)
+- When several RTSP endpoints are listed, the client moves to the next one only on one specific error code. (Code.)
+
+### Transport and recovery
+
+- The logged Windows session used a dedicated SRTP video socket plus a DTLS bundle socket for audio, microphone, and six SCTP channels. The code also has a unified single-socket mode and an RTC media mode. (Log and code.)
+- DTLS accepts the peer certificate only if its fingerprint matches the one in the SDP, then exports SRTP keys. (Code.)
+- Lost video packets are requested with NACK-v2, control command `0x317`, up to 64 records per command. (Code.)
+- Reference-frame invalidation is control command `0x301`; an IDR request is `0x302`. A pending request is resent after 100 ms until a recovery frame arrives. (Code.)
+- The NACK feature is switched off and back on during high round-trip times. (Windows log.)
+
+### Video and color
+
+- Automatic codec choice prefers AV1, then HEVC, then H.264. H.264 is capped at 120 FPS. An explicitly chosen codec that cannot be decoded returns an error instead of switching codec. (Code; the cap also appears in logs.)
+- A 4:4:4 request selects HEVC when HEVC 4:4:4 decodes; otherwise chroma drops to 4:2:0. One logged Windows session asked for H.264 10-bit 4:4:4 and streamed HEVC 10-bit 4:4:4 SDR. (Code and log.)
+- 10-bit SDR also needs a server-side remote-config switch; without it the client uses 8-bit BT.709. (Code.)
+- Windows decodes with D3D11 video decoding (DXVA profiles) and presents through a flip-model swap chain that switches from 8-bit to 10-bit after the first 10-bit frame. (Code and log.)
+- macOS decodes with VideoToolbox and presents with Metal. (Code.)
+- Windows HDR output is PQ BT.2020 in a 10-bit swap chain. No scRGB output path was found. (Code.)
+
+### Audio and input
+
+- Game audio is Opus, 48 kHz, 5 ms frames, with RFC 2198 redundancy level 2. It passes through an adaptive jitter buffer that started at 80 ms, could reach 200 ms, and lowered its floor to 45 ms. (Windows log.)
+- Playback supports 2, 6, and 8 channels. (Code and log.)
+- Microphone capture uses a bundled WebRTC audio module with echo cancellation against the game audio. Noise suppression and gain control were off in the logged session. (Code and log.)
+- The SCTP input channels used stream IDs 0, 2, 4, 6, 8, and 10, and the partially reliable input threshold was 300 ms. (Log.)
+- Clipboard paste uses an NVST custom-message exchange with a 64 KiB limit. (Code and log.)
+
+### Where OpenNOW v1.0.2 differs
+
+| Area | Official client | OpenNOW v1.0.2 |
+| --- | --- | --- |
+| Loss recovery | Reference-frame invalidation and IDR | IDR request only (invalidation is in nightly builds) |
+| Audio jitter | Adaptive timestamp jitter buffer | Bounded playback queue, no timestamp jitter buffer (added in nightly builds) |
+| Audio channels | Up to 8 | Stereo |
+| Microphone | Echo cancellation | No echo cancellation |
+| Clipboard | Custom-message paste protocol | Text submitted through the streamer as input |
+| 4:4:4 in ANNOUNCE | Chroma value `1` | Chroma value `3` (`chroma_format_idc`); server acceptance is unknown |
+| PLAY response | Only 200 starts the stream | 200 or 455 |
+| Idle warning | Parsed from server timer messages | Not parsed (parsed in nightly builds) |
+
+### Still unknown
+
+- Whether servers accept every codec, bit depth, chroma, and HDR combination, and whether they accept OpenNOW's chroma encoding.
+- How alliance-partner seats differ from NVIDIA-operated seats.
+- HDR at runtime: none of the logged sessions used HDR.
+- The FEC algorithm details, the frame capture-time units, and which frame types the server sends in response to invalidation.
+- Whether the official Windows client sent any invalidation or IDR request in the logged sessions.
+- Which nibble of the frame-header byte holds the frame type. The research notes disagree.
+
 ## Diagnostics
 
-Native and Qt logs are collected through **Settings → About → Copy diagnostics**. Distinguish an entirely black application window from a stream-only black video surface when filing reports.
+Native and Qt logs are collected through **Settings → About & support → Copy diagnostics → Export**. Distinguish an entirely black application window from a stream-only black video surface when filing reports. For transport debugging, start the app from a terminal with `OPENNOW_NVST_TRACE=1`; the extra lines go to standard error, not to `native-streamer.log`.
 
 ## Known limitations
 
@@ -55,4 +166,4 @@ Native and Qt logs are collected through **Settings → About → Copy diagnosti
 - Nightly packages may be unsigned/not notarized.
 - Separate Android, iOS, Switch, and OpenNOW-Mac projects are not this Qt desktop path.
 
-For the full reference, use [Native Streamer](/docs/reference/native-streamer/). Historical Chromium notes remain on [Protocol notes](/docs/reference/webrtc/).
+For the full reference, use [Native Streamer](/docs/reference/native-streamer/). Electron-era WebRTC notes and the WebRTC compatibility mode are on [Protocol notes](/docs/reference/webrtc/).

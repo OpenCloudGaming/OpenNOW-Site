@@ -1,45 +1,73 @@
 ---
 title: Media
-description: Screenshots, recordings, and local media storage in OpenNOW
+description: Screenshots, recordings, replay clips, and local media storage in OpenNOW
 ---
 
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
 
-OpenNOW captures screenshots and records the source stream through the native desktop path. Media is listed in the app's Media UI. Recordings are written as Matroska (`.mkv`) files with optional JPEG thumbnails.
+OpenNOW saves screenshots and recordings of a stream to your Pictures folder. Screenshots are PNG images of the stream area. Recordings and replay clips copy the incoming video and audio into Matroska (`.mkv`) files without re-encoding. The **Captures** screen lists both.
 
 ## Storage locations
 
 <LocalDataLocationsTable variant="media" />
 
+The Qt app resolves the system Pictures folder (on Linux this follows your XDG user directories) and passes it to the core as `OPENNOW_PICTURES_DIR`, so both processes use one folder. Set `OPENNOW_PICTURES_DIR` yourself to use a different Pictures root; OpenNOW adds `OpenNOW/Screenshots` and `OpenNOW/Recordings` below it. A relative path is made absolute. An empty value turns the media library off.
+
+The Flatpak build has write access only to `OpenNOW/` in the Pictures folder (`--filesystem=xdg-pictures/OpenNOW:create`).
+
+**Settings → Recording** shows the save locations and has **Open folder** buttons for the recordings folder and the captures folder.
+
 ## Screenshots
 
-- Triggered by the screenshot shortcut (default `Ctrl+F11`) or stream/Media controls.
-- Written under `Pictures/OpenNOW/Screenshots/` unless `OPENNOW_PICTURES_DIR` overrides the Pictures root.
-- Supported extensions include PNG, JPG/JPEG, and WebP.
+- Press the screenshot shortcut (default `Ctrl+F11`) during a stream.
+- OpenNOW captures the stream area of the window as it appears on screen and saves it as PNG.
+- File name: `<game title>-<yyyyMMdd-HHmmss-zzz>.png`, with a UTC timestamp. Characters other than letters, digits, `.`, `_`, and `-` in the title become `-`.
+- The capture must be at least 64×64 pixels. If the desktop compositor blocks screen capture, OpenNOW shows "The desktop compositor did not allow OpenNOW to capture the stream."
+- From the Captures screen you can export a screenshot to another location as PNG, JPEG, or WebP.
 
 ## Recordings
 
-- Triggered by the recording shortcut (default `F12`) or stream/Media controls.
-- Native recordings target a new `.mkv` file under `Pictures/OpenNOW/Recordings/`.
-- Recording bitrate, resolution, and FPS preferences live in Settings (`recordingBitrateMbps`, `recordingResolution`, `recordingFps`).
-- Replay-buffer related preferences also exist in settings when the feature is enabled.
+- Press the recording shortcut (default `F12`) to start and again to stop. Recording needs an active native stream.
+- The native streamer writes the source video (H.264, H.265, or AV1, as negotiated) and Opus game audio into Matroska. No extra video encoder runs while you play.
+- Recordings follow the stream's resolution, frame rate, and bitrate. To change them, change the stream settings in **Settings → Stream**.
+- File name: `OpenNOW-<game title>-<milliseconds since epoch>.mkv`. The streamer writes to a hidden `.<name>.mkv.part` file and renames it when the recording is finalized. If recording fails, the part file is deleted.
+- A JPEG thumbnail is saved next to the recording as `<name>-thumb.jpg`. The Captures screen can regenerate it from the video (up to 960×540).
 
-## Media listing
+## Replay clips
 
-- Screenshots and recordings can be listed together and filtered by game where metadata is available.
-- Recording thumbnails use a companion `-thumb.jpg` when present.
-- Media can be revealed in the system file manager or deleted from the app.
+- Turn on **Settings → Recording → Enable replay buffer** before you start the session. The buffer keeps the last 15–120 seconds (default 30) within a 64–512 MiB memory limit (default 256).
+- Press the save-clip shortcut (default `Ctrl+F12`) to save the buffer as a clip. The file name has `-clip` after the game title.
+- Memory limits and keyframe spacing can make a clip shorter than the target length, or make OpenNOW wait for the next keyframe.
+
+## Captures screen
+
+- Lists the 100 newest screenshots and recordings, newest first, and can filter by game title.
+- Recognizes `.png`, `.jpg`, `.jpeg`, and `.webp` screenshots and `.mkv`, `.mp4`, `.webm`, `.mov`, and `.avi` recordings. Files ending in `-thumb` are treated as thumbnails, not captures.
+- Deleting a recording also deletes its thumbnail.
 
 ## Capture flow
 
 ```text
-Qt shell / shortcuts          Native streamer + core media helpers
-   │                                  │
-   ├─ screenshot request ────────────►│── write image under Screenshots/
-   │                                  │
-   ├─ start/stop recording ──────────►│── write Matroska under Recordings/
-   │◄── gallery listing ──────────────┤
+Qt shell / shortcuts               Native streamer + core media helpers
+   │                                       │
+   ├─ screenshot (window capture) ─────────┤── Qt writes PNG under Screenshots/
+   │                                       │
+   ├─ start/stop recording ───────────────►│── core picks the file name
+   │                                       │── streamer writes Matroska under Recordings/
+   │◄── Captures listing ──────────────────┤
 ```
+
+## Observed in NVIDIA's official client
+
+This section describes NVIDIA's official GeForce NOW client, not OpenNOW. It comes from static analysis of the Windows client 2.0.89.141 and the macOS client 2.0.87.131 (x86_64 code only), plus logs from one user's Windows sessions. No official binary was run and no capture was tested. Most capture evidence is names found in the binaries, which shows the code exists but not when it runs.
+
+- The macOS client has a capture library with separate instant-replay (DVR) and manual capture entry points, and it writes MP4 through AVAssetWriter. (Strings.)
+- The Windows client contains a recorder component with an H.264 target codec, an `ImageWriter` class, and a Media Foundation H.264 encoder. Its app loads Gallery, NvCamera, and ShareServer plugins. (Strings; the plugins appear in logs.)
+- Codec choice depends on recording support. On macOS, a failed H.264 encode test can remove HEVC and AV1 from automatic codec choice for small SDR 8-bit streams below 240 FPS. On Windows, the same kind of request falls back to H.264 when the client cannot re-encode. (Code.)
+
+Unknown: which capture calls a session reaches, whether recording uses the encoded stream or decoded frames, and how highlight capture is triggered.
+
+OpenNOW records the source stream to Matroska without re-encoding, so its codec choice does not depend on an encoder test.
 
 ## Related pages
 

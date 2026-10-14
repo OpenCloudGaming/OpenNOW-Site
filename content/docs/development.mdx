@@ -9,12 +9,12 @@ OpenNOW's active desktop client lives in `opennow-qt/` in the [OpenCloudGaming/O
 
 ## Prerequisites
 
-- Qt 6.8+ with Quick, Multimedia, and ShaderTools
+- Qt 6.8+ with Quick, Quick Controls 2, Multimedia, Network, Test, and ShaderTools
 - CMake 3.24+ and a C++20 toolchain
 - SDL3
 - Rust/Cargo
 - Platform media dependencies for the native streamer
-- Linux: `pkg-config`, `libwayland-dev`, and `wayland-protocols` (required even for X11 builds)
+- Linux: `pkg-config`, `libwayland-dev`, and `wayland-protocols` (required even for X11 builds), the `libva` and `libva-drm` development packages, and libclang; ARM64 Linux also needs `libdrm` and `libudev` development packages
 - A GeForce NOW account for end-to-end session testing
 
 ```bash
@@ -25,7 +25,7 @@ cmake --build build/opennow-qt
 ctest --test-dir build/opennow-qt --output-on-failure
 ```
 
-Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable.
+`main` matches the v1.0.2 release. Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable. The development executable is normally `build/opennow-qt/OpenNOW.exe` on Windows and `build/opennow-qt/opennow-qt` on Linux.
 
 ## Common commands
 
@@ -34,11 +34,14 @@ Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` a
 | `cmake -S opennow-qt -B build/opennow-qt …` | Configure the Qt app, core, and streamer FFI |
 | `cmake --build build/opennow-qt` | Build the desktop app |
 | `ctest --test-dir build/opennow-qt --output-on-failure` | Run Qt/C++ and related tests |
-| `cpack --config build/opennow-qt/CPackConfig.cmake …` | Create platform packages when packaging is configured |
+| `cmake --build build/opennow-qt --target opennow-ci-unit-tests` then `ctest --test-dir build/opennow-qt -L ci-unit --output-on-failure` | Run only the headless `ci-unit` Qt tests that CI runs |
+| `cmake --build build/opennow-qt --config Release --target package` | Create CPack packages: WiX MSI and ZIP on Windows, DMG and ZIP on macOS, DEB on Linux |
 
-The Qt CMake build compiles `opennow-streamer-ffi` with Cargo's release profile and links the resulting shared library into the app. There is no separate packaged streamer executable.
+The Qt CMake build compiles `opennow-streamer-ffi` with Cargo's release profile and links the resulting shared library into the app, including in Debug builds. On Linux it enables the bundled FFmpeg software decoder and native H.264 VA-API. There is no separate packaged streamer executable.
 
-Repository JavaScript under `scripts/` is for tools such as localization checks. It is not required to build or launch the desktop client.
+A direct developer CPack DEB uses the distribution's Qt and SDL3, so it needs Qt 6.8+ and SDL3 on the target system. Release DEBs instead bundle the AppImage runtime under `/opt/opennow`.
+
+Repository JavaScript under `scripts/` is for tools such as localization checks (`npm run locales:check`). It is not required to build or launch the desktop client.
 
 ## Source layout
 
@@ -49,6 +52,7 @@ native/opennow-streamer/     Native NVST transport, media, input, and Qt FFI
 locales/                     English source and Crowdin-managed translations
 docs/                        Architecture, protocols, acceptance, and release guides
 scripts/                     Repository-only tooling (for example localization)
+playnite/                    Playnite library integration (C#)
 .github/                     CI workflows and contributor guidance
 ```
 
@@ -64,10 +68,23 @@ See [Native Streamer](/docs/reference/native-streamer/) for runtime behavior, GP
 
 ## CI and releases
 
-Qt work uses the `qt-ci` / related Qt workflows on GitHub Actions. Public Qt packages use names like `OpenNOW-Qt-<version>-…`. The published Latest release is **v1.0.2** with Qt packages (`OpenNOW-Qt-1.0.2-…`). Promoting `dev` to `main` does not publish release artifacts by itself. Nightlies (for example `v1.0.3-nightly.*`) are typically published from `dev` as prereleases. Stable publication still requires the approved `qt-release-candidate` → `qt-stable-release` flow.
+Workflows in `.github/workflows/` on `main`:
+
+| Workflow (file) | Trigger | Purpose |
+| --- | --- | --- |
+| `qt-ci` (`qt-ci.yml`) | Pull requests and pushes to `dev` or `main` that touch the app, native code, locales, or workflows; manual dispatch | Lint, packaging-contract and localization checks, then native tests on `linux-x64`, `windows-x64`, and `macos-arm64`. A manual run also builds all five package platforms. With `publish_nightly=true` it publishes a nightly prerelease with signed update manifests |
+| `Qt checks` (`qt-checks.yml`) and `Qt unsigned build` (`qt-build.yml`) | Called by other workflows | Shared checks and package builds |
+| `Qt Flatpak build` (`qt-flatpak.yml`) | Manual | Builds and checks an x86_64 Flatpak bundle and uploads it as an artifact. It creates no release |
+| `qt-release-candidate` (`qt-release-candidate.yml`) | Manual, with an exact 40-character commit | Builds a signed production candidate: macOS Developer ID signing and notarization, optional Windows Authenticode, and isolated Ed25519 update signing. It does not publish a release |
+| `Qt update-signed stable release` (`qt-stable-release.yml`) | Manual, on `main` | Promotes a successful `qt-release-candidate` run for the exact `main` commit to a public Latest release without rebuilding |
+| `CodeQL Advanced` (`codeql.yml`) | Pushes, pull requests, weekly schedule | Code scanning |
+
+Public Qt packages use names like `OpenNOW-Qt-<version>-…`. The Latest release is **v1.0.2**, published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`v1.0.3-nightly.<run>.<attempt>`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release.
+
+The v1.0.2 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; Linux x64/ARM64 `.AppImage` and `.deb`; macOS Apple Silicon `.dmg` and `.zip`; two `.AppImage.zsync` sidecars; one `<asset>.manifest.json` per asset; `RELEASE-INFO.json`; and `SHA256SUMS`. Nightlies publish the macOS DMG only; their macOS ZIP is a CI validation artifact.
 
 Current package matrix:
 
 <ReleasePackageMatrixTable />
 
-Manual publication details live in the upstream [nightly guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-nightly-release.md) and [release-candidate guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-release-candidate.md). Prefer those docs over historical Electron packaging notes.
+Manual publication details live in the upstream [nightly guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-nightly-release.md), [release-candidate guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-release-candidate.md), and [stable release guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-unsigned-stable-release.md). Prefer those docs over historical Electron packaging notes.

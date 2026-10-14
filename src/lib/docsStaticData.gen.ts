@@ -74,12 +74,12 @@ export const pageTree = {
         "defaultOpen": true,
         "children": [
           {
-            "$id": "architecture/overview.md",
+            "$id": "architecture/overview.mdx",
             "type": "page",
             "name": "Architecture Overview",
             "description": "How the Qt shell, Rust core, and in-process native streamer fit together",
             "url": "/docs/architecture/overview",
-            "$ref": "architecture/overview.md"
+            "$ref": "architecture/overview.mdx"
           }
         ],
         "$id": "architecture",
@@ -95,18 +95,18 @@ export const pageTree = {
         "defaultOpen": true,
         "children": [
           {
-            "$id": "reference/authentication.md",
+            "$id": "reference/authentication.mdx",
             "type": "page",
             "name": "Authentication",
-            "description": "OAuth + PKCE, QR device login, and token lifecycle in OpenNOW",
+            "description": "QR/device sign-in, providers, saved accounts, profile PINs, and token lifecycle in OpenNOW",
             "url": "/docs/reference/authentication",
-            "$ref": "reference/authentication.md"
+            "$ref": "reference/authentication.mdx"
           },
           {
             "$id": "reference/webrtc.mdx",
             "type": "page",
-            "name": "Protocol notes (historical WebRTC)",
-            "description": "Historical Chromium/WebRTC signaling notes; not the default Qt desktop path",
+            "name": "Protocol notes (WebRTC)",
+            "description": "Electron-era Chromium/WebRTC signaling history, the native WebRTC compatibility mode in nightly builds, and how NVIDIA's official client uses WebRTC pieces",
             "url": "/docs/reference/webrtc",
             "$ref": "reference/webrtc.mdx"
           },
@@ -114,7 +114,7 @@ export const pageTree = {
             "$id": "reference/native-streamer.mdx",
             "type": "page",
             "name": "Native Streamer",
-            "description": "Production in-process NVST runtime, Qt GPU presentation, packaging, and diagnostics",
+            "description": "The in-process NVST streamer in the Qt app, its video backends per platform, and its diagnostics",
             "url": "/docs/reference/native-streamer",
             "$ref": "reference/native-streamer.mdx"
           },
@@ -122,7 +122,7 @@ export const pageTree = {
             "$id": "reference/media.mdx",
             "type": "page",
             "name": "Media",
-            "description": "Screenshots, recordings, and local media storage in OpenNOW",
+            "description": "Screenshots, recordings, replay clips, and local media storage in OpenNOW",
             "url": "/docs/reference/media",
             "$ref": "reference/media.mdx"
           },
@@ -138,7 +138,7 @@ export const pageTree = {
             "$id": "reference/configuration.mdx",
             "type": "page",
             "name": "Configuration",
-            "description": "Settings defaults, local data locations, and Qt-era preferences for OpenNOW",
+            "description": "Settings keys, defaults, ranges, Settings locations, and local data locations for OpenNOW",
             "url": "/docs/reference/configuration",
             "$ref": "reference/configuration.mdx"
           }
@@ -159,7 +159,7 @@ export const pageTree = {
             "$id": "advanced/streamer-investigation.mdx",
             "type": "page",
             "name": "Native Streamer Architecture",
-            "description": "Advanced notes on the in-process Qt/native NVST streamer path",
+            "description": "Internals of the in-process NVST streamer, environment overrides, and what research shows about NVIDIA's official client",
             "url": "/docs/advanced/streamer-investigation",
             "$ref": "advanced/streamer-investigation.mdx"
           }
@@ -181,7 +181,7 @@ const pages = {
     "markdownUrl": "/docs/advanced/streamer-investigation.md"
   },
   "architecture/overview": {
-    "path": "architecture/overview.md",
+    "path": "architecture/overview.mdx",
     "markdownUrl": "/docs/architecture/overview.md"
   },
   "development": {
@@ -205,7 +205,7 @@ const pages = {
     "markdownUrl": "/docs/index.md"
   },
   "reference/authentication": {
-    "path": "reference/authentication.md",
+    "path": "reference/authentication.mdx",
     "markdownUrl": "/docs/reference/authentication.md"
   },
   "reference/configuration": {
