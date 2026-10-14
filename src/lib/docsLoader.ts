@@ -1,6 +1,5 @@
 import { notFound } from '@tanstack/react-router';
 import type { SerializedPageTree } from 'fumadocs-core/source/client';
-import { slugsToMarkdownPath } from '@/lib/source';
 
 export type DocsLoaderData = {
   path: string;
@@ -10,7 +9,7 @@ export type DocsLoaderData = {
 
 export async function loadDocsPageData(slugs: string[]): Promise<DocsLoaderData> {
   if (import.meta.env.SSR) {
-    const { source } = await import('@/lib/source');
+    const { source, slugsToMarkdownPath } = await import('@/lib/source');
     const page = source.getPage(slugs);
     if (!page) throw notFound();
 
