@@ -1,0 +1,61 @@
+---
+title: Ports & team
+description: Every OpenNOW port, who maintains it, how far along it is, and where to get it
+icon: Users
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+OpenNOW started as a desktop client and now runs on phones, handhelds, and consoles. Most ports are separate projects with their own repository, release schedule, and maintainer. This page lists each one with its status, source, download, and the minimum hardware its repository states.
+
+<Callout type="info" title="Independent community projects">
+None of these ports are affiliated with NVIDIA, Sony, Nintendo, Apple, or Google. Every port needs your own GeForce NOW account. Console and handheld ports run as homebrew.
+</Callout>
+
+## Status levels
+
+| Status | Meaning |
+| --- | --- |
+| **Stable** | Published as a stable release and recommended for everyday play. |
+| **Beta** | Published builds you can install today. Expect rough edges and fast-moving changes. |
+| **Experimental** | A working prototype, or code without a published build. Expect bugs and missing features. |
+| **Coming soon** | Announced and in development. No release has been published yet. |
+
+## Ports
+
+| Port | Maintainers | Status | Source | Install | Minimum hardware |
+| --- | --- | --- | --- | --- | --- |
+| Desktop (Windows, macOS, Linux) | [zortosofficial1](https://github.com/zortos293) | Stable | [OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) | [Latest release](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) · [Getting Started](/docs/guides/getting-started) | Packages for Windows x64 and ARM64, Linux x64 and ARM64, and macOS on Apple silicon |
+| Raspberry Pi 4/5 | [zortosofficial1](https://github.com/zortos293) | Beta | [OpenNOW `docs/raspberry-pi.md`](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/raspberry-pi.md) | Linux ARM64 `.AppImage` or `.deb` from the [latest release](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) | Raspberry Pi 4 or 5 on Raspberry Pi OS Desktop, 64-bit (Trixie), with Mesa V3DV 25.1.6 or newer. The 32-bit OS is not supported. |
+| OpenNOW Mac | [anderson.oki](https://github.com/anderson-oki) | Beta | [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac) | [Mac releases](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) (`.dmg` or `.zip`) | macOS 15.6 or later. AV1 hardware decoding needs an M3 or later Apple silicon Mac. |
+| Android | [printedwaste](https://github.com/Kief5555) | Stable | [OpenNOW `android-native` branch](https://github.com/OpenCloudGaming/OpenNOW/tree/android-native/android) | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) · [beta APK](https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9) | Android 7.0 (API 24) or later |
+| iOS (iPhone and iPad) | [printedwaste](https://github.com/Kief5555) | Beta | Not public | [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2) | Not stated |
+| Nintendo Switch | [zortosofficial1](https://github.com/zortos293) | Beta | [OpenNOW-Switch](https://github.com/OpenCloudGaming/OpenNOW-Switch) | [Latest release](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) · [Nintendo Switch guide](/docs/guides/nintendo-switch) | A modded Switch with custom firmware and Homebrew Menu |
+| PlayStation 5 | [zortosofficial1](https://github.com/zortos293), koi_sats | Experimental | [OpenNOW-PS5](https://github.com/OpenCloudGaming/OpenNOW-PS5) | [PS5 releases](https://github.com/OpenCloudGaming/OpenNOW-PS5/releases) (directory package, not a PKG) | A PS5 that can run native homebrew, with a native homebrew directory loader such as ShadowMountPlus |
+| PS Vita | [josephinoo](https://github.com/josephinoo) | Beta | [OpenNOW-vita](https://github.com/OpenCloudGaming/OpenNOW-vita) | [Latest release](https://github.com/OpenCloudGaming/OpenNOW-vita/releases/latest) (`.vpk`) | Not stated. Confirmed working on an original PS Vita and in the Vita3K emulator. |
+| DualScreen | [zortosofficial1](https://github.com/zortos293) | Experimental | [OpenNOW `android-dual-screen` branch](https://github.com/OpenCloudGaming/OpenNOW/tree/android-dual-screen) | No build published | An Android handheld with a built-in second display, such as the AYN Thor |
+| 4handhelds | [dpadguy\_\_](https://github.com/dpadGuy) | Coming soon | [OpenNOW-4Handhelds](https://github.com/OpenCloudGaming/OpenNOW-4Handhelds) | No release yet | An R36S or other RK3326 handheld running dArkOS. Tested on an R36S clone with 1 GB of RAM. |
+
+## About each port
+
+**Desktop.** The Qt Quick app with the in-process native streamer. [Getting Started](/docs/guides/getting-started) covers every package, and [Troubleshooting](/docs/guides/troubleshooting) covers common problems.
+
+**Raspberry Pi 4/5.** The desktop app's Linux ARM64 build. Pi 4 decodes H.264 and HEVC in hardware. Pi 5 decodes HEVC in hardware and has no H.264 hardware decoder. Both decoder paths support 8-bit 4:2:0 SDR only. For a first check, select the V4L2 backend, HEVC, 8-bit 4:2:0, HDR off, and 1920×1080 at 60 FPS. The upstream guide still lists the per-board acceptance matrix that must pass before Pi support counts as hardware-validated.
+
+**OpenNOW Mac.** A separate native SwiftUI client with its own NVST transport, upscaling, ultrawide modes, and Steam Controller support. The README credits [Jayian1890](https://github.com/Jayian1890) for the base and core functionality.
+
+**Android and iOS.** The Android app ships on Google Play, with a direct beta APK for previews. The iOS app is in beta on TestFlight.
+
+**Nintendo Switch.** A native Borealis homebrew client derived from [SwitchNOW](https://github.com/Blade-Punisher/SwitchNOW) by Blade-Punisher. Follow the [Nintendo Switch guide](/docs/guides/nintendo-switch) to install it.
+
+**PlayStation 5.** A console-tested experimental alpha with hardware H.264 and HEVC Main10 decoding, GPU presentation, DualSense input, and an in-game keyboard. It is not a retail PlayStation application. [Portablelle](https://github.com/Portablelle) created the original PS5 port that this project continues.
+
+**PS Vita.** A native Rust homebrew client that uses the Vita's hardware H.264 decoder. josephinoo also maintains [rtc-vita](https://github.com/josephinoo/rtc-vita), a fork of the webrtc-rs `rtc` stack with PS Vita network-interface support and a direct H.264 path.
+
+**DualScreen.** On handhelds with a second built-in screen, OpenNOW runs a companion deck on the bottom screen: account and hours, search, presets, the queue, live stream statistics, a touch keyboard, and a trackpad. It turns on only when the second screen is built in. It lives on a development branch and has no published build yet.
+
+**4handhelds.** A controller UI that runs the OpenNOW core and native streamer on RK3326 handhelds, with Rockchip MPP video decoding. The repository has build instructions, and the first release is coming soon.
+
+## Help bring OpenNOW to more devices
+
+Want to help bring OpenNOW to more devices? Reach out to the team on the [OpenNOW Discord](https://discord.gg/8EJYaJcNfD). Tell us which device you want to target and what you have built so far.

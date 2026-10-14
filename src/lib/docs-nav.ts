@@ -17,6 +17,7 @@ import {
   Network,
   Radio,
   SlidersHorizontal,
+  Users,
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
@@ -25,6 +26,7 @@ import {
 const PAGE_ICONS: Record<string, LucideIcon> = {
   '/docs': MonitorPlay,
   '/docs/guides/getting-started': Download,
+  '/docs/guides/ports-and-team': Users,
   '/docs/guides/troubleshooting': CircleHelp,
   '/docs/guides/nintendo-switch': Gamepad2,
   '/docs/development': Wrench,

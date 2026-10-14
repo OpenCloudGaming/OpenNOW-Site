@@ -10,12 +10,12 @@ import { Card, Cards } from 'fumadocs-ui/components/card';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
-import { CircleHelp, Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal } from 'lucide-react';
+import { CircleHelp, Cpu, Download, Gamepad2, Network, Radio, SlidersHorizontal, Users } from 'lucide-react';
 import { Nightly } from '@/components/docs/Nightly';
 
-OpenNOW is an open-source GeForce NOW client. The desktop app uses Qt Quick for the interface and Rust for account services and streaming. Desktop and controller-first console layouts live in the same app. Separate Android, iOS, and [OpenNOW-Switch](/docs/guides/nintendo-switch) builds are available for other platforms.
+OpenNOW is an open-source GeForce NOW client. The desktop app uses Qt Quick for the interface and Rust for account services and streaming. Desktop and controller-first console layouts live in the same app. Separate ports cover Android, iOS, [Nintendo Switch](/docs/guides/nintendo-switch), PS5, PS Vita, and handhelds. [Ports & team](/docs/guides/ports-and-team) lists every port with its maintainer, status, and download.
 
-For macOS users looking for a separate performance-focused build, Jayian1890 maintains [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac).
+For macOS users looking for a separate native build optimized for Apple M-series Macs, anderson.oki maintains [OpenNOW-Mac](https://github.com/OpenCloudGaming/OpenNOW-Mac).
 
 <Callout type="info" title="Independent community project">
 OpenNOW is not affiliated with NVIDIA. NVIDIA and GeForce NOW are trademarks of NVIDIA Corporation.
@@ -32,6 +32,7 @@ The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, publis
 <Cards>
   <Card title="Install and play" icon={<Download />} href="/docs/guides/getting-started" description="Qt packages, first launch, desktop/console shells, settings, and CMake source builds." />
   <Card title="Troubleshoot a problem" icon={<CircleHelp />} href="/docs/guides/troubleshooting" description="Fast checks for sign-in, launch, video, network, audio, input, and native streaming issues." />
+  <Card title="Ports & team" icon={<Users />} href="/docs/guides/ports-and-team" description="Every OpenNOW port: Pi, Mac, Android, iOS, Switch, PS5, Vita, and handhelds, with maintainers and status." />
   <Card title="Nintendo Switch" icon={<Gamepad2 />} href="/docs/guides/nintendo-switch" description="Install the native homebrew client, sign in, tune streaming, and create HOME-screen shortcuts." />
   <Card title="Architecture map" icon={<Network />} href="/docs/architecture/overview" description="Qt shell, Rust core JSON protocol, and in-process streamer FFI." />
   <Card title="Configuration reference" icon={<SlidersHorizontal />} href="/docs/reference/configuration" description="Settings defaults, local data locations, and Qt-era preferences." />
@@ -63,6 +64,7 @@ The GitHub Latest release is **v1.0.2** (`OpenNOW-Qt-1.0.2-…` packages, publis
   <Tab>
     - Start with [Getting Started](/docs/guides/getting-started).
     - Use [Nintendo Switch](/docs/guides/nintendo-switch) for homebrew installation, controls, and Switch-specific streaming settings.
+    - Use [Ports & team](/docs/guides/ports-and-team) to find the right build for a phone, console, or handheld.
     - Keep [Configuration](/docs/reference/configuration) open when tuning quality, shortcuts, capture, and console mode.
     - Use [Media](/docs/reference/media) for screenshots, recordings, local storage, and gallery behavior.
   </Tab>

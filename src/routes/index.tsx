@@ -6,16 +6,23 @@ import {
   CircleHelp,
   Code2,
   CornerDownLeft,
+  Cpu,
   Download,
   FlaskConical,
+  Gamepad,
   Gamepad2,
+  GamepadDirectional,
   Gauge,
+  Joystick,
   Laptop,
+  MessageCircle,
   MonitorPlay,
   Radio,
+  Rows2,
   ShieldCheck,
   SlidersHorizontal,
   Smartphone,
+  Users,
   Wifi,
   type LucideIcon,
 } from 'lucide-react';
@@ -24,7 +31,7 @@ import { track } from '@/lib/analytics';
 import { DesktopDownloads } from '@/components/desktop-downloads';
 import { releases } from '@/lib/releases.gen';
 import { HomeShell } from '@/components/home-shell';
-import { BrandMark } from '@/components/console';
+import { BrandMark, consoleLinks } from '@/components/console';
 
 const quickLinks: { title: string; description: string; splat: string; icon: LucideIcon }[] = [
   {
@@ -80,6 +87,18 @@ const deepDives = [
   ['Protocol notes', 'Historical Chromium/WebRTC path notes retained for signaling and SDP context.', 'reference/webrtc', Wifi, true],
 ] as const;
 
+type PortStatus = 'Stable' | 'Beta' | 'Experimental' | 'Coming soon';
+
+const statusChip: Record<PortStatus, string> = {
+  Stable: 'border-mint/28 bg-mint/10 text-mint',
+  Beta: 'border-sky/28 bg-sky/10 text-sky',
+  Experimental: 'border-amber/28 bg-amber/10 text-amber',
+  'Coming soon': 'border-seam-soft bg-white/3 text-muted',
+};
+
+const portCard = 'group flex h-full flex-col gap-3 rounded-[14px] border p-[18px] transition-colors sm:min-h-[232px] sm:gap-3.5 sm:p-5';
+const portCardIdle = 'border-seam-soft bg-glass hover:border-seam hover:bg-white/5';
+
 const downloads: {
   title: string;
   description: string;
@@ -87,16 +106,40 @@ const downloads: {
   href: string;
   icon: LucideIcon;
   cta: string;
+  status: PortStatus;
+  maintainers: string;
   featured?: boolean;
 }[] = [
   {
     title: 'Desktop',
-    description: 'Qt Quick + native NVST client. Latest published desktop packages are OpenNOW-Qt (v1.0.2); historical tags may still ship Electron.',
+    description: 'Qt Quick + native NVST client for Windows, macOS, and Linux. Latest published desktop packages are OpenNOW-Qt (v1.0.2); historical tags may still ship Electron.',
     format: '.msi · .zip · .AppImage · .deb · .dmg',
     href: 'https://github.com/OpenCloudGaming/OpenNOW/releases',
     icon: Laptop,
     cta: 'Browse desktop builds',
+    status: 'Stable',
+    maintainers: 'zortosofficial1',
     featured: true,
+  },
+  {
+    title: 'Raspberry Pi 4/5',
+    description: 'The desktop app’s Linux ARM64 build on 64-bit Raspberry Pi OS, with V4L2 hardware HEVC decoding.',
+    format: 'ARM64 .AppImage · .deb',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW/releases/latest',
+    icon: Cpu,
+    cta: 'Get the ARM64 build',
+    status: 'Beta',
+    maintainers: 'zortosofficial1',
+  },
+  {
+    title: 'OpenNOW Mac',
+    description: 'A separate native SwiftUI client for macOS 15.6 or later, optimized for Apple M-series Macs.',
+    format: 'macOS .dmg · .zip',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-Mac/releases',
+    icon: Laptop,
+    cta: 'View Mac releases',
+    status: 'Beta',
+    maintainers: 'anderson.oki',
   },
   {
     title: 'Android',
@@ -105,30 +148,8 @@ const downloads: {
     href: 'https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow',
     icon: Smartphone,
     cta: 'Open Google Play',
-  },
-  {
-    title: 'Nintendo Switch',
-    description: 'A native controller-first client for modded Switch systems.',
-    format: 'SwitchNOW.nro',
-    href: 'https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest',
-    icon: Gamepad2,
-    cta: 'Get the Switch build',
-  },
-  {
-    title: 'iPhone and iPad',
-    description: 'Install the current iOS beta through Apple TestFlight.',
-    format: 'TestFlight beta',
-    href: 'https://testflight.apple.com/join/u1XPJKH2',
-    icon: Smartphone,
-    cta: 'Open TestFlight',
-  },
-  {
-    title: 'OpenNOW Mac',
-    description: 'A separate performance-focused macOS build by Jayian1890.',
-    format: 'macOS .zip',
-    href: 'https://github.com/OpenCloudGaming/OpenNOW-Mac/releases',
-    icon: Laptop,
-    cta: 'View Mac releases',
+    status: 'Stable',
+    maintainers: 'printedwaste',
   },
   {
     title: 'Android Beta',
@@ -137,6 +158,68 @@ const downloads: {
     href: 'https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9',
     icon: FlaskConical,
     cta: 'Download beta APK',
+    status: 'Beta',
+    maintainers: 'printedwaste',
+  },
+  {
+    title: 'iPhone and iPad',
+    description: 'Install the current iOS beta through Apple TestFlight.',
+    format: 'TestFlight beta',
+    href: 'https://testflight.apple.com/join/u1XPJKH2',
+    icon: Smartphone,
+    cta: 'Open TestFlight',
+    status: 'Beta',
+    maintainers: 'printedwaste',
+  },
+  {
+    title: 'Nintendo Switch',
+    description: 'A native controller-first client for modded Switch systems.',
+    format: 'SwitchNOW.nro',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest',
+    icon: Gamepad2,
+    cta: 'Get the Switch build',
+    status: 'Beta',
+    maintainers: 'zortosofficial1',
+  },
+  {
+    title: 'PlayStation 5',
+    description: 'A console-tested native prototype with hardware decoding and DualSense controls, for PS5 systems that run native homebrew.',
+    format: 'Homebrew .zip',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-PS5/releases',
+    icon: Gamepad,
+    cta: 'View PS5 releases',
+    status: 'Experimental',
+    maintainers: 'zortosofficial1 · koi_sats',
+  },
+  {
+    title: 'PS Vita',
+    description: 'A native Rust homebrew client with hardware H.264 decoding, confirmed working on an original PS Vita.',
+    format: '.vpk',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-vita/releases/latest',
+    icon: GamepadDirectional,
+    cta: 'Get the Vita build',
+    status: 'Beta',
+    maintainers: 'josephinoo',
+  },
+  {
+    title: 'DualScreen',
+    description: 'A bottom-screen companion deck for Android handhelds with a built-in second display, such as the AYN Thor. No build is published yet.',
+    format: 'Android · branch',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW/tree/android-dual-screen',
+    icon: Rows2,
+    cta: 'View the branch',
+    status: 'Experimental',
+    maintainers: 'zortosofficial1',
+  },
+  {
+    title: '4handhelds',
+    description: 'A port for the R36S and other RK3326 handhelds running dArkOS. The first release has not shipped yet.',
+    format: 'R36S · RK3326',
+    href: 'https://github.com/OpenCloudGaming/OpenNOW-4Handhelds',
+    icon: Joystick,
+    cta: 'Follow the repo',
+    status: 'Coming soon',
+    maintainers: 'dpadguy__',
   },
 ];
 
@@ -337,31 +420,41 @@ function Home() {
             <div className="flex flex-1 flex-col gap-3.5">
               <Kicker>Downloads</Kicker>
               <SectionHeading index="02" id="downloads-title">Pick the build made for your screen.</SectionHeading>
-              <p className="text-base leading-[26px] text-body sm:pl-12 sm:text-[17px] sm:leading-[27px]">Stable releases, platform-native clients, and previews—all in one place.</p>
+              <p className="text-base leading-[26px] text-body sm:pl-12 sm:text-[17px] sm:leading-[27px]">Every OpenNOW port, who builds it, and how far along it is—all in one place.</p>
             </div>
-            <a href="https://github.com/OpenCloudGaming/OpenNOW/releases" className="inline-flex w-fit items-center gap-2 pb-1 text-sm font-extrabold text-mint hover:underline hover:underline-offset-4">
-              <Code2 className="size-[15px]" aria-hidden /> View release notes <ArrowUpRight className="size-[15px]" aria-hidden />
-            </a>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              <Link
+                to="/docs/$"
+                params={{ _splat: 'guides/ports-and-team' }}
+                onClick={() => track('home_doc_card_clicked', { title: 'Ports & team', href: '/docs/guides/ports-and-team' })}
+                className="inline-flex w-fit items-center gap-2 pb-1 text-sm font-extrabold text-mint hover:underline hover:underline-offset-4"
+              >
+                <Users className="size-[15px]" aria-hidden /> Meet the team <ArrowRight className="size-[15px]" aria-hidden />
+              </Link>
+              <a href="https://github.com/OpenCloudGaming/OpenNOW/releases" className="inline-flex w-fit items-center gap-2 pb-1 text-sm font-extrabold text-mint hover:underline hover:underline-offset-4">
+                <Code2 className="size-[15px]" aria-hidden /> View release notes <ArrowUpRight className="size-[15px]" aria-hidden />
+              </a>
+            </div>
           </div>
           <ul className="mt-6 grid gap-3 sm:mt-9 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {downloads.map(({ title, description, format, href, icon, cta, featured }) => (
+            {downloads.map(({ title, description, format, href, icon, cta, status, maintainers, featured }) => (
               <li key={title}>
                 <a
                   href={href}
                   onClick={() => track('home_download_clicked', { platform: title, href })}
-                  className={`group flex h-full flex-col gap-3 rounded-[14px] border p-[18px] transition-colors sm:min-h-[232px] sm:gap-3.5 sm:p-5 ${
-                    featured
-                      ? 'border-mint/36 bg-linear-150 from-mint/10 via-white/2 via-60% to-white/2 hover:border-mint/60'
-                      : 'border-seam-soft bg-glass hover:border-seam hover:bg-white/5'
-                  }`}
+                  className={`${portCard} ${featured ? 'border-mint/36 bg-linear-150 from-mint/10 via-white/2 via-60% to-white/2 hover:border-mint/60' : portCardIdle}`}
                 >
                   <span className="flex items-start justify-between gap-3">
                     <IconTile icon={icon} className="size-[38px] rounded-[10px] sm:size-10" />
                     <span className="rounded-md border border-seam-soft bg-white/3 px-[9px] py-[5px] text-right font-mono text-[11px] font-medium leading-[14px] text-muted">{format}</span>
                   </span>
                   <span className="flex flex-col gap-1 sm:gap-1.5 sm:pt-1.5">
-                    <span className="text-[19px] font-black leading-6 tracking-[-0.01em] text-ink sm:text-xl sm:leading-[26px]">{title}</span>
+                    <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                      <span className="text-[19px] font-black leading-6 tracking-[-0.01em] text-ink sm:text-xl sm:leading-[26px]">{title}</span>
+                      <span className={`rounded-[5px] border px-1.5 py-[3px] font-mono text-[10px] font-semibold uppercase leading-3 tracking-[0.08em] ${statusChip[status]}`}>{status}</span>
+                    </span>
                     <span className="text-sm leading-[21px] text-muted sm:leading-[22px]">{description}</span>
+                    <span className="font-mono text-xs leading-4 text-body">by {maintainers}</span>
                   </span>
                   <span className="mt-auto inline-flex items-center gap-1.5 pt-1 text-sm font-extrabold text-mint">
                     {cta} <ArrowUpRight className="size-[15px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
@@ -369,11 +462,34 @@ function Home() {
                 </a>
               </li>
             ))}
+            <li>
+              <a
+                href={consoleLinks.discord}
+                onClick={() => track('home_cta_clicked', { cta: 'help_port', location: 'downloads' })}
+                className={`${portCard} ${portCardIdle}`}
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <IconTile icon={MessageCircle} className="size-[38px] rounded-[10px] sm:size-10" />
+                  <span className="rounded-md border border-seam-soft bg-white/3 px-[9px] py-[5px] text-right font-mono text-[11px] font-medium leading-[14px] text-muted">Discord</span>
+                </span>
+                <span className="flex flex-col gap-1 sm:gap-1.5 sm:pt-1.5">
+                  <span className="text-[19px] font-black leading-6 tracking-[-0.01em] text-ink sm:text-xl sm:leading-[26px]">Your device next</span>
+                  <span className="text-sm leading-[21px] text-muted sm:leading-[22px]">Want to help bring OpenNOW to more devices? Reach out to the team!</span>
+                </span>
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-1 text-sm font-extrabold text-mint">
+                  Join the Discord <ArrowUpRight className="size-[15px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
+                </span>
+              </a>
+            </li>
           </ul>
           <p className="mt-4 text-sm leading-[22px] text-muted sm:mt-[18px]">
             Nintendo Switch requires custom firmware and Homebrew Menu.{' '}
             <Link to="/docs/$" params={{ _splat: 'guides/nintendo-switch' }} className="font-extrabold text-mint hover:underline hover:underline-offset-4">
               Read the installation guide
+            </Link>
+            . Status, maintainers, and hardware requirements for every port are in{' '}
+            <Link to="/docs/$" params={{ _splat: 'guides/ports-and-team' }} className="font-extrabold text-mint hover:underline hover:underline-offset-4">
+              Ports &amp; team
             </Link>
             .
           </p>
