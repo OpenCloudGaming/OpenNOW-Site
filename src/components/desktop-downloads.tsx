@@ -160,7 +160,7 @@ export function DesktopDownloads() {
             <a
               href={`https://github.com/${REPO}/releases`}
               onClick={() => track('home_download_clicked', { platform: 'desktop-fallback', href: 'releases' })}
-              className="inline-flex items-center gap-2 rounded-[9px] bg-mint px-4 py-2 text-sm font-extrabold text-mint-ink transition-colors hover:bg-[#7bedb9]"
+              className="inline-flex items-center gap-2 rounded-[9px] bg-mint px-4 py-2 text-sm font-extrabold text-mint-ink transition-colors hover:bg-[#93efca]"
             >
               Browse all releases <ArrowUpRight className="size-4" aria-hidden />
             </a>
@@ -193,7 +193,7 @@ export function DesktopDownloads() {
                         <a
                           href={primary.browser_download_url}
                           onClick={() => track('home_download_clicked', { platform: platform.id, channel, asset: primary.name })}
-                          className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-mint px-3.5 text-sm font-extrabold text-mint-ink transition-colors hover:bg-[#7bedb9] sm:h-[38px] sm:w-fit sm:rounded-lg"
+                          className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-mint px-3.5 text-sm font-extrabold text-mint-ink transition-colors hover:bg-[#93efca] sm:h-[38px] sm:w-fit sm:rounded-lg"
                         >
                           <Download className="size-[15px]" aria-hidden /> {platform.primary.label} · {formatSize(primary.size)}
                         </a>

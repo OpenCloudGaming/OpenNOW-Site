@@ -59,7 +59,7 @@ export function JumpTo() {
   return (
     <section
       aria-labelledby="jump-to-label"
-      className="overflow-hidden rounded-[14px] border border-mint/22 bg-[linear-gradient(180deg,rgb(86_230_165/5%),rgb(255_255_255/2%))]"
+      className="overflow-hidden rounded-[14px] border border-mint/22 bg-[linear-gradient(180deg,rgb(110_231_183/5%),rgb(255_255_255/2%))]"
     >
       <div className="flex items-center gap-2 border-b border-mint/16 px-4 py-3">
         <CornerDownLeft aria-hidden="true" className="size-3.5 text-mint" />

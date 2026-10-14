@@ -158,7 +158,7 @@ export function ConsolePageHeader({ title, description, markdownUrl, githubUrl }
       <div className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-x-3.5 gap-y-3 lg:grid-cols-[76px_minmax(0,1fr)] lg:gap-x-6 lg:gap-y-2">
         <span
           aria-hidden="true"
-          className="col-start-1 row-start-1 inline-flex size-12 items-center justify-center rounded-[13px] border border-mint/30 bg-[linear-gradient(160deg,rgb(86_230_165/20%),rgb(86_230_165/4%))] text-mint shadow-[0_0_40px_rgb(86_230_165/12%)] lg:row-span-2 lg:size-[76px] lg:rounded-[20px]"
+          className="col-start-1 row-start-1 inline-flex size-12 items-center justify-center rounded-[13px] border border-mint/30 bg-[linear-gradient(160deg,rgb(110_231_183/20%),rgb(110_231_183/4%))] text-mint shadow-[0_0_40px_rgb(110_231_183/12%)] lg:row-span-2 lg:size-[76px] lg:rounded-[20px]"
         >
           <Icon className="size-6 lg:size-9" strokeWidth={1.6} />
         </span>
