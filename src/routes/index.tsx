@@ -192,7 +192,7 @@ const downloads: {
     maintainers: 'zortosofficial1',
   },
   {
-    title: '4handhelds',
+    title: '4Handhelds',
     description: 'A port for the R36S and other RK3326 handhelds running dArkOS. The first release has not shipped yet.',
     format: 'R36S · RK3326',
     href: 'https://github.com/OpenCloudGaming/OpenNOW-4Handhelds',
