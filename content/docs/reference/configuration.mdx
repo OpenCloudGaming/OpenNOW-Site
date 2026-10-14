@@ -70,7 +70,11 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 
 ![OpenNOW onboarding, step 03 Picture (Pick your picture): the detected GPU, monitor, HDR, hardware codecs and measured line, then Resolution 1440p, Frame rate 120, HDR on, Codec AV1 and Bitrate 75 Mbps, next to a live preview of the stream and a line budget bar.](/illustrations/configuration-picture.webp "In the app · Onboarding › Pick your picture")
 
+<Nightly since="v1.0.3-nightly.983.1">
+
 ![OpenNOW console mode, Settings › Streaming: Codec with Auto, AV1, H.264 and H.265, Color quality focused on 10-bit 4:2:0, HDR off because the display does not report HDR support, Max bitrate 75 Mbps, Fallback codec Auto, Frame generation (experimental) off, Cloud G-Sync on and Stats overlay on launch, each marked as applying from the next session.](/illustrations/configuration-streaming.webp "In the app · Console mode › Settings › Streaming")
+
+</Nightly>
 
 ## Capture and recording
 
@@ -107,6 +111,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `controllerRightStickDeadzone` | `number` | `5` | Right-stick dead zone in percent, 0–50. **Settings → Controls → Right stick dead zone** |
 | `controllerVibrationIntensity` | `number` | `100` | Vibration strength in percent, 0–100. **Settings → Controls → Controller vibration** |
 | `controllerProfiles` <Nightly since="v1.0.3-nightly" /> | `object` | `{}` | Per-controller dead zones and vibration, keyed by controller. A controller without its own values uses the three settings above. Edited in the `Ctrl+G` drawer under **Controllers** |
+| `forwardFlightControls` <Nightly since="v1.0.3-nightly" /> | `boolean` | `true` | Forwards supported flight sticks, throttles, pedals, and wheels to the game as the real HID device instead of an Xbox controller. **Settings → Controls → Forward flight sticks and wheels as native devices** |
 | `enableGyroscopeControls` | `boolean` | `false` | **Settings → Controls → Gyroscope**. v1.0.2 stores this toggle but does not send motion data |
 
 ## Statistics and session overlays

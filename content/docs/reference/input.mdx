@@ -66,6 +66,8 @@ The session menu is a drawer docked on the left edge. Its quick toggles (statist
 
 The **Controllers** page in the drawer shows each connected pad. For each pad you can set left and right stick dead zones and vibration strength, test the sticks and rumble, apply the values to all pads, or reset the pad to the defaults from **Settings → Controls**. Values are saved per pad in `controllerProfiles` and apply immediately. You can also make one pad the only Player 1 until the app restarts.
 
+![OpenNOW Ctrl+G Controllers page: forwarded flight devices with Active and Declined badges, a No controller connected card, and the default left and right stick dead zone and vibration sliders shared with Settings › Controllers.](/illustrations/input-controllers.webp "In the app · Ctrl+G menu › Controllers")
+
 </Nightly>
 
 ## Anti-AFK
@@ -154,9 +156,23 @@ Outside gameplay, controllers drive the OpenNOW interface when **Controller inpu
 | `controllerProfiles` <Nightly since="v1.0.3-nightly" /> | Per-controller dead zones and vibration |
 | `controllerVibrationIntensity` | Rumble intensity |
 
-![OpenNOW Ctrl+G Controllers page: forwarded flight devices with Active and Declined badges, a No controller connected card, and the default left and right stick dead zone and vibration sliders shared with Settings › Controllers.](/illustrations/input-controllers.webp "In the app · Ctrl+G menu › Controllers")
+<Nightly since="v1.0.3-nightly.983.1">
 
 ![OpenNOW console mode, Settings › Input & controllers: player slots P1 DualSense Wireless Controller and P2 Xbox Wireless Controller with battery levels, P3 and P4 waiting for a button press, then Button glyphs detected from the active controller, Gyroscope, the left and right stick dead zone sliders, Vibration and Mouse sensitivity, each applying live.](/illustrations/input-settings.webp "In the app · Console mode › Settings › Input & controllers")
+
+</Nightly>
+
+### Flight controls and wheels
+
+<Nightly since="v1.0.3-nightly">
+
+Supported flight sticks, throttles, rudder pedals, and wheels reach the game as the real HID device, not as an Xbox controller. Games read every axis, button, and hat switch. The supported list has 18 USB vendor and product IDs from Thrustmaster, Logitech, Saitek, and Mad Catz, including the HOTAS Warthog, T.Flight, TWCS, X52, X56, and Logitech G29/G920/G923/G PRO/RS50 families. A device on the list can still be declined by the server; a declined device stays idle and is not turned into a controller.
+
+**Settings → Controls → Forward flight sticks and wheels as native devices** (`forwardFlightControls`, default on) controls this. When it is off, a device that SDL recognizes as a gamepad is sent as an Xbox controller with fewer axes and buttons, and other devices are ignored. Settings and the Ctrl+G **Controllers** page list each device as ready, active in the session, or declined by the server.
+
+Input to these devices stops when OpenNOW loses focus, when a local overlay opens, and when the session ends, and buttons are released first. Set dead zones and curves in the game. A T.Flight HOTAS 4 must enter HID mode before each session: unplug it, hold **SHARE + OPTIONS**, and reconnect USB.
+
+</Nightly>
 
 ## Clipboard paste
 
