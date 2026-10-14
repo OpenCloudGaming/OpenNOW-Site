@@ -117,117 +117,128 @@ export function DesktopDownloads() {
   const checksums = state.status === 'ready' ? state.release.assets.find((asset) => asset.name === 'SHA256SUMS') : undefined;
 
   return (
-    <div className="mt-14">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div className="mt-12 sm:mt-14">
+      <div className="flex flex-col justify-between gap-3.5 sm:flex-row sm:items-end sm:gap-6">
         <div>
-          <h3 className="text-xl font-semibold tracking-tight text-fd-foreground">Desktop packages</h3>
-          <p className="mt-1 text-sm leading-6 text-fd-muted-foreground">Direct downloads for the current stable release and the latest nightly.</p>
+          <h3 className="flex items-center gap-2.5 text-[21px] font-black leading-[27px] text-ink sm:text-[22px] sm:leading-7 sm:tracking-[-0.01em]">
+            <Terminal className="size-4 text-mint" aria-hidden />
+            Desktop packages
+          </h3>
+          <p className="mt-1 text-[15px] leading-6 text-muted">Direct downloads for the current stable release and the latest nightly.</p>
         </div>
-        <div className="inline-flex w-fit rounded-xl border bg-fd-card/75 p-1 text-sm font-semibold" role="tablist" aria-label="Release channel">
+        <div className="flex w-full gap-1 rounded-[10px] border border-seam bg-glass p-1 sm:w-fit" role="tablist" aria-label="Release channel">
           {(['stable', 'nightly'] as const).map((option) => (
             <button
               key={option}
               role="tab"
               aria-selected={channel === option}
               onClick={() => setChannel(option)}
-              className={`rounded-lg px-4 py-1.5 capitalize transition-colors ${channel === option ? 'bg-fd-primary text-fd-primary-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
+              className={`inline-flex h-[34px] flex-1 items-center justify-center gap-2 rounded-[7px] border px-3.5 text-sm capitalize transition-colors sm:h-8 sm:flex-none ${channel === option ? 'border-mint/36 bg-mint/12 font-extrabold text-mint' : 'border-transparent font-bold text-muted hover:text-ink'}`}
             >
+              <span aria-hidden className={`size-2 rounded-full ${option === 'stable' ? 'bg-green shadow-[0_0_0_3px_rgb(29_185_84/0.16)]' : 'bg-amber shadow-[0_0_0_3px_rgb(255_209_102/0.16)]'}`} />
               {option}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-2xl border bg-fd-card/75">
+      <div className="mt-4 overflow-hidden rounded-[14px] border border-seam bg-[#0a0e18]">
         {state.status === 'loading' && (
-          <div className="divide-y" aria-label="Loading downloads">
+          <div className="divide-y divide-seam-soft" aria-label="Loading downloads">
             {PLATFORMS.map((platform) => (
-              <div key={platform.id} className="flex animate-pulse flex-col gap-4 p-5 sm:flex-row sm:items-center">
-                <div className="h-5 w-28 rounded bg-fd-accent" />
-                <div className="h-10 flex-1 rounded-xl bg-fd-accent" />
+              <div key={platform.id} className="flex animate-pulse flex-col gap-4 p-4 sm:flex-row sm:items-center sm:px-5">
+                <div className="h-5 w-28 rounded bg-raised" />
+                <div className="h-10 flex-1 rounded-[9px] bg-raised" />
               </div>
             ))}
           </div>
         )}
 
         {state.status === 'error' && (
-          <div className="flex flex-col items-start gap-3 p-6">
-            <p className="text-sm leading-6 text-fd-muted-foreground">Couldn&apos;t reach the GitHub releases API, so direct links are unavailable right now.</p>
+          <div className="flex flex-col items-start gap-3 p-5 sm:p-6">
+            <p className="text-sm leading-6 text-muted">Couldn&apos;t reach the GitHub releases API, so direct links are unavailable right now.</p>
             <a
               href={`https://github.com/${REPO}/releases`}
               onClick={() => track('home_download_clicked', { platform: 'desktop-fallback', href: 'releases' })}
-              className="inline-flex items-center gap-2 rounded-xl bg-fd-primary px-4 py-2 text-sm font-semibold text-fd-primary-foreground transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-[9px] bg-mint px-4 py-2 text-sm font-extrabold text-mint-ink transition-colors hover:bg-[#93efca]"
             >
-              Browse all releases <ArrowUpRight className="size-4" />
+              Browse all releases <ArrowUpRight className="size-4" aria-hidden />
             </a>
           </div>
         )}
 
         {state.status === 'ready' && (
-          <div className="divide-y">
-            {PLATFORMS.map((platform) => {
-              const Icon = PLATFORM_ICONS[platform.id as keyof typeof PLATFORM_ICONS];
-              const primary = findAsset(state.release, platform.primary.pattern);
-              return (
-                <div key={platform.id} className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:gap-6">
-                  <div className="flex min-w-44 items-center gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
-                      <Icon className="size-5" />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-fd-foreground">{platform.label}</span>
-                      <span className="block text-xs text-fd-muted-foreground">{platform.note}</span>
-                    </span>
+          <div>
+            <div className="hidden items-center gap-6 border-b border-seam bg-white/3 px-5 py-[11px] font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted sm:flex" aria-hidden>
+              <span className="w-[200px]">Platform</span>
+              <span>Recommended</span>
+            </div>
+            <div className="divide-y divide-seam-soft">
+              {PLATFORMS.map((platform) => {
+                const Icon = PLATFORM_ICONS[platform.id as keyof typeof PLATFORM_ICONS];
+                const primary = findAsset(state.release, platform.primary.pattern);
+                return (
+                  <div key={platform.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-6 sm:px-5 sm:py-[18px]">
+                    <div className="flex items-center gap-3 sm:w-[200px] sm:shrink-0">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-[9px] border border-mint/18 bg-mint/10 text-mint sm:size-10 sm:rounded-[10px]">
+                        <Icon className="size-[18px] sm:size-5" strokeWidth={1.75} aria-hidden />
+                      </span>
+                      <span>
+                        <span className="block text-[15px] font-extrabold leading-5 text-ink">{platform.label}</span>
+                        <span className="block font-mono text-xs leading-4 text-muted">{platform.note}</span>
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
+                      {primary ? (
+                        <a
+                          href={primary.browser_download_url}
+                          onClick={() => track('home_download_clicked', { platform: platform.id, channel, asset: primary.name })}
+                          className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-mint px-3.5 text-sm font-extrabold text-mint-ink transition-colors hover:bg-[#93efca] sm:h-[38px] sm:w-fit sm:rounded-lg"
+                        >
+                          <Download className="size-[15px]" aria-hidden /> {platform.primary.label} · {formatSize(primary.size)}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-muted">No {platform.label.toLowerCase()} build in {state.release.tag_name}.</span>
+                      )}
+                      {platform.secondary.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {platform.secondary.map((target) => {
+                            const asset = findAsset(state.release, target.pattern);
+                            if (!asset) return null;
+                            return (
+                              <a
+                                key={target.label}
+                                href={asset.browser_download_url}
+                                onClick={() => track('home_download_clicked', { platform: platform.id, channel, asset: asset.name })}
+                                className="inline-flex h-[30px] items-center rounded-[7px] border border-seam bg-glass px-[11px] text-[13px] font-bold text-ink transition-colors hover:border-mint/40 hover:bg-raised"
+                              >
+                                {target.label} · {formatSize(asset.size)}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-1 flex-col gap-2">
-                    {primary ? (
-                      <a
-                        href={primary.browser_download_url}
-                        onClick={() => track('home_download_clicked', { platform: platform.id, channel, asset: primary.name })}
-                        className="inline-flex w-fit items-center gap-2 rounded-xl bg-fd-primary px-4 py-2 text-sm font-semibold text-fd-primary-foreground transition-colors hover:opacity-90"
-                      >
-                        <Download className="size-4" /> {platform.primary.label} · {formatSize(primary.size)}
-                      </a>
-                    ) : (
-                      <span className="text-sm text-fd-muted-foreground">No {platform.label.toLowerCase()} build in {state.release.tag_name}.</span>
-                    )}
-                    {platform.secondary.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {platform.secondary.map((target) => {
-                          const asset = findAsset(state.release, target.pattern);
-                          if (!asset) return null;
-                          return (
-                            <a
-                              key={target.label}
-                              href={asset.browser_download_url}
-                              onClick={() => track('home_download_clicked', { platform: platform.id, channel, asset: asset.name })}
-                              className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold text-fd-foreground transition-colors hover:bg-fd-accent"
-                            >
-                              {target.label} · {formatSize(asset.size)}
-                            </a>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-dashed px-5 py-4 text-xs text-fd-muted-foreground">
-              <span>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 border-t border-dashed border-seam px-4 py-3.5 sm:px-5">
+              <span className="inline-flex items-center gap-2 font-mono text-xs font-semibold text-ink">
+                <span aria-hidden className={`size-2 rounded-full ${channel === 'stable' ? 'bg-green' : 'bg-amber'}`} />
                 {channel === 'stable' ? 'Stable' : 'Nightly'} {state.release.tag_name}
               </span>
               {checksums && (
-                <a href={checksums.browser_download_url} className="inline-flex items-center gap-1.5 font-semibold text-fd-primary hover:opacity-80">
-                  <FileCheck className="size-3.5" /> Verify checksums
+                <a href={checksums.browser_download_url} className="inline-flex items-center gap-1.5 text-[13px] font-extrabold text-mint hover:underline hover:underline-offset-4">
+                  <FileCheck className="size-3.5" aria-hidden /> Verify checksums
                 </a>
               )}
               <a
                 href={state.release.html_url}
                 onClick={() => track('home_download_clicked', { platform: 'desktop-release-notes', channel, href: state.release.html_url })}
-                className="inline-flex items-center gap-1.5 font-semibold text-fd-primary hover:opacity-80"
+                className="inline-flex items-center gap-1.5 text-[13px] font-extrabold text-mint hover:underline hover:underline-offset-4"
               >
-                All files and release notes <ArrowUpRight className="size-3.5" />
+                All files and release notes <ArrowUpRight className="size-3.5" aria-hidden />
               </a>
             </div>
           </div>

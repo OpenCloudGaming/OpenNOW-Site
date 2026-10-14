@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import {
   ArrowRight,
   ArrowUpRight,
   Camera,
+  CircleHelp,
   Code2,
+  CornerDownLeft,
   Download,
   FlaskConical,
   Gamepad2,
@@ -13,29 +14,36 @@ import {
   MonitorPlay,
   Radio,
   ShieldCheck,
+  SlidersHorizontal,
   Smartphone,
   Wifi,
   type LucideIcon,
 } from 'lucide-react';
-import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
 import { track } from '@/lib/analytics';
 import { DesktopDownloads } from '@/components/desktop-downloads';
+import { releases } from '@/lib/releases.gen';
+import { HomeShell } from '@/components/home-shell';
+import { BrandMark } from '@/components/console';
 
-const quickLinks: { title: string; description: string; splat: string }[] = [
+const quickLinks: { title: string; description: string; splat: string; icon: LucideIcon }[] = [
   {
     title: 'Install OpenNOW',
     description: 'Choose the right package and launch your first stream.',
     splat: 'guides/getting-started',
+    icon: Download,
   },
   {
     title: 'Tune your stream',
     description: 'Balance codec, resolution, frame rate, and bitrate.',
     splat: 'reference/configuration',
+    icon: SlidersHorizontal,
   },
   {
     title: 'Fix a problem',
     description: 'Work through sign-in, launch, video, audio, and input issues.',
     splat: 'guides/troubleshooting',
+    icon: CircleHelp,
   },
 ];
 
@@ -44,7 +52,7 @@ const highlights: { title: string; description: string; icon: LucideIcon; classN
     title: 'Make the stream yours',
     description: 'Control codec, bitrate, resolution, FPS, color depth, region, L4S, and Cloud G-Sync from one place.',
     icon: Gauge,
-    className: 'lg:col-span-2',
+    className: 'sm:col-span-2',
   },
   {
     title: 'Built to recover',
@@ -62,14 +70,14 @@ const highlights: { title: string; description: string; icon: LucideIcon; classN
     title: 'Capture locally',
     description: 'Save screenshots and recordings with thumbnails, gallery access, and reveal-on-disk controls.',
     icon: Camera,
-    className: 'lg:col-span-2',
+    className: 'sm:col-span-2',
   },
 ];
 
 const deepDives = [
-  ['Architecture', 'Follow a session across the Qt shell, out-of-process Rust core, and in-process streamer.', 'architecture/overview', Radio],
-  ['Native streamer', 'See how the production NVST runtime loads in-process and presents GPU video in Qt.', 'reference/native-streamer', MonitorPlay],
-  ['Protocol notes', 'Historical Chromium/WebRTC path notes retained for signaling and SDP context.', 'reference/webrtc', Wifi],
+  ['Architecture', 'Follow a session across the Qt shell, out-of-process Rust core, and in-process streamer.', 'architecture/overview', Radio, false],
+  ['Native streamer', 'See how the production NVST runtime loads in-process and presents GPU video in Qt.', 'reference/native-streamer', MonitorPlay, false],
+  ['Protocol notes', 'Historical Chromium/WebRTC path notes retained for signaling and SDP context.', 'reference/webrtc', Wifi, true],
 ] as const;
 
 const downloads: {
@@ -83,7 +91,7 @@ const downloads: {
 }[] = [
   {
     title: 'Desktop',
-    description: 'Qt Quick + native NVST client. Latest published desktop packages are OpenNOW-Qt (v1.0.1); historical tags may still ship Electron.',
+    description: 'Qt Quick + native NVST client. Latest published desktop packages are OpenNOW-Qt (v1.0.2); historical tags may still ship Electron.',
     format: '.msi · .zip · .AppImage · .deb · .dmg',
     href: 'https://github.com/OpenCloudGaming/OpenNOW/releases',
     icon: Laptop,
@@ -132,170 +140,329 @@ const downloads: {
   },
 ];
 
+function Kicker({ children }: { children: ReactNode }) {
+  return <p className="font-mono text-[11px] font-medium uppercase leading-[14px] tracking-[0.08em] text-mint">{children}</p>;
+}
+
+function SectionHeading({ index, id, children }: { index: string; id?: string; children: ReactNode }) {
+  return (
+    <h2 id={id} className="flex items-start gap-3 text-balance text-[26px] font-black leading-[31px] tracking-[-0.015em] text-ink sm:gap-3.5 sm:text-[34px] sm:leading-10 sm:tracking-[-0.02em]">
+      <span
+        aria-hidden
+        className="mt-0.5 grid h-[26px] w-[34px] shrink-0 place-items-center rounded-[7px] border border-mint/22 bg-mint/8 font-mono text-xs font-semibold leading-[14px] tracking-normal text-mint sm:mt-[7px]"
+      >
+        {index}
+      </span>
+      <span className="min-w-0">{children}</span>
+    </h2>
+  );
+}
+
+function IconTile({ icon: Icon, className = 'size-9 rounded-[9px]' }: { icon: LucideIcon; className?: string }) {
+  return (
+    <span className={`grid shrink-0 place-items-center border border-mint/18 bg-mint/10 text-mint ${className}`}>
+      <Icon className="size-1/2" strokeWidth={1.75} aria-hidden />
+    </span>
+  );
+}
+
+function Kbd({ children }: { children: ReactNode }) {
+  return (
+    <kbd className="grid h-[22px] min-w-[22px] place-items-center rounded-[5px] border border-seam-soft bg-raised px-1.5 font-mono text-[11px] font-medium leading-[14px] text-ink">
+      {children}
+    </kbd>
+  );
+}
+
+function ReleaseReadout({ className = '' }: { className?: string }) {
+  const channels = [
+    { label: 'Stable', release: releases.stable, tone: 'text-white' },
+    { label: 'Nightly', release: releases.nightly, tone: 'text-white/64' },
+  ].flatMap(({ release, ...channel }) => (release ? [{ ...channel, release }] : []));
+  if (channels.length === 0) return null;
+  return (
+    <ul className={`flex flex-col gap-0.5 font-mono text-xs font-semibold uppercase leading-[14px] tracking-[0.08em] ${className}`} aria-label="Current releases">
+      {channels.map(({ label, release, tone }) => (
+        <li key={label} className={tone}>
+          {label}{' '}
+          <a href={release.url} className="underline-offset-4 hover:text-mint hover:underline">
+            {release.tag}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const pillPrimary =
+  'inline-flex h-14 items-center justify-center gap-3 rounded-full bg-white px-[30px] text-[18px] font-black leading-6 text-ground shadow-[0_18px_44px_rgb(127_212_255/20%)] transition-colors hover:bg-white/88 sm:h-16';
+const pillGlass =
+  'inline-flex h-14 items-center justify-center gap-3 rounded-full border border-seam bg-[rgb(14_16_24/82%)] px-7 text-[18px] font-extrabold leading-6 text-white transition-colors hover:bg-[rgb(30_36_52/92%)] sm:h-16';
+
+/** A real app screen from the OpenNOW Paper files (master file, console mode from Game Mode v4), framed like the docs' app figures. */
+function AppWindow({ src, label, alt }: { src: string; label: string; alt: string }) {
+  return (
+    <figure className="overflow-hidden rounded-xl border border-seam-soft bg-surface">
+      <figcaption className="flex h-10 items-center gap-2.5 border-b border-seam-soft px-4">
+        <BrandMark height={11} />
+        <span className="truncate font-mono text-[11px] font-medium uppercase leading-[14px] tracking-[0.08em] text-muted">{label}</span>
+        <span aria-hidden className="ms-auto flex gap-1.5">
+          <span className="size-1.5 rounded-full bg-white/14" />
+          <span className="size-1.5 rounded-full bg-white/14" />
+          <span className="size-1.5 rounded-full bg-white/14" />
+        </span>
+      </figcaption>
+      <img
+        src={`/home/${src}-648.webp`}
+        srcSet={`/home/${src}-648.webp 648w, /home/${src}-1296.webp 1296w`}
+        sizes="(min-width: 1440px) 648px, (min-width: 1024px) calc(50vw - 72px), calc(100vw - 40px)"
+        width={648}
+        height={364}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className="block aspect-[648/364] h-auto w-full object-cover"
+      />
+    </figure>
+  );
+}
+
 function Home() {
   return (
-    <HomeLayout {...baseOptions()}>
-      <main className="home-page flex flex-1 flex-col overflow-hidden">
-        <section className="hero-grid relative border-b">
-          <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-6 pb-20 pt-20 text-center lg:pb-28 lg:pt-28">
-            <p className="mb-7 text-xs font-semibold uppercase tracking-[0.18em] text-fd-primary">Open-source cloud gaming</p>
-            <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-fd-foreground sm:text-6xl lg:text-7xl">
-              Your cloud games. Your rules.
-            </h1>
-            <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-fd-muted-foreground">
-              OpenNOW is an independent GeForce NOW client with deeper stream controls, local capture, and native apps across desktop, mobile, and Nintendo Switch.
-            </p>
-            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-              <a
-                href="#downloads"
-                onClick={() => track('home_cta_clicked', { cta: 'choose_download', location: 'hero' })}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-fd-primary px-5 py-3 text-sm font-semibold text-fd-primary-foreground transition-colors hover:opacity-90"
-              >
-                <Download className="size-4" />
-                Choose a download
-              </a>
-              <Link
-                to="/docs/$"
-                params={{ _splat: 'guides/getting-started' }}
-                onClick={() => track('home_cta_clicked', { cta: 'get_started', location: 'hero' })}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold text-fd-foreground transition-colors hover:bg-fd-accent"
-              >
-                Read the quick start
-              </Link>
-            </div>
+    <HomeShell>
+      <section aria-labelledby="home-title" className="home-hero-art">
+        <div className="mx-auto flex max-w-[1080px] flex-col items-center gap-5 px-5 pt-10 text-center sm:gap-7 sm:pt-[88px]">
+          <p className="inline-flex h-10 items-center gap-2.5 rounded-full border border-seam bg-[rgb(14_16_24/82%)] px-[18px] font-mono text-xs font-semibold uppercase leading-[14px] tracking-[0.08em] text-white">
+            <span aria-hidden className="size-2 shrink-0 rounded-full bg-mint" />
+            Open-source cloud gaming<span className="hidden sm:inline"> · Bring your own GeForce NOW account</span>
+          </p>
+          <h1 id="home-title" className="max-w-[880px] text-balance text-[39px] font-black leading-[41px] tracking-[-0.045em] text-white sm:text-[64px] sm:leading-[64px] lg:text-[96px] lg:leading-[94px] lg:tracking-[-0.055em]">
+            <span className="sm:block">Your cloud games.</span> <span className="sm:block">Your rules.</span>
+          </h1>
+          <p className="max-w-[720px] text-pretty text-[17px] font-medium leading-[27px] text-white/64 sm:text-xl sm:leading-8">
+            OpenNOW is an independent GeForce NOW client with deeper stream controls, local capture, and native apps across desktop, mobile, and Nintendo Switch.
+          </p>
+          <div className="flex w-full flex-col items-stretch gap-2.5 pt-1 sm:w-auto sm:flex-row sm:items-center sm:gap-3.5 sm:pt-2">
+            <a
+              href="#downloads"
+              onClick={() => track('home_cta_clicked', { cta: 'choose_download', location: 'hero' })}
+              className={pillPrimary}
+            >
+              <Download className="size-5" strokeWidth={2.4} aria-hidden />
+              Choose a download
+            </a>
+            <Link
+              to="/docs/$"
+              params={{ _splat: 'guides/getting-started' }}
+              onClick={() => track('home_cta_clicked', { cta: 'get_started', location: 'hero' })}
+              className={pillGlass}
+            >
+              Read the quick start
+            </Link>
+            <ReleaseReadout className="items-center pt-2 sm:items-start sm:pl-3.5 sm:pt-0 sm:text-left" />
           </div>
-        </section>
+        </div>
+        <div className="flex justify-center px-5 pb-12 pt-9 sm:px-10 sm:pb-24 sm:pt-[72px]">
+          <img
+            src="/home/hero-1200.webp"
+            srcSet="/home/hero-600.webp 600w, /home/hero-1200.webp 1200w, /home/hero-2400.webp 2400w"
+            sizes="(min-width: 1280px) 1200px, calc(100vw - 40px)"
+            width={1200}
+            height={750}
+            alt="The OpenNOW desktop Home screen: a Continue playing banner for Cyberpunk 2077 with Start and Details buttons and a 1440p · 120 fps · AV1 readout, then Jump back in and Favourites rows of game covers, the icon sidebar on the left and a shortcut bar along the bottom."
+            fetchPriority="high"
+            decoding="async"
+            className="h-auto w-full max-w-[1200px] rounded-[14px] border border-seam shadow-[0_40px_100px_rgb(0_0_0/65%)] sm:rounded-[28px]"
+          />
+        </div>
+      </section>
 
-        <section className="mx-auto w-full max-w-3xl px-6 py-20 sm:py-24">
-          <h2 className="text-2xl font-semibold tracking-tight text-fd-foreground sm:text-3xl">Start here</h2>
-          <p className="mt-3 leading-7 text-fd-muted-foreground">Three pages cover most of what people need first.</p>
-          <nav className="mt-8 border-t" aria-label="Start here">
-            {quickLinks.map(({ title, description, splat }) => (
-              <Link
-                key={title}
-                to="/docs/$"
-                params={{ _splat: splat }}
-                onClick={() => track('home_doc_card_clicked', { title, href: `/docs/${splat}` })}
-                className="group flex items-start justify-between gap-6 border-b py-5"
-              >
-                <span>
-                  <span className="block font-medium text-fd-foreground transition group-hover:text-fd-primary">{title}</span>
-                  <span className="mt-1 block text-sm leading-6 text-fd-muted-foreground">{description}</span>
-                </span>
-                <ArrowRight className="mt-1.5 size-4 shrink-0 text-fd-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-fd-primary" />
-              </Link>
-            ))}
+      <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-10 xl:px-16">
+        <div className="grid gap-4 pb-14 sm:gap-4 lg:grid-cols-2 lg:pb-24">
+          <AppWindow
+            src="esc-menu"
+            label="In the app · Desktop · In-stream menu (Esc)"
+            alt="The OpenNOW desktop in-stream menu over Elden Ring: live FPS, latency and bitrate, Back to game, Stream quality, Invite a friend, Switch to console mode and End session, next to a connection graph and the F3 stats overlay shortcuts."
+          />
+          <AppWindow
+            src="console"
+            label="In the app · Console mode · My games"
+            alt="OpenNOW console mode, My games: Cyberpunk 2077 focused as a wide tile at the start of a grid of large game tiles with store badges and an Add a game tile, the profile, region, clock and battery pills along the top, and the controller dock with Search, Edit tile and Details hints along the bottom."
+          />
+        </div>
+
+        <section aria-labelledby="start-here" className="grid gap-3.5 pb-14 sm:pb-24 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-14">
+          <div className="flex flex-col gap-3.5">
+            <SectionHeading index="01" id="start-here">Start here</SectionHeading>
+            <p className="text-base leading-[26px] text-body sm:pl-12 sm:text-[17px] sm:leading-[27px]">Three pages cover most of what people need first.</p>
+          </div>
+          <nav aria-label="Start here" className="mt-1 overflow-hidden rounded-[14px] border border-mint/22 bg-linear-to-b from-mint/5 to-white/2 lg:mt-0">
+            <div className="flex items-center gap-2 border-b border-mint/16 px-3.5 py-3 sm:px-4">
+              <CornerDownLeft className="size-3.5 text-mint" aria-hidden />
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-mint">Start here</span>
+              <span className="ml-auto hidden items-center gap-1.5 text-[13px] font-semibold text-muted sm:flex">
+                or search everything <Kbd>Ctrl</Kbd>
+                <Kbd>K</Kbd>
+              </span>
+            </div>
+            <ul>
+              {quickLinks.map(({ title, description, splat, icon }) => (
+                <li key={title} className="border-seam-soft [&+li]:border-t">
+                  <Link
+                    to="/docs/$"
+                    params={{ _splat: splat }}
+                    onClick={() => track('home_doc_card_clicked', { title, href: `/docs/${splat}` })}
+                    className="group flex items-start gap-3 p-3.5 transition-colors hover:bg-white/3 sm:items-center sm:gap-4 sm:py-4 sm:pl-3.5 sm:pr-4"
+                  >
+                    <IconTile icon={icon} className="size-8 rounded-lg sm:size-9 sm:rounded-[9px]" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-base font-extrabold leading-[21px] text-ink group-hover:text-mint sm:text-[17px] sm:leading-[22px]">{title}</span>
+                      <span className="mt-[3px] block text-sm leading-[21px] text-muted">{description}</span>
+                      <span className="mt-1 block font-mono text-[11px] font-medium text-muted sm:hidden">{splat}</span>
+                    </span>
+                    <span className="hidden w-[200px] font-mono text-xs font-medium text-muted sm:block">{splat}</span>
+                    <span className="hidden sm:block">
+                      <Kbd>↵</Kbd>
+                    </span>
+                    <ArrowRight className="mt-0.5 size-4 text-faint sm:hidden" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </nav>
         </section>
 
-        <section id="downloads" className="download-zone scroll-mt-20 border-y">
-          <div className="mx-auto w-full max-w-7xl px-6 py-20 sm:py-24">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div className="max-w-2xl">
-                <p className="section-kicker">Downloads</p>
-                <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-fd-foreground sm:text-4xl">Pick the build made for your screen.</h2>
-                <p className="mt-4 text-lg leading-8 text-fd-muted-foreground">Stable releases, platform-native clients, and previews—all in one place.</p>
-              </div>
-              <a href="https://github.com/OpenCloudGaming/OpenNOW/releases" className="inline-flex items-center gap-2 text-sm font-semibold text-fd-primary hover:opacity-80">
-                <Code2 className="size-4" /> View release notes <ArrowUpRight className="size-4" />
-              </a>
+        <section id="downloads" aria-labelledby="downloads-title" className="scroll-mt-20 pb-14 sm:pb-24">
+          <div className="flex flex-col gap-3.5 lg:flex-row lg:items-end lg:gap-6">
+            <div className="flex flex-1 flex-col gap-3.5">
+              <Kicker>Downloads</Kicker>
+              <SectionHeading index="02" id="downloads-title">Pick the build made for your screen.</SectionHeading>
+              <p className="text-base leading-[26px] text-body sm:pl-12 sm:text-[17px] sm:leading-[27px]">Stable releases, platform-native clients, and previews—all in one place.</p>
             </div>
-            <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {downloads.map(({ title, description, format, href, icon: Icon, cta, featured }) => (
+            <a href="https://github.com/OpenCloudGaming/OpenNOW/releases" className="inline-flex w-fit items-center gap-2 pb-1 text-sm font-extrabold text-mint hover:underline hover:underline-offset-4">
+              <Code2 className="size-[15px]" aria-hidden /> View release notes <ArrowUpRight className="size-[15px]" aria-hidden />
+            </a>
+          </div>
+          <ul className="mt-6 grid gap-3 sm:mt-9 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {downloads.map(({ title, description, format, href, icon, cta, featured }) => (
+              <li key={title}>
                 <a
-                  key={title}
                   href={href}
                   onClick={() => track('home_download_clicked', { platform: title, href })}
-                  className={`download-card group flex min-h-64 flex-col rounded-2xl border p-6 transition hover:-translate-y-1 ${featured ? 'download-card-featured' : 'bg-fd-card/75'}`}
+                  className={`group flex h-full flex-col gap-3 rounded-[14px] border p-[18px] transition-colors sm:min-h-[232px] sm:gap-3.5 sm:p-5 ${
+                    featured
+                      ? 'border-mint/36 bg-linear-150 from-mint/10 via-white/2 via-60% to-white/2 hover:border-mint/60'
+                      : 'border-seam-soft bg-glass hover:border-seam hover:bg-white/5'
+                  }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <span className="grid size-11 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
-                      <Icon className="size-5" />
-                    </span>
-                    <span className="rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-fd-muted-foreground">{format}</span>
-                  </div>
-                  <h3 className="mt-7 text-xl font-semibold text-fd-foreground">{title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-fd-muted-foreground">{description}</p>
-                  <span className="mt-auto inline-flex items-center gap-2 pt-7 text-sm font-semibold text-fd-primary">
-                    {cta} <ArrowUpRight className="size-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  <span className="flex items-start justify-between gap-3">
+                    <IconTile icon={icon} className="size-[38px] rounded-[10px] sm:size-10" />
+                    <span className="rounded-md border border-seam-soft bg-white/3 px-[9px] py-[5px] text-right font-mono text-[11px] font-medium leading-[14px] text-muted">{format}</span>
+                  </span>
+                  <span className="flex flex-col gap-1 sm:gap-1.5 sm:pt-1.5">
+                    <span className="text-[19px] font-black leading-6 tracking-[-0.01em] text-ink sm:text-xl sm:leading-[26px]">{title}</span>
+                    <span className="text-sm leading-[21px] text-muted sm:leading-[22px]">{description}</span>
+                  </span>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-1 text-sm font-extrabold text-mint">
+                    {cta} <ArrowUpRight className="size-[15px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
                   </span>
                 </a>
-              ))}
-            </div>
-            <p className="mt-5 text-sm text-fd-muted-foreground">
-              Nintendo Switch requires custom firmware and Homebrew Menu.{' '}
-              <Link to="/docs/$" params={{ _splat: 'guides/nintendo-switch' }} className="font-semibold text-fd-primary hover:opacity-80">Read the installation guide</Link>.
-            </p>
-            <DesktopDownloads />
-          </div>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-sm leading-[22px] text-muted sm:mt-[18px]">
+            Nintendo Switch requires custom firmware and Homebrew Menu.{' '}
+            <Link to="/docs/$" params={{ _splat: 'guides/nintendo-switch' }} className="font-extrabold text-mint hover:underline hover:underline-offset-4">
+              Read the installation guide
+            </Link>
+            .
+          </p>
+          <DesktopDownloads />
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 py-20 sm:py-24">
-          <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
-            <div className="lg:sticky lg:top-28">
-              <p className="section-kicker">More control</p>
-              <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-fd-foreground sm:text-4xl">The useful controls aren’t hidden.</h2>
-              <p className="mt-4 text-lg leading-8 text-fd-muted-foreground">OpenNOW puts session quality, input, reliability, and capture where you can actually reach them.</p>
-              <Link to="/docs/$" params={{ _splat: 'reference/configuration' }} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-fd-primary hover:opacity-80">
-                Explore every setting <ArrowRight className="size-4" />
-              </Link>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {highlights.map(({ title, description, icon: Icon, className }) => (
-                <article key={title} className={`bento-card rounded-2xl border bg-fd-card/65 p-6 ${className}`}>
-                  <span className="grid size-10 place-items-center rounded-xl bg-fd-primary text-fd-primary-foreground"><Icon className="size-5" /></span>
-                  <h3 className="mt-8 text-lg font-semibold text-fd-foreground">{title}</h3>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-fd-muted-foreground">{description}</p>
-                </article>
-              ))}
-            </div>
+        <section aria-labelledby="more-control" className="grid gap-3.5 pb-14 sm:pb-24 lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-14">
+          <div className="flex flex-col gap-3.5 lg:sticky lg:top-24 lg:self-start">
+            <Kicker>More control</Kicker>
+            <SectionHeading index="03" id="more-control">The useful controls aren’t hidden.</SectionHeading>
+            <p className="text-base leading-[26px] text-body sm:pl-12 sm:text-[17px] sm:leading-[27px]">OpenNOW puts session quality, input, reliability, and capture where you can actually reach them.</p>
+            <Link to="/docs/$" params={{ _splat: 'reference/configuration' }} className="inline-flex w-fit items-center gap-1.5 text-sm font-extrabold text-mint hover:underline hover:underline-offset-4 sm:ml-12 sm:mt-2">
+              Explore every setting <ArrowRight className="size-[15px]" aria-hidden />
+            </Link>
           </div>
+          <ul className="mt-2.5 grid gap-3 sm:grid-cols-3 sm:gap-4 lg:mt-0">
+            {highlights.map(({ title, description, icon: Icon, className }) => (
+              <li key={title} className={`rounded-[14px] border border-seam-soft bg-glass p-[18px] sm:min-h-[208px] sm:p-[22px] ${className}`}>
+                <span className="grid size-9 place-items-center rounded-[9px] bg-mint text-mint-ink sm:size-10 sm:rounded-[10px]">
+                  <Icon className="size-[18px] sm:size-5" strokeWidth={1.75} aria-hidden />
+                </span>
+                <h3 className="mt-[18px] text-lg font-black leading-6 tracking-[-0.01em] text-ink sm:mt-7 sm:text-[19px] sm:leading-[25px]">{title}</h3>
+                <p className="mt-1.5 max-w-[460px] text-sm leading-[22px] text-muted">{description}</p>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        <section className="border-t bg-fd-card/35">
-          <div className="mx-auto w-full max-w-7xl px-6 py-20 sm:py-24">
-            <div className="max-w-2xl">
-              <p className="section-kicker">Under the hood</p>
-              <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-fd-foreground sm:text-4xl">Documentation for people who want the whole picture.</h2>
-            </div>
-            <div className="mt-10 divide-y border-y">
-              {deepDives.map(([title, description, splat, Icon]) => (
+        <section aria-labelledby="under-the-hood" className="pb-14 sm:pb-24">
+          <div className="flex flex-col gap-3.5">
+            <Kicker>Under the hood</Kicker>
+            <SectionHeading index="04" id="under-the-hood">Documentation for people who want the whole picture.</SectionHeading>
+          </div>
+          <ul className="mt-2 divide-y divide-seam-soft border-y border-seam-soft sm:mt-8">
+            {deepDives.map(([title, description, splat, Icon, historical]) => (
+              <li key={title}>
                 <Link
-                  key={title}
                   to="/docs/$"
                   params={{ _splat: splat }}
                   onClick={() => track('home_doc_card_clicked', { title, href: `/docs/${splat}` })}
-                  className="group grid gap-4 py-6 transition hover:pl-2 sm:grid-cols-[48px_0.7fr_1fr_auto] sm:items-center"
+                  className="group grid grid-cols-[38px_minmax(0,1fr)] items-start gap-x-3.5 gap-y-1 py-4 transition-colors hover:bg-white/2 sm:grid-cols-[44px_300px_minmax(0,1fr)_200px_16px] sm:items-center sm:gap-x-5 sm:px-1 sm:py-5"
                 >
-                  <span className="grid size-11 place-items-center rounded-xl border bg-fd-background text-fd-primary"><Icon className="size-5" /></span>
-                  <h3 className="font-semibold text-fd-foreground">{title}</h3>
-                  <p className="text-sm leading-6 text-fd-muted-foreground">{description}</p>
-                  <ArrowRight className="hidden size-4 text-fd-primary transition group-hover:translate-x-1 sm:block" />
+                  <IconTile icon={Icon} className="row-span-3 size-[38px] rounded-[10px] sm:row-span-1 sm:size-11 sm:rounded-[11px]" />
+                  <span className="flex items-center gap-2.5">
+                    <span className="text-[17px] font-black leading-[22px] text-ink group-hover:text-mint sm:text-lg sm:leading-6">{title}</span>
+                    {historical && (
+                      <span className="rounded-[5px] border border-amber/28 bg-amber/10 px-1.5 py-[3px] font-mono text-[10px] font-semibold uppercase leading-3 tracking-[0.08em] text-amber">Historical</span>
+                    )}
+                  </span>
+                  <span className="text-sm leading-[22px] text-muted sm:text-[15px] sm:leading-6">{description}</span>
+                  <span className="font-mono text-[11px] font-medium text-muted sm:text-xs">{splat}</span>
+                  <ArrowRight className="hidden size-4 text-mint transition-transform group-hover:translate-x-1 sm:block" aria-hidden />
                 </Link>
-              ))}
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 py-20 sm:py-24">
-          <div className="final-cta relative overflow-hidden rounded-3xl border px-6 py-14 text-center sm:px-12 sm:py-16">
-            <div className="relative mx-auto max-w-2xl">
-              <MonitorPlay className="mx-auto size-10 text-emerald-400" />
-              <h2 className="mt-6 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">Ready to take control of the stream?</h2>
-              <p className="mt-4 text-pretty leading-7 text-white/60">Start with the quick guide, or inspect every part of the open-source client.</p>
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link to="/docs/$" params={{ _splat: 'guides/getting-started' }} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300">
-                  Get started <ArrowRight className="size-4" />
-                </Link>
-                <a href="https://github.com/OpenCloudGaming/OpenNOW" className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-                  <Code2 className="size-4" /> Browse the source
-                </a>
-              </div>
-            </div>
+      </div>
+
+      <section aria-labelledby="final-cta" className="home-cta-art border-t border-seam">
+        <div className="mx-auto flex max-w-[900px] flex-col items-center gap-5 px-5 py-16 text-center sm:gap-[26px] sm:py-[120px]">
+          <span className="grid size-[72px] place-items-center rounded-[22px] border-[3px] border-white bg-[#0b0b0a] shadow-[0_20px_60px_rgb(0_0_0/60%)] sm:size-[88px] sm:rounded-[26px]">
+            <img src="/brand/opennow-mark.png" alt="" width={52} height={28} loading="lazy" className="h-6 w-auto drop-shadow-[0_0_18px_rgb(94_226_60/45%)] sm:h-7" />
+          </span>
+          <h2 id="final-cta" className="text-balance text-[34px] font-black leading-[37px] tracking-[-0.045em] text-white sm:text-[56px] sm:leading-[58px] lg:text-[76px] lg:leading-[76px] lg:tracking-[-0.055em]">
+            Ready to take control of the stream?
+          </h2>
+          <p className="max-w-[600px] text-pretty text-[17px] font-medium leading-[27px] text-white/64 sm:text-xl sm:leading-[30px]">
+            Start with the quick guide, or inspect every part of the open-source client.
+          </p>
+          <div className="flex w-full flex-col items-stretch gap-2.5 pt-1 sm:w-auto sm:flex-row sm:gap-3.5">
+            <Link
+              to="/docs/$"
+              params={{ _splat: 'guides/getting-started' }}
+              className={pillPrimary}
+            >
+              <ArrowRight className="size-5" strokeWidth={2.4} aria-hidden /> Get started
+            </Link>
+            <a
+              href="https://github.com/OpenCloudGaming/OpenNOW"
+              className={pillGlass}
+            >
+              Browse the source
+            </a>
           </div>
-        </section>
-      </main>
-    </HomeLayout>
+        </div>
+      </section>
+    </HomeShell>
   );
 }
 
@@ -304,6 +471,17 @@ export const Route = createFileRoute('/')({
     meta: [
       { title: 'OpenNOW — Open-source GeForce NOW client' },
       { name: 'description', content: 'Download OpenNOW and learn how to install, tune, and troubleshoot the open-source GeForce NOW client.' },
+    ],
+    links: [
+      {
+        rel: 'preload',
+        as: 'image',
+        href: '/home/hero-1200.webp',
+        imageSrcSet: '/home/hero-600.webp 600w, /home/hero-1200.webp 1200w, /home/hero-2400.webp 2400w',
+        imageSizes: '(min-width: 1280px) 1200px, calc(100vw - 40px)',
+        fetchPriority: 'high',
+      },
+      { rel: 'preload', as: 'image', href: '/home/keyart-1600.webp', media: '(min-width: 800px)', fetchPriority: 'high' },
     ],
   }),
   component: Home,

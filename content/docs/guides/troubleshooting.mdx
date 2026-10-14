@@ -82,6 +82,10 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
 
 Do not repeatedly relaunch while an earlier CloudMatch session is still being released. Stop the session once, wait briefly, then make one clean attempt.
 
+![OpenNOW console launch stage while queued for Cyberpunk 2077 on Steam in EU Central: You are in line, queue position 37 that updates when GeForce NOW reports it, the steps Session requested, Waiting for a rig, Setting up the rig and Connecting the stream, the time waited on this device and a Leave queue hint.](/illustrations/troubleshooting-queue.webp "In the app · Console mode › Launch › In queue")
+
+![OpenNOW console launch stage after the rig is ready: Connecting to your game, waiting for the first video frame, with the rig card (RTX 4080, EU Central, 1440p at 120 FPS requested), the first three launch steps done, Connecting the stream in progress and a Cancel session hint.](/illustrations/troubleshooting-connecting.webp "In the app · Console mode › Launch › Connecting")
+
 ## Stream quality and video
 
 Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can sustain. Prefer **8-bit 4:2:0** color quality. The Settings UI labels **4:4:4** chroma profiles as **Coming soon** — do not expect them to work yet. H.265, AV1, 10-bit **4:2:0**, high frame rates, and ultrawide profiles still require compatible subscription profiles plus local GPU, driver, and display support. Codec **Auto** may select AV1 only when the probed platform/stream limits allow it.
@@ -97,12 +101,16 @@ Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can s
 | H.265 unavailable on Windows | Microsoft's HEVC Video Extensions may be missing | Open the HEVC help in Settings and install the free Store extension first (paid offer if needed). Restart OpenNOW. GPU hardware HEVC decode is still required |
 | High GPU use with upscaling | MetalFX (macOS) or FSR 1 (Windows/Linux) costs extra GPU time | Turn upscaling **Off**, or lower stream resolution/FPS if the local GPU is saturated |
 | Flatpak cannot auto-update | Flatpak builds disable the in-app self-updater | Update with `flatpak update io.github.opencloudgaming.OpenNOW` from a Flatpak remote, or rebuild/reinstall a local `.flatpak` bundle |
-| In-app update discovery or portable install fails | Updater discovery, portable ZIP replacement, or failure reporting is incomplete on older builds | Prefer published **v1.0.1** signed updates when available; on nightlies / `main`, retry Check for updates and note the surfaced failure message. Flatpak still has no self-updater |
+| In-app update discovery or portable install fails | Updater discovery, portable ZIP replacement, or failure reporting is incomplete on older builds | Prefer published **v1.0.2** signed updates when available; on nightlies / `main`, retry Check for updates and note the surfaced failure message. Flatpak still has no self-updater |
 | Entire app window is black vs only the video surface | Note which one you see before changing settings | Export diagnostics and include both `native-streamer.log` and `qt-native.log` |
 
 <Callout type="warn" title="Change one variable at a time">
 Changing codec, resolution, FPS, bitrate, backend, and region together makes the result impossible to interpret. Begin with the conservative profile, then restore one option per stream.
 </Callout>
+
+![OpenNOW Ctrl+G in-stream drawer during a session: FPS, output resolution, bitrate and the NVST · H265 · D3D11VA connection line, Back to game, quick toggles for microphone, Anti-AFK, stats overlay and fullscreen with their shortcuts, then Controllers, Invite a friend, Switch to console mode and End session, with the F3 stats bar (fps, latency, UDP receive rate, codec) in the corner.](/illustrations/troubleshooting-ctrlg.webp "In the app · Ctrl+G menu")
+
+![OpenNOW console Guide (Ctrl+G, or the PS or Xbox button) over a live Forza Horizon 5 stream: the session line (2560×1440, 120 FPS, AV1, RTX 4080), Resume game focused, quick actions for screenshot, record, microphone, stats overlay, fullscreen and Anti-AFK, then Controllers & co-op, Shortcuts & help and End session, with a Screenshot saved toast.](/illustrations/troubleshooting-console-guide.webp "In the app · Console mode › Guide (Ctrl+G)")
 
 ## Input, controller, and microphone
 
@@ -112,6 +120,8 @@ Changing codec, resolution, FPS, bitrate, backend, and region together makes the
 - **Console / couch mode is hard to leave:** use the console exit control, pointer interaction when `leaveConsoleOnPointer` is enabled, or Settings to change shell preferences. Console mode changes the browsing UI but does not change NVIDIA account state.
 - **Clipboard paste does nothing:** enable clipboard paste in Settings → Controls, make sure keyboard input is active in the stream, and use the configured paste path rather than assuming the OS shortcut alone is enough.
 - **Microphone is silent:** grant microphone permission to OpenNOW at the operating-system level, select the intended mode in Settings, and reconnect the stream so capture is negotiated again.
+
+![OpenNOW console Guide › Controllers & co-op over the stream: P1 DualSense Wireless Controller and P2 Xbox Wireless Controller connected with battery levels, P3 and P4 waiting for a controller to connect or press a button, and a note that remapping and controller settings live in Settings › Input & controllers.](/illustrations/troubleshooting-console-controllers.webp "In the app · Console mode › Guide › Controllers & co-op")
 
 See [Input and Controls](/docs/reference/input) for shortcuts, pointer behavior, and microphone modes.
 

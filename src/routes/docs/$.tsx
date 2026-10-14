@@ -1,23 +1,18 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import browserCollections from 'collections/browser';
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-  ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/docs/page';
-import { baseOptions } from '@/lib/layout.shared';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { TOCProvider } from 'fumadocs-ui/layouts/docs/page/slots/toc';
 import { gitConfig } from '@/lib/shared';
 import { loadDocsPageData } from '@/lib/docsLoader';
 import { DocsError } from '@/components/docs-error';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { Code2, Download, MonitorPlay } from 'lucide-react';
 import { Suspense, useEffect } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 import { track } from '@/lib/analytics';
+import { createConsoleSlots } from '@/components/docs-layout/slots';
+import { ConsoleArticle, ConsolePageHeader, ConsolePager, ConsoleTocPanel, MobileToc, NoTocPopover } from '@/components/docs-layout/page';
+import { DocsHero, JumpTo } from '@/components/docs-layout/home';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -30,36 +25,40 @@ export const Route = createFileRoute('/docs/$')({
   },
 });
 
+const layoutSlots = createConsoleSlots({
+  onTopBarLink: (target) => {
+    if (target === 'home') track('docs_footer_link_clicked', { target: 'home' });
+    if (target === 'github') track('docs_footer_link_clicked', { target: 'app_repository' });
+  },
+  onStatusBarLink: (target) => {
+    if (target === 'stable' || target === 'nightly' || target === 'releases') track('docs_sidebar_release_clicked', { target });
+    if (target === 'github') track('docs_footer_link_clicked', { target: 'app_repository' });
+  },
+});
+
+const pageSlots = {
+  container: ConsoleArticle,
+  footer: ConsolePager,
+  toc: { provider: TOCProvider, main: ConsoleTocPanel, popover: NoTocPopover },
+};
+
 const clientLoader = browserCollections.docs.createClientLoader({
-  component(
-    { toc, frontmatter, default: MDX },
-    // you can define props for the component
-    {
-      markdownUrl,
-      path,
-    }: {
-      markdownUrl: string;
-      path: string;
-    },
-  ) {
+  component({ toc, frontmatter, default: MDX }, { markdownUrl, path }: { markdownUrl: string; path: string }) {
+    const isHome = path === 'index.mdx';
     return (
-      <DocsPage
-        toc={toc}
-        tableOfContent={{
-          style: 'clerk',
-          header: <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-fd-muted-foreground">On this page</p>,
-        }}
-      >
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="-mt-3 mb-2 flex flex-wrap items-center gap-2 border-b pb-6">
-          <MarkdownCopyButton markdownUrl={markdownUrl} />
-          <ViewOptionsPopover
+      <DocsPage toc={toc} slots={pageSlots} breadcrumb={{ enabled: false }}>
+        {isHome ? <DocsHero /> : null}
+        <div className="flex flex-col gap-6 lg:gap-11">
+          <ConsolePageHeader
+            title={frontmatter.title}
+            description={frontmatter.description}
             markdownUrl={markdownUrl}
             githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
           />
+          <MobileToc />
         </div>
-        <DocsBody>
+        {isHome ? <JumpTo /> : null}
+        <DocsBody className="console-prose">
           <MDX components={useMDXComponents()} />
         </DocsBody>
       </DocsPage>
@@ -75,41 +74,7 @@ function Page() {
   }, [path, markdownUrl]);
 
   return (
-    <DocsLayout
-      {...baseOptions()}
-      tree={pageTree}
-      tabMode="top"
-      sidebar={{
-        collapsible: true,
-        banner: (
-          <a
-            href="https://github.com/OpenCloudGaming/OpenNOW/releases"
-            onClick={() => track('docs_sidebar_release_clicked')}
-            className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 p-3 text-sm transition hover:border-emerald-500/35 hover:bg-emerald-500/10"
-          >
-            <span className="grid size-9 place-items-center rounded-lg bg-emerald-400/10 text-emerald-500">
-              <Download className="size-4" />
-            </span>
-            <span>
-              <span className="block font-medium">Latest release</span>
-              <span className="text-xs text-fd-muted-foreground">Grab desktop builds</span>
-            </span>
-          </a>
-        ),
-        footer: (
-          <div className="space-y-2 text-xs text-fd-muted-foreground">
-            <a className="flex items-center gap-2 transition hover:text-fd-foreground" href="https://github.com/OpenCloudGaming/OpenNOW" onClick={() => track('docs_footer_link_clicked', { target: 'app_repository' })}>
-              <Code2 className="size-3.5" />
-              App repository
-            </a>
-            <Link className="flex items-center gap-2 transition hover:text-fd-foreground" to="/" onClick={() => track('docs_footer_link_clicked', { target: 'home' })}>
-              <MonitorPlay className="size-3.5" />
-              OpenNOW home
-            </Link>
-          </div>
-        ),
-      }}
-    >
+    <DocsLayout tree={pageTree} tabs={false} themeSwitch={{ enabled: false }} slots={layoutSlots}>
       <Link to={markdownUrl} hidden />
       <Suspense>{clientLoader.useContent(path, { markdownUrl, path })}</Suspense>
     </DocsLayout>

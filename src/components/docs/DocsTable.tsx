@@ -1,3 +1,5 @@
+import { DataGrid } from './DataGrid';
+
 interface DocsTableColumn {
   key: string;
   header: string;
@@ -30,23 +32,9 @@ function getValue(row: DocsTableRow, column: DocsTableColumn) {
 
 export function DocsTable({ columns, rows }: DocsTableProps) {
   return (
-    <table>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th key={column.key}>{column.header}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            {columns.map((column) => (
-              <td key={column.key}>{formatInline(getValue(row, column), column.code)}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <DataGrid
+      headers={columns.map((column) => column.header)}
+      rows={rows.map((row) => columns.map((column) => formatInline(getValue(row, column), column.code)))}
+    />
   );
 }

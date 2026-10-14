@@ -2,55 +2,72 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+@import './fonts.css';
+@import './console-prose.css';
+
+/* Design B "Console": Nocturne tokens. Dark only; :root mirrors .dark. */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-ground: #0b0f1a;
+  --color-surface: #0e1320;
+  --color-well: #070a12;
+  --color-bar: #080b13;
+  --color-palette: #111727;
+  --color-glass: rgb(255 255 255 / 3%);
+  --color-raised: rgb(255 255 255 / 8%);
+  --color-seam: rgb(255 255 255 / 14%);
+  --color-seam-soft: rgb(255 255 255 / 7%);
+  --color-ink: #eef2f8;
+  --color-body: #c4ccda;
+  --color-lead: #a9b3c6;
+  --color-code: #dce3ee;
+  --color-muted: #8e99ad;
+  --color-faint: #5f6b80;
+  --color-mint: #6ee7b7;
+  --color-mint-ink: #05140d;
+  --color-green: #1db954;
+  --color-sky: #7fd4ff;
+  --color-amber: #ffd166;
+  --color-danger: #ff8a80;
 }
 
-:root {
-  --color-fd-background: hsl(150, 24%, 98%);
-  --color-fd-foreground: hsl(156, 24%, 10%);
-  --color-fd-primary: hsl(158, 72%, 27%);
-  --color-fd-primary-foreground: hsl(150, 40%, 98%);
-  --color-fd-border: hsla(158, 18%, 42%, 0.2);
-  --color-fd-ring: hsl(158, 70%, 38%);
-  --color-fd-accent: hsl(151, 28%, 93%);
-  --color-fd-accent-foreground: hsl(158, 38%, 15%);
-  --color-fd-muted: hsl(150, 16%, 94%);
-  --color-fd-muted-foreground: hsl(155, 9%, 40%);
-  --color-fd-secondary: hsl(151, 25%, 91%);
-  --color-fd-secondary-foreground: hsl(158, 35%, 14%);
-  --color-fd-card: hsl(150, 30%, 99%);
-  --color-fd-card-foreground: hsl(156, 24%, 10%);
-  --color-fd-popover: hsl(150, 30%, 99%);
-  --color-fd-popover-foreground: hsl(156, 24%, 10%);
-}
-
+:root,
 .dark {
-  --color-fd-background: hsl(168, 31%, 5%);
-  --color-fd-foreground: hsl(150, 20%, 93%);
-  --color-fd-primary: hsl(157, 71%, 56%);
-  --color-fd-primary-foreground: hsl(164, 52%, 7%);
-  --color-fd-border: hsla(157, 25%, 66%, 0.14);
-  --color-fd-ring: hsl(157, 71%, 56%);
-  --color-fd-accent: hsl(164, 23%, 13%);
-  --color-fd-accent-foreground: hsl(153, 35%, 88%);
-  --color-fd-muted: hsl(166, 20%, 10%);
-  --color-fd-muted-foreground: hsl(155, 9%, 62%);
-  --color-fd-secondary: hsl(164, 23%, 12%);
-  --color-fd-secondary-foreground: hsl(150, 20%, 93%);
-  --color-fd-card: hsl(166, 26%, 7.5%);
-  --color-fd-card-foreground: hsl(150, 20%, 93%);
-  --color-fd-popover: hsl(168, 29%, 6.5%);
-  --color-fd-popover-foreground: hsl(150, 20%, 93%);
+  color-scheme: dark;
+  --color-fd-background: var(--color-ground);
+  --color-fd-foreground: var(--color-ink);
+  --color-fd-primary: var(--color-mint);
+  --color-fd-primary-foreground: var(--color-mint-ink);
+  --color-fd-border: var(--color-seam);
+  --color-fd-ring: var(--color-sky);
+  --color-fd-accent: rgb(255 255 255 / 5%);
+  --color-fd-accent-foreground: var(--color-ink);
+  --color-fd-muted: rgb(255 255 255 / 4%);
+  --color-fd-muted-foreground: var(--color-muted);
+  --color-fd-secondary: var(--color-raised);
+  --color-fd-secondary-foreground: var(--color-ink);
+  --color-fd-card: #10141f;
+  --color-fd-card-foreground: var(--color-ink);
+  --color-fd-popover: var(--color-palette);
+  --color-fd-popover-foreground: var(--color-ink);
+  --color-fd-info: var(--color-sky);
+  --color-fd-warning: var(--color-amber);
+  --color-fd-danger: var(--color-danger);
+  --color-fd-error: var(--color-danger);
+  --color-fd-success: var(--color-green);
 }
 
 html {
   scrollbar-gutter: stable;
+  background: var(--color-ground);
 }
 
 body {
-  font-feature-settings: 'ss01' 1, 'cv11' 1;
-  letter-spacing: -0.006em;
+  font-family: var(--font-sans);
+  color: var(--color-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -64,39 +81,65 @@ html > body[data-scroll-locked] {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-fd-primary) 28%, transparent);
+  background: color-mix(in oklab, var(--color-mint) 30%, transparent);
+  color: var(--color-ink);
 }
 
-#nd-subnav {
-  border-color: var(--color-fd-border);
-  background: color-mix(in oklab, var(--color-fd-background) 82%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
+:focus-visible {
+  outline: 2px solid var(--color-sky);
+  outline-offset: 2px;
 }
 
-#nd-sidebar {
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--color-fd-card) 88%, transparent), transparent 28%),
-    var(--color-fd-background);
+/* ---------- Console shell (DocsLayout container slot) ---------- */
+.console-grid {
+  display: grid;
+  min-height: 100dvh;
+  grid-template:
+    'header' auto
+    'crumbs' auto
+    'main' 1fr
+    'status' auto / minmax(0, 1fr);
+  background: var(--color-ground);
 }
 
-#nd-page {
-  background-image: radial-gradient(circle at 72% 0%, color-mix(in oklab, var(--color-fd-primary) 7%, transparent), transparent 24rem);
+@media (min-width: 1024px) {
+  .console-grid {
+    grid-template:
+      'header header' auto
+      'sidebar main' 1fr
+      'status status' auto / 232px minmax(0, 1fr);
+  }
 }
 
-#nd-page article h2 {
-  letter-spacing: -0.025em;
+@media (min-width: 1280px) {
+  .console-grid {
+    grid-template:
+      'header header header header header' auto
+      'sidebar . main toc .' 1fr
+      'status status status status status' auto / 232px minmax(0, 1fr) minmax(0, 936px) 272px minmax(0, 1fr);
+  }
 }
 
-#nd-page article :is(p, li) {
-  line-height: 1.78;
+.console-skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 60;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--color-mint);
+  color: var(--color-mint-ink);
+  font-weight: 800;
+  font-size: 14px;
+  transform: translateY(-200%);
 }
 
-#nd-page article table {
-  border-radius: 0.75rem;
+.console-skip-link:focus {
+  transform: none;
 }
 
-#nd-page article pre {
-  box-shadow: 0 18px 45px -34px rgba(0, 0, 0, 0.55);
+#nd-page :is(h2, h3, [id]) {
+  scroll-margin-top: 88px;
 }
 
 .hero-grid {
@@ -179,5 +222,34 @@ html > body[data-scroll-locked] {
 
   .bento-card {
     min-height: 13rem;
+  }
+}
+
+/* Landing art from the OpenNOW Paper master file (Site · 01 Landing): key art under a navy wash.
+   Phones get the wash only, so the hero headline (not a late background image) is the mobile LCP. */
+.home-hero-art {
+  background: linear-gradient(180deg, rgb(14 20 32) 0%, var(--color-ground) 100%);
+}
+.home-cta-art {
+  background: linear-gradient(180deg, var(--color-ground) 0%, rgb(14 20 32) 100%);
+}
+@media (min-width: 800px) {
+  .home-hero-art,
+  .home-cta-art {
+    background-color: var(--color-ground);
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .home-hero-art {
+    background-image:
+      linear-gradient(180deg, rgb(14 20 32 / 85%) 0%, rgb(14 20 32 / 95%) 62%, var(--color-ground) 100%),
+      url('/home/keyart-1600.webp');
+    background-position: 50%, 50% 30%;
+  }
+  .home-cta-art {
+    background-image:
+      linear-gradient(180deg, rgb(14 20 32 / 95%) 0%, rgb(14 20 32 / 80%) 100%),
+      url('/home/keyart-1600.webp');
+    background-position: 50%, 50% 70%;
   }
 }

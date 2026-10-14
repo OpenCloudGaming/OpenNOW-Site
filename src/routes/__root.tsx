@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import * as React from 'react';
 import appCss from '@/styles/app.css?url';
+import nunitoUrl from '@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2?url';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import { PostHogProvider } from 'posthog-js/react';
 import SearchDialog from '@/components/search';
@@ -16,13 +17,14 @@ export const Route = createRootRoute({
         name: 'description',
         content: 'Download, configure, and troubleshoot OpenNOW, the open-source GeForce NOW client for desktop, mobile, and Nintendo Switch.',
       },
-      { name: 'theme-color', content: '#071410' },
+      { name: 'theme-color', content: '#0B0F1A' },
       { property: 'og:site_name', content: 'OpenNOW Docs' },
       { property: 'og:type', content: 'website' },
       { property: 'og:title', content: 'OpenNOW — Open-source GeForce NOW client' },
       { property: 'og:description', content: 'Install, tune, and troubleshoot OpenNOW across desktop, mobile, and Nintendo Switch.' },
     ],
     links: [
+      { rel: 'preload', href: nunitoUrl, as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
     ],
@@ -32,13 +34,13 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex min-h-screen flex-col bg-ground">
         <PostHogProvider apiKey={POSTHOG_KEY} options={posthogOptions}>
-          <RootProvider search={{ SearchDialog }}>
+          <RootProvider theme={{ enabled: false }} search={{ SearchDialog }}>
             <Outlet />
           </RootProvider>
         </PostHogProvider>

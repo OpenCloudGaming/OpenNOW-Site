@@ -1,20 +1,16 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { BookOpen, Code2, Download, MessageCircle, Radio, Settings2 } from 'lucide-react';
-import { appName } from './shared';
+import { BrandLockup } from '@/components/console/brand';
 
 function NavTitle() {
-  return (
-    <span className="flex items-center gap-2 font-semibold tracking-tight">
-      <img src="/favicon.svg" alt="" width={28} height={28} className="size-7" />
-      <span>{appName} <span className="text-xs font-medium text-fd-muted-foreground">Docs</span></span>
-    </span>
-  );
+  return <BrandLockup />;
 }
 
 const iconClassName = 'size-4';
 
 export function baseOptions(): BaseLayoutProps {
   return {
+    themeSwitch: { enabled: false },
     nav: {
       title: NavTitle,
       url: '/',

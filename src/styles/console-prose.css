@@ -1,0 +1,876 @@
+/* Design B "Console": MDX content theming. Scoped to the docs body (.console-prose). */
+
+.console-prose {
+  --prose-measure: 700px;
+  counter-reset: console-h2;
+  color: var(--color-body);
+  font-size: 16px;
+  line-height: 28px;
+  max-width: none;
+}
+
+.console-prose > * {
+  margin-block: 0;
+}
+
+.console-prose > * + * {
+  margin-top: 20px;
+}
+
+.console-prose :where(p, ul, ol) {
+  max-width: var(--prose-measure);
+}
+
+.console-prose :where(p, li) {
+  color: var(--color-body);
+  font-size: 16px;
+  line-height: 28px;
+}
+
+.console-prose :where(strong) {
+  color: var(--color-ink);
+  font-weight: 800;
+}
+
+.console-prose :where(a):not(.console-h2-anchor, [data-card]) {
+  color: var(--color-mint);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-mint) 40%, transparent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.console-prose :where(a):not(.console-h2-anchor, [data-card]):hover {
+  text-decoration-color: var(--color-mint);
+}
+
+/* Inline code: a quiet chip in prose. */
+.console-prose :where(code):not(pre code) {
+  border: 1px solid var(--color-seam-soft);
+  border-radius: 5px;
+  background: var(--color-raised);
+  padding: 1px 5px;
+  color: var(--color-code);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.console-prose :where(code)::before,
+.console-prose :where(code)::after {
+  content: none;
+}
+
+/* ---------- headings ---------- */
+.console-h2 {
+  counter-increment: console-h2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 56px !important;
+  margin-bottom: 0;
+  color: var(--color-ink);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 900;
+  letter-spacing: -0.015em;
+}
+
+.console-prose > .console-h2:first-child {
+  margin-top: 0 !important;
+}
+
+.console-h2-index {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 26px;
+  border: 1px solid color-mix(in oklab, var(--color-mint) 22%, transparent);
+  border-radius: 7px;
+  background: color-mix(in oklab, var(--color-mint) 8%, transparent);
+  color: var(--color-mint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.console-h2-index::before {
+  content: counter(console-h2, decimal-leading-zero);
+}
+
+.console-h2-anchor {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 400;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.console-h2-anchor:hover,
+.console-h2:hover .console-h2-anchor {
+  color: var(--color-mint);
+}
+
+.console-h2 + * {
+  margin-top: 20px;
+}
+
+.console-prose :where(h3) {
+  margin-top: 28px;
+  color: var(--color-ink);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 800;
+}
+
+.console-prose :where(h3) a[data-card] {
+  color: inherit;
+  text-decoration: none;
+}
+
+.console-prose :where(h4) {
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* ---------- lists ---------- */
+.console-prose :where(ul, ol):not(.not-prose *) {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.console-prose :where(ul, ol):not(.not-prose *) > li {
+  position: relative;
+  margin: 0;
+  padding-inline-start: 36px;
+}
+
+.console-prose :where(ul):not(.not-prose *) > li::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 11px;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--color-mint);
+}
+
+.console-prose :where(ol):not(.not-prose *) {
+  counter-reset: console-ol;
+}
+
+.console-prose :where(ol):not(.not-prose *) > li {
+  counter-increment: console-ol;
+}
+
+.console-prose :where(ol):not(.not-prose *) > li::before {
+  content: counter(console-ol, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  text-align: center;
+  color: var(--color-mint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.console-prose li > :where(p) {
+  margin: 0;
+}
+
+.console-prose li :where(ul, ol) {
+  margin-top: 8px;
+}
+
+/* ---------- terminal code ---------- */
+.console-code {
+  overflow: hidden;
+  border: 1px solid var(--color-seam);
+  border-radius: 12px;
+  background: var(--color-well);
+}
+
+.console-code-viewport {
+  overflow-x: auto;
+  max-height: 600px;
+  padding: 14px 20px 16px 0;
+}
+
+.console-code-viewport:focus-visible {
+  outline-offset: -2px;
+}
+
+.console-code pre {
+  counter-reset: console-line;
+  margin: 0;
+  min-width: max-content;
+  background: transparent;
+  color: var(--color-code);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.console-code pre code {
+  display: flex;
+  flex-direction: column;
+}
+
+.console-code .line {
+  counter-increment: console-line;
+  white-space: pre;
+}
+
+.console-code .line::before {
+  content: counter(console-line);
+  display: inline-block;
+  width: 44px;
+  padding-right: 16px;
+  text-align: right;
+  color: var(--color-faint);
+  user-select: none;
+}
+
+.console-code .line span {
+  color: var(--shiki-dark, var(--color-code));
+}
+
+/* ---------- data grid ---------- */
+.console-datagrid {
+  overflow: hidden;
+  border: 1px solid var(--color-seam);
+  border-radius: 12px;
+  background: var(--color-glass);
+}
+
+.console-datagrid-scroll {
+  overflow-x: auto;
+}
+
+.console-datagrid table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.console-datagrid thead th {
+  background: rgb(255 255 255 / 4%);
+  border-bottom: 1px solid var(--color-seam);
+  padding: 11px 14px;
+  text-align: start;
+  white-space: nowrap;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.console-datagrid tbody td {
+  padding: 12px 14px;
+  vertical-align: top;
+  color: var(--color-body);
+  border: 0;
+}
+
+.console-datagrid tbody tr + tr td {
+  border-top: 1px solid var(--color-seam-soft);
+}
+
+.console-datagrid tbody tr {
+  transition: background-color 120ms;
+}
+
+.console-datagrid tbody tr:hover {
+  background: rgb(255 255 255 / 3%);
+}
+
+.console-datagrid tbody td:first-child {
+  color: var(--color-ink);
+  font-weight: 700;
+  min-width: 140px;
+}
+
+.console-datagrid td code {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--color-code);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.console-datagrid td:not(:last-child) code {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.console-datagrid td:first-child code {
+  color: var(--color-mint);
+  font-weight: 600;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.console-datagrid td strong {
+  font-weight: 800;
+}
+
+.console-datagrid td a {
+  color: var(--color-mint);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-mint) 40%, transparent);
+  text-underline-offset: 3px;
+}
+
+.console-datagrid-mobile-head {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .console-datagrid-mobile-head {
+    display: block;
+    margin: 0;
+    padding: 10px 16px;
+    background: rgb(255 255 255 / 4%);
+    border-bottom: 1px solid var(--color-seam);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .console-datagrid-scroll {
+    overflow: visible;
+  }
+
+  .console-datagrid table,
+  .console-datagrid tbody {
+    display: block;
+  }
+
+  .console-datagrid thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .console-datagrid tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 6px;
+    padding: 14px 16px;
+  }
+
+  .console-datagrid tbody tr[hidden] {
+    display: none;
+  }
+
+  .console-datagrid tbody tr + tr {
+    border-top: 1px solid var(--color-seam-soft);
+  }
+
+  .console-datagrid tbody tr + tr td {
+    border-top: 0;
+  }
+
+  .console-datagrid tbody td {
+    padding: 0;
+    flex: 1 1 100%;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 21px;
+    overflow-wrap: anywhere;
+  }
+
+  .console-datagrid tbody td:first-child {
+    font-size: 15px;
+    font-weight: 800;
+    min-width: 0;
+  }
+
+  .console-datagrid td:first-child code {
+    font-size: 14px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* Middle columns become labelled chips (TYPE / DEFAULT …). */
+  .console-datagrid tbody td:not(:first-child, :last-child) {
+    flex: 0 1 auto;
+    display: block;
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: rgb(255 255 255 / 4%);
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 600;
+  }
+
+  .console-datagrid tbody td:not(:first-child, :last-child)::before {
+    content: attr(data-label);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .console-datagrid td:not(:first-child, :last-child) code {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+}
+
+/* ---------- callouts as status strips (fumadocs Callout) ---------- */
+.console-prose div:has(> [role='none']:first-child) {
+  position: relative;
+  gap: 14px;
+  margin-block: 20px;
+  padding: 14px 18px 15px 16px;
+  border: 1px solid color-mix(in oklab, var(--callout-color) 22%, transparent);
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--callout-color) 6%, transparent);
+  box-shadow: none;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.console-prose div:has(> [role='none']:first-child) > [role='none'] {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 0;
+  background: var(--callout-color);
+}
+
+.console-prose div:has(> [role='none']:first-child) > svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  margin-inline-end: 0;
+  fill: none;
+  color: var(--callout-color);
+  stroke: var(--callout-color);
+}
+
+.console-prose div:has(> [role='none']:first-child) > div:last-child {
+  gap: 5px;
+}
+
+.console-prose div:has(> [role='none']:first-child) > div:last-child > p:first-child {
+  color: var(--color-ink);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 800;
+}
+
+.console-prose div:has(> [role='none']:first-child) > div:last-child > p:first-child::before {
+  content: 'Info';
+  margin-inline-end: 12px;
+  color: var(--callout-color);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.console-prose div:has(> [role='none']:first-child)[style*='fd-warning'] > div:last-child > p:first-child::before {
+  content: 'Warning';
+}
+
+.console-prose div:has(> [role='none']:first-child)[style*='fd-danger'] > div:last-child > p:first-child::before,
+.console-prose div:has(> [role='none']:first-child)[style*='fd-error'] > div:last-child > p:first-child::before {
+  content: 'Danger';
+}
+
+.console-prose div:has(> [role='none']:first-child) > div:last-child > div,
+.console-prose div:has(> [role='none']:first-child) > div:last-child > div :where(p, li) {
+  color: var(--color-body);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+@media (max-width: 1023px) {
+  .console-prose div:has(> [role='none']:first-child) > div:last-child > p:first-child::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+}
+
+/* ---------- cards (fumadocs Cards/Card) ---------- */
+.console-prose .grid:has(> [data-card]) {
+  gap: 12px;
+}
+
+.console-prose .grid:has(> [data-card]:first-child:nth-last-child(3n)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.console-prose [data-card]:not(h2 *, h3 *) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--color-seam-soft);
+  border-radius: 12px;
+  background: var(--color-glass);
+  text-decoration: none;
+  transition: border-color 120ms, background-color 120ms;
+}
+
+.console-prose a[data-card]:not(h2 *, h3 *):hover {
+  border-color: color-mix(in oklab, var(--color-mint) 35%, transparent);
+  background: rgb(255 255 255 / 5%);
+}
+
+.console-prose [data-card]:not(h2 *, h3 *) > div:first-child:has(svg) {
+  margin-bottom: 8px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in oklab, var(--color-mint) 18%, transparent);
+  border-radius: 9px;
+  background: color-mix(in oklab, var(--color-mint) 10%, transparent);
+  box-shadow: none;
+  color: var(--color-mint);
+}
+
+.console-prose [data-card]:not(h2 *, h3 *) > div:first-child svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.75;
+}
+
+.console-prose [data-card]:not(h2 *, h3 *) > h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 800;
+}
+
+.console-prose [data-card]:not(h2 *, h3 *) > p {
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.console-prose a[data-card]:not(h2 *, h3 *)::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-faint);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7h10v10'/%3E%3Cpath d='M7 17 17 7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.console-prose a[data-card][href*='#']:not(h2 *, h3 *)::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14'/%3E%3Cpath d='m19 12-7 7-7-7'/%3E%3C/svg%3E");
+}
+
+.console-prose a[data-card]:not(h2 *, h3 *)::after {
+  content: attr(href);
+  margin-top: auto;
+  padding-top: 8px;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 500;
+}
+
+.console-prose a[data-card][href*='#']:not(h2 *, h3 *)::after {
+  content: 'Jump to section';
+}
+
+@media (max-width: 639px) {
+  .console-prose a[data-card]:not(h2 *, h3 *)::after {
+    display: none;
+  }
+}
+
+/* ---------- steps (fumadocs Steps/Step) ---------- */
+.console-prose .fd-steps {
+  counter-reset: console-step;
+  max-width: var(--prose-measure);
+  border: 0;
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+}
+
+.console-prose .fd-step {
+  counter-increment: console-step;
+  position: relative;
+  padding: 3px 0 22px 46px;
+}
+
+.console-prose .fd-step:last-child {
+  padding-bottom: 0;
+}
+
+.console-prose .fd-step::before {
+  content: counter(console-step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  inset-inline-start: 0;
+  border: 1px solid color-mix(in oklab, var(--color-mint) 40%, transparent);
+  border-radius: 9px;
+  background: color-mix(in oklab, var(--color-mint) 8%, var(--color-ground));
+  color: var(--color-mint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 600;
+  transform: none;
+  translate: none;
+}
+
+.console-prose .fd-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 36px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--color-seam);
+}
+
+.console-prose .fd-step > * {
+  margin: 0;
+}
+
+.console-prose .fd-step > * + * {
+  margin-top: 10px;
+}
+
+.console-prose .fd-step > p:first-child > strong:first-child {
+  display: inline;
+}
+
+/* ---------- tabs (fumadocs Tabs) ---------- */
+.console-prose div[data-orientation='horizontal']:has(> [role='tablist']) {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-seam);
+  border-radius: 12px;
+  background: var(--color-glass);
+}
+
+.console-prose [role='tablist'][data-orientation='horizontal'] {
+  gap: 24px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-seam-soft);
+}
+
+.console-prose [role='tab'] {
+  height: 46px;
+  padding: 0 2px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.console-prose [role='tab'][data-state='active'] {
+  border-bottom-color: var(--color-mint);
+  color: var(--color-ink);
+  font-weight: 800;
+}
+
+.console-prose [role='tabpanel'] {
+  padding: 20px 20px 22px;
+  background: transparent;
+  border-radius: 0;
+}
+
+.console-prose [role='tabpanel'] > * + * {
+  margin-top: 14px;
+}
+
+@media (max-width: 639px) {
+  .console-prose [role='tablist'][data-orientation='horizontal'] {
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .console-prose [role='tabpanel'] {
+    padding: 16px 16px 18px;
+  }
+}
+
+/* ---------- accordions (fumadocs Accordions) ---------- */
+.console-prose div[data-orientation='vertical']:has(> [data-orientation='vertical'] > h3) {
+  overflow: hidden;
+  border: 1px solid var(--color-seam);
+  border-radius: 12px;
+  background: var(--color-glass);
+}
+
+.console-prose div[data-orientation='vertical']:has(> [data-orientation='vertical'] > h3) > * + * {
+  border-top: 1px solid var(--color-seam-soft);
+}
+
+.console-prose div[data-orientation='vertical'] > [data-state='open'] {
+  background: rgb(255 255 255 / 2%);
+}
+
+.console-prose div[data-orientation='vertical'] > div > h3 {
+  margin: 0;
+}
+
+.console-prose div[data-orientation='vertical'] > div > h3 > button {
+  gap: 12px;
+  padding: 14px 18px;
+  color: var(--color-body);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 700;
+}
+
+.console-prose div[data-orientation='vertical'] > div > h3 > button[data-state='open'] {
+  color: var(--color-ink);
+  font-weight: 800;
+}
+
+.console-prose div[data-orientation='vertical'] > div > h3 > button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+  color: var(--color-muted);
+}
+
+.console-prose div[data-orientation='vertical'] > div > h3 > button[data-state='open'] svg {
+  color: var(--color-mint);
+}
+
+.console-prose div[data-orientation='vertical'] > div > h3 > button:focus-visible {
+  outline: 2px solid var(--color-sky);
+  outline-offset: -2px;
+}
+
+.console-prose div[data-orientation='vertical'] > div > [role='region'] > div {
+  padding: 0 20px 16px 46px;
+}
+
+.console-prose div[data-orientation='vertical'] > div > [role='region'] :where(p, li) {
+  font-size: 15px;
+  line-height: 24px;
+}
+
+/* ---------- files (fumadocs Files/Folder/File) ---------- */
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) {
+  border-color: var(--color-seam);
+  border-radius: 12px;
+  background: var(--color-well);
+  padding: 12px 18px 14px;
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state])::before {
+  content: 'Files';
+  display: block;
+  margin: -12px -18px 12px;
+  padding: 13px 16px 13px 38px;
+  border-bottom: 1px solid var(--color-seam-soft);
+  background: rgb(255 255 255 / 2.5%) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e99ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E") 16px center / 14px no-repeat;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) button {
+  gap: 9px;
+  padding: 5px 0;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) button::after {
+  content: '/';
+  margin-inline-start: -9px;
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) button svg {
+  color: var(--color-amber);
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) :where(button, div):hover {
+  background: none;
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) [data-state] > div > div {
+  margin-inline-start: 7px;
+  padding-inline-start: 15px;
+  border-color: var(--color-seam-soft);
+}
+
+.console-prose .not-prose.rounded-md.border:has(> [data-state]) div.rounded-md:not(.border) {
+  align-items: flex-start;
+  gap: 9px;
+  padding: 5px 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* ---------- app figures ---------- */
+.console-figure {
+  overflow: hidden;
+  border: 1px solid var(--color-seam);
+  border-radius: 14px;
+  background: var(--color-ground);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
+}
