@@ -345,7 +345,7 @@ function Home() {
           <AppWindow
             src="esc-menu"
             label="In the app · Desktop · In-stream menu (Esc)"
-            alt="The OpenNOW desktop in-stream menu, a drawer docked on the left over a running Cyberpunk 2077 stream: the game title and session time with an Esc hint, live FPS 120, output 1440p, bitrate 48 Mb and the NVST · AV1 · VAAPI connection line, a note that quality, bitrate and codec change from the next session, Back to game, quick toggles for microphone, Anti-AFK, stats overlay and fullscreen with their shortcuts, then Controllers with its connected-pad note, Invite a friend marked unavailable, Switch to console mode marked gamepad ready, End session, and key hints for move, select, back and commands."
+            alt="The OpenNOW desktop in-stream menu, a drawer docked on the left of the stream view: the game Cyberpunk 2077 with LIVE · 1:24:07 and an Esc hint, live FPS 120, output 1440p, bitrate 48 Mb and a Streaming pill reading NVST · AV1 · VAAPI, a note that quality, bitrate and codec change from the next session, Back to game, quick toggles for microphone, Anti-AFK, stats overlay and fullscreen with their shortcuts, then Controllers with its connected-pad note, Invite a friend marked unavailable, Switch to console mode marked gamepad ready, End session, and the key hints for move, select, back and commands."
           />
           <AppWindow
             src="console"
