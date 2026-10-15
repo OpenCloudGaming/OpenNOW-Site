@@ -4,7 +4,6 @@ description: Internals of the in-process NVST streamer, environment overrides, a
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Nightly } from '@/components/docs/Nightly';
 import DataChannelsTable from '@/components/docs/DataChannelsTable';
 import NativeEnvironmentVariablesTable from '@/components/docs/NativeEnvironmentVariablesTable';
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
@@ -61,34 +60,18 @@ The bundle opens these SCTP data channels:
 
 The app also sets variables for its own use. Do not set them by hand: `OPENNOW_APP_EXECUTABLE`, `OPENNOW_APP_PID`, `OPENNOW_UPDATE_PLAN`, and `OPENNOW_UPDATE_NONCE` pass state to the updater, and the `OPENNOW_NATIVE_*` input and renderer variables configure the legacy standalone streamer process.
 
-## Changes in nightly builds
-
-<Nightly since="v1.0.3-nightly.875.1">
+## Native path changes since v1.0.2
 
 **WebRTC compatibility mode.** The core can allocate a session that uses a native WebRTC transport (the `str0m` library) instead of NVST. The streamer then runs the signaling WebSocket, SDP offer/answer, and ICE itself, and passes compressed frames to the same decoders. See [Protocol notes](/docs/reference/webrtc/).
-
-</Nightly>
-
-<Nightly since="v1.0.3-nightly.1026.1">
 
 - **Reference-frame invalidation.** After unrecoverable loss, the streamer sends the lost frame range as control command `0x301`, withholds dependent frames, and resumes on the next I, intra-refresh, or reference-picture-invalidation frame. An IDR request is the bounded backstop.
 - **Launch fallback.** Unsupported codec, chroma, or HDR requests degrade before a seat is allocated: missing HDR output clears HDR, software decode becomes 8-bit 4:2:0 SDR, 4:4:4 selects HEVC when it can decode it and otherwise drops to 4:2:0, and undecodable 10-bit SDR drops to 8-bit. Each step is logged as a `stream_profile_fallback` diagnostics event.
 - **Audio.** NVST audio RTP is reordered by timestamp in a jitter buffer that starts at 45 ms and grows by 20 ms per late-arrival burst, up to 200 ms. The microphone wraps Opus in RFC 2198 RED when the server offers it.
 - **Server timers.** Server idle-warning and termination control messages are parsed.
 
-</Nightly>
-
-<Nightly since="v1.0.3-nightly.990.1">
-
 **DroidDeck MediaCodec decode (Linux, opt-in).** With `OPENNOW_NATIVE_VIDEO_BACKEND=mediacodec` inside a DroidDeck session that has the bridge enabled, H.264 decodes on Android's hardware decoder. Decoded NV12 pixels are copied into the Vulkan uploader; this path is not zero-copy.
 
-</Nightly>
-
-<Nightly since="v1.0.3-nightly.1046.1">
-
 **AWDL suppression (macOS, opt-in).** An optional root LaunchDaemon keeps `awdl0` down while streaming. It is off by default, needs administrator approval to install, and can interrupt AirDrop, AirPlay, Sidecar, and Universal Control while active.
-
-</Nightly>
 
 ## Observed in NVIDIA's official client
 
@@ -133,18 +116,18 @@ This section describes NVIDIA's official GeForce NOW client, not OpenNOW. It com
 - The SCTP input channels used stream IDs 0, 2, 4, 6, 8, and 10, and the partially reliable input threshold was 300 ms. (Log.)
 - Clipboard paste uses an NVST custom-message exchange with a 64 KiB limit. (Code and log.)
 
-### Where OpenNOW v1.0.2 differs
+### Where OpenNOW v1.0.3 differs
 
-| Area | Official client | OpenNOW v1.0.2 |
+| Area | Official client | OpenNOW v1.0.3 |
 | --- | --- | --- |
-| Loss recovery | Reference-frame invalidation and IDR | IDR request only (invalidation is in nightly builds) |
-| Audio jitter | Adaptive timestamp jitter buffer | Bounded playback queue, no timestamp jitter buffer (added in nightly builds) |
+| Loss recovery | Reference-frame invalidation and IDR | Reference-frame invalidation and IDR |
+| Audio jitter | Adaptive timestamp jitter buffer | Timestamp jitter buffer, 45 to 200 ms |
 | Audio channels | Up to 8 | Stereo |
 | Microphone | Echo cancellation | No echo cancellation |
 | Clipboard | Custom-message paste protocol | Text submitted through the streamer as input |
 | 4:4:4 in ANNOUNCE | Chroma value `1` | Chroma value `3` (`chroma_format_idc`); server acceptance is unknown |
 | PLAY response | Only 200 starts the stream | 200 or 455 |
-| Idle warning | Parsed from server timer messages | Not parsed (parsed in nightly builds) |
+| Idle warning | Parsed from server timer messages | Parsed |
 
 ### Still unknown
 

@@ -3,7 +3,6 @@ title: Authentication
 description: QR/device sign-in, providers, saved accounts, profile PINs, and token lifecycle in OpenNOW
 ---
 
-import { Nightly } from '@/components/docs/Nightly';
 
 OpenNOW signs in to NVIDIA and alliance partner accounts with the OAuth 2.0 device authorization flow. You approve the sign-in on your provider's own page, either by scanning a QR code or by opening the page in your browser. OpenNOW never sees your password. The Rust core owns provider discovery, the device flow, token refresh, and session storage. The Qt shell starts and displays the flow over the shell/core protocol.
 
@@ -78,23 +77,15 @@ OpenNOW can keep several accounts signed in on one PC. **Settings → Account �
 
 A profile PIN is a four-digit code that is required before OpenNOW switches to that account. PINs are local to the device and never sent to NVIDIA. They are stored as scrypt hashes in `console-profiles-qt.json`. After five wrong attempts the PIN locks for 30 seconds, then 1, 5, and 15 minutes for repeated lockouts. An account with a PIN is not restored automatically at startup.
 
-<Nightly since="v1.0.3-nightly.1046.1">
-
 When two or more accounts are saved, OpenNOW opens **Who's playing?** at launch so you choose an account before the home screen. It also opens when saved accounts exist but none could be restored. The same picker is used for **Manage accounts**, Settings, and console mode. An expired sign-in is marked on its tile. Turn on **Settings → Account → Skip "Who's playing?"** (`startAsLastUsedAccount`) to start as the last-used account instead.
 
 The sidebar has an account switcher that opens with `Ctrl+Shift+A` from anywhere in the desktop shell. `Ctrl+1` through `Ctrl+9` switch to the matching saved account, and the command palette has **Switch to** entries. Every switch checks the profile PIN. If a running session belongs to the current account, OpenNOW asks you to end it before switching.
-
-</Nightly>
 
 ## Linked game accounts
 
 The Settings account section uses NVIDIA's GraphQL endpoint (`https://games.geforce.com/graphql`) to discover supported store providers and read the current user's linked and synced accounts. Providers are normalized to stable codes: `UPLAY`, `BATTLENET`, `EPIC`, `GAIJIN`, `STEAM`, and `XBOX`. Bundled provider definitions are used if the provider query fails.
 
-<Nightly since="v1.0.3-nightly.1107.1">
-
 The bundled codes also include `GOG`. Linking and sync follow the server's feature flags. A store with no supported link or sync action is not shown. Steam stays visible because sync is supported.
-
-</Nightly>
 
 Linking uses the ALS API (`https://als.geforcenow.com/v1`) to request a provider login URL, opens the external browser, and waits for the result on the first free local port of 2259, 6460, 7119, 8870, and 9096. Link, unlink, and resync actions invalidate account-scoped game/library/catalog caches, including proxy-scoped cache keys when a session proxy is configured, so the library can refresh after account changes.
 

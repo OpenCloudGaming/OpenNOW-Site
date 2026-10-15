@@ -3,15 +3,10 @@ title: Architecture Overview
 description: How the Qt shell, Rust core, and in-process native streamer fit together
 ---
 
-import { Nightly } from '@/components/docs/Nightly';
 
 OpenNOW's desktop client is a Qt 6 Quick application with an out-of-process Rust core and an in-process native NVST streamer. The Electron/`opennow-stable` desktop runtime is retired. The Qt app does not embed a browser and has no Chromium/WebRTC fallback.
 
-<Nightly since="v1.0.3-nightly.875.1">
-
 The native streamer also has a WebRTC compatibility transport. It runs in the same Rust engine; no browser is involved. **Settings → Network → Advanced → WebRTC compatibility mode** chooses it. By default it is used for alliance partner accounts, and NVST stays the default for NVIDIA accounts.
-
-</Nightly>
 
 ## Source layout
 
@@ -68,7 +63,7 @@ QML is one `OpenNOW` module. `qml/Main.qml` composes the desktop and console sur
 | `opennow-streamer-hid` | Native HID sessions for Sony controllers |
 | `opennow-streamer-ffi` | Bounded C ABI that Qt loads in process |
 | `opennow-streamer` | Development JSON-lines host for the same engine; not included in Qt packages |
-| `opennow-awdl-helper` <Nightly since="v1.0.3-nightly.1046.1" /> | Privileged macOS helper that suppresses AWDL while streaming |
+| `opennow-awdl-helper` | Privileged macOS helper that suppresses AWDL while streaming |
 
 ## Streaming data flow
 
@@ -85,7 +80,7 @@ QML is one `OpenNOW` module. `qml/Main.qml` composes the desktop and console sur
 
 The production desktop path is always native. Qt lends its QRhi graphics objects to the embedded Rust engine. Platform decode publishes a native GPU frame; Qt imports the converted texture into the scene graph so overlays compose above video. The packaged app does not ship a separate streamer executable, helper window, or browser video path.
 
-See [Native Streamer](/docs/reference/native-streamer) for packaging, diagnostics, and protocol details. Electron-era WebRTC notes and the nightly WebRTC compatibility mode are on [Protocol notes](/docs/reference/webrtc).
+See [Native Streamer](/docs/reference/native-streamer) for packaging, diagnostics, and protocol details. Electron-era WebRTC notes and the WebRTC compatibility mode are on [Protocol notes](/docs/reference/webrtc).
 
 ## Key source areas
 
