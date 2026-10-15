@@ -4,7 +4,6 @@ description: The in-process NVST streamer in the Qt app, its video backends per 
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Nightly } from '@/components/docs/Nightly';
 
 import NativePlatformVideoPathsTable from '@/components/docs/NativePlatformVideoPathsTable';
 import ReleasePackageMatrixTable from '@/components/docs/ReleasePackageMatrixTable';
@@ -15,11 +14,7 @@ The native streamer is the **production** desktop streaming path. The Qt app loa
 Older docs described an experimental Electron-supervised Rust child process with a GStreamer `webrtcbin` backend and web fallback. That path is retired with Electron. Packaged Qt builds embed the streamer library beside the executable and `opennow-core`.
 </Callout>
 
-<Nightly since="v1.0.3-nightly.875.1">
-
 The core can also start a session over a native WebRTC transport, called **WebRTC compatibility mode**. It runs inside the same embedded streamer and uses the same decoders and GPU presentation. See [Protocol notes](/docs/reference/webrtc/).
-
-</Nightly>
 
 ## How Qt uses it
 
@@ -44,7 +39,7 @@ There is no separate streamer window, helper application, or packaged standalone
 | `audioOutputDevice` | `""` | Opaque output device ID from native enumeration; empty means system default |
 | `showNativeStreamerStats` | `false` | Native stats overlay preference |
 | `enableCloudGsync` | `false` | Cloud G-Sync/VRR request |
-| `webrtcCompatibilityMode` | `"auto"` | <Nightly since="v1.0.3-nightly.875.1" /> **Settings → Network → Advanced → WebRTC compatibility mode**: Automatic, WebRTC, or NVST for new sessions |
+| `webrtcCompatibilityMode` | `"auto"` | **Settings → Network → Advanced → WebRTC compatibility mode**: Automatic, WebRTC, or NVST for new sessions |
 
 On Windows the stream view uses DirectX 11. The picker also lists DirectX 12 and Vulkan, but marks them as not supported by this stream view. On Linux, Auto never falls back to software decoding; pick **Software (CPU)** yourself when no hardware decoder works. Leave **Auto** selected unless you are isolating a known GPU issue.
 
@@ -60,13 +55,9 @@ HDR needs a 10-bit HEVC or AV1 hardware path on the platform and an HDR-capable 
 
 The streamer requests retransmission of lost video packets, uses forward error correction data from the server, and asks for a new keyframe (IDR) when a frame cannot be repaired. If video stops, the app retries the session a bounded number of times (8 attempts) before it reports a failure.
 
-<Nightly since="v1.0.3-nightly.1026.1">
-
 - After unrecoverable loss, the streamer reports the lost frame range to the server (reference-frame invalidation) and holds back frames that depend on it until a recovery frame arrives. An IDR request remains the backstop.
 - When the chosen codec, chroma, or HDR mode cannot be decoded, launch falls back to a profile that can be (for example 4:4:4 to 4:2:0, or HDR to SDR) instead of failing. Each fallback is recorded in diagnostics.
 - Game audio passes through a timestamp-ordered jitter buffer (45 to 200 ms), and the microphone can send redundant audio (RED) when the server offers it.
-
-</Nightly>
 
 ## Packaging
 
@@ -78,7 +69,7 @@ Look for assets named `OpenNOW-Qt-…` in [GitHub Releases](https://github.com/O
 
 ## Local JSON protocol
 
-The embedded engine speaks a versioned local JSON protocol (protocol 7) through the FFI command/response/event callbacks. The FFI ABI version is 11 in v1.0.2. Published nightlies use 12 from v1.0.3-nightly.983.1 and 13 from v1.0.3-nightly.1026.1. On `dev` it is 15, which is not in a published nightly yet. Important user-facing capabilities include:
+The embedded engine speaks a versioned local JSON protocol (protocol 7) through the FFI command/response/event callbacks. The FFI ABI version is 15 in v1.0.3; it was 11 in v1.0.2, 12 from v1.0.3-nightly.983.1, and 13 from v1.0.3-nightly.1026.1. Important user-facing capabilities include:
 
 - session start/stop and telemetry
 - microphone enable/toggle/state

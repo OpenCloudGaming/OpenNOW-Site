@@ -4,7 +4,6 @@ description: Qt/CMake/Cargo local setup, checks, CI, and release packaging
 ---
 
 import ReleasePackageMatrixTable from '@/components/docs/ReleasePackageMatrixTable';
-import { Nightly } from '@/components/docs/Nightly';
 
 OpenNOW's active desktop client lives in `opennow-qt/` in the [OpenCloudGaming/OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) repository, with Rust services under `native/`. This site is the canonical public documentation for that codebase. You do not need Node.js or npm to build or run the desktop app.
 
@@ -26,7 +25,7 @@ cmake --build build/opennow-qt
 ctest --test-dir build/opennow-qt --output-on-failure
 ```
 
-`main` matches the v1.0.2 release. Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable. The development executable is normally `build/opennow-qt/OpenNOW.exe` on Windows and `build/opennow-qt/opennow-qt` on Linux.
+`main` matches the v1.0.3 release. Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable. The development executable is normally `build/opennow-qt/OpenNOW.exe` on Windows and `build/opennow-qt/opennow-qt` on Linux.
 
 ## Common commands
 
@@ -80,18 +79,14 @@ Workflows in `.github/workflows/` on `main`:
 | `Qt update-signed stable release` (`qt-stable-release.yml`) | Manual, on `main` | Promotes a successful `qt-release-candidate` run for the exact `main` commit to a public Latest release without rebuilding |
 | `CodeQL Advanced` (`codeql.yml`) | Pushes, pull requests, weekly schedule | Code scanning |
 
-Public Qt packages use names like `OpenNOW-Qt-<version>-…`. The Latest release is **v1.0.2**, published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`v1.0.3-nightly.<run>.<attempt>`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release.
+Public Qt packages use names like `OpenNOW-Qt-<version>-…`. `main` now carries **v1.0.3**; each stable release is published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`v1.0.3-nightly.<run>.<attempt>`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release.
 
-The v1.0.2 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; Linux x64/ARM64 `.AppImage` and `.deb`; macOS Apple Silicon `.dmg` and `.zip`; two `.AppImage.zsync` sidecars; one `<asset>.manifest.json` per asset; `RELEASE-INFO.json`; and `SHA256SUMS`. Nightlies publish the macOS DMG only; their macOS ZIP is a CI validation artifact.
+The v1.0.3 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; Linux x64/ARM64 `.AppImage`, `.deb`, and `.flatpak`; macOS Apple Silicon `.dmg` and `.zip`; two `.AppImage.zsync` sidecars; one `<asset>.manifest.json` per asset; `RELEASE-INFO.json`; and `SHA256SUMS`. Nightlies publish the macOS DMG only; their macOS ZIP is a CI validation artifact.
 
 Current package matrix:
 
 <ReleasePackageMatrixTable />
 
-<Nightly since="v1.0.3-nightly.1107.1">
-
-The Linux row above describes the stable packages. From this nightly, GitHub Releases also include `OpenNOW-Qt-<version>-Linux-x64.flatpak` and `OpenNOW-Qt-<version>-Linux-arm64.flatpak`. They are not on Flathub. v1.0.2 has no Flatpak. The manual **Qt Flatpak build** workflow still uploads an artifact and does not publish a release by itself.
-
-</Nightly>
+The Linux row above covers the AppImage and DEB. GitHub Releases also include `OpenNOW-Qt-<version>-Linux-x64.flatpak` and `OpenNOW-Qt-<version>-Linux-arm64.flatpak`. They are not on Flathub. The manual **Qt Flatpak build** workflow still uploads an artifact and does not publish a release by itself.
 
 Manual publication details live in the upstream [nightly guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-nightly-release.md), [release-candidate guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-release-candidate.md), and [stable release guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-unsigned-stable-release.md). Prefer those docs over historical Electron packaging notes.

@@ -10,7 +10,6 @@ import { Card, Cards } from 'fumadocs-ui/components/card';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Bug, Cable, Gamepad2, KeyRound, MonitorPlay, Radio } from 'lucide-react';
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
-import { Nightly } from '@/components/docs/Nightly';
 
 Most OpenNOW problems fall into one of four layers: authentication, the GeForce NOW session, the local native stream path, or input. Start with the quick checks below, then use the section that matches what you see.
 
@@ -82,13 +81,9 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
 
 Do not repeatedly relaunch while an earlier CloudMatch session is still being released. Stop the session once, wait briefly, then make one clean attempt.
 
-<Nightly since="v1.0.3-nightly.983.1">
-
 ![OpenNOW console launch stage while queued for Cyberpunk 2077 on Steam in EU Central: You are in line, queue position 37 that updates when GeForce NOW reports it, the steps Session requested, Waiting for a rig, Setting up the rig and Connecting the stream, the time waited on this device and a Leave queue hint.](/illustrations/troubleshooting-queue.webp "In the app · Console mode › Launch › In queue")
 
 ![OpenNOW console launch stage after the rig is ready: Connecting to your game, waiting for the first video frame, with the rig card (RTX 4080, EU Central, 1440p at 120 FPS requested), the first three launch steps done, Connecting the stream in progress and a Cancel session hint.](/illustrations/troubleshooting-connecting.webp "In the app · Console mode › Launch › Connecting")
-
-</Nightly>
 
 ## Stream quality and video
 
@@ -106,30 +101,18 @@ Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can s
 | H.265 unavailable on Windows | Microsoft's HEVC Video Extensions may be missing | Open the HEVC help in Settings and install the free Store extension first (paid offer if needed). Restart OpenNOW. GPU hardware HEVC decode is still required |
 | High GPU use with upscaling | MetalFX (macOS) or FSR 1 (Windows/Linux) costs extra GPU time | Turn upscaling **Off**, or lower stream resolution/FPS if the local GPU is saturated |
 | Flatpak cannot auto-update | Flatpak builds disable the in-app self-updater | Update with `flatpak update io.github.opencloudgaming.OpenNOW` from a Flatpak remote, or rebuild/reinstall a local `.flatpak` bundle |
-| In-app update fails or does not install | Installation needs your confirmation and no active or recovering stream. Portable Windows installs on FAT or exFAT drives cannot be replaced in place. Builds older than v1.0.1 do not trust the update key | End the stream and retry **Settings → About & support → Check for updates**; note the failure message the updater shows. Move a portable install to an NTFS drive, or update it manually. Install v1.0.2 manually once if you come from v1.0.0 |
+| In-app update fails or does not install | Installation needs your confirmation and no active or recovering stream. Portable Windows installs on FAT or exFAT drives cannot be replaced in place. Builds older than v1.0.1 do not trust the update key | End the stream and retry **Settings → Updates → Check for updates**; note the failure message the updater shows. Move a portable install to an NTFS drive, or update it manually. Install v1.0.3 manually once if you come from v1.0.0 |
 | Entire app window is black vs only the video surface | Note which one you see before changing settings | Export diagnostics and include both `native-streamer.log` and `qt-native.log` |
 
-<Nightly since="dev after v1.0.3-nightly.1107.1">
-
-On desktop, **Check for updates** is on **Settings → Updates**, not under About & support. v1.0.3-nightly.1107.1 still uses **Settings → About & support → Check for updates**.
-
-</Nightly>
+On desktop, **Check for updates** is on **Settings → Updates**, not under About & support.
 
 <Callout type="warn" title="Change one variable at a time">
 Changing codec, resolution, FPS, bitrate, backend, and region together makes the result impossible to interpret. Begin with the conservative profile, then restore one option per stream.
 </Callout>
 
-<Nightly since="v1.0.3-nightly">
-
 ![OpenNOW Ctrl+G in-stream drawer during a session: FPS, output resolution, bitrate and the NVST · H265 · D3D11VA connection line, Back to game, quick toggles for microphone, Anti-AFK, stats overlay and fullscreen with their shortcuts, then Controllers, Invite a friend, Switch to console mode and End session, with the F3 stats bar (fps, latency, UDP receive rate, codec) in the corner.](/illustrations/troubleshooting-ctrlg.webp "In the app · Ctrl+G menu")
 
-</Nightly>
-
-<Nightly since="v1.0.3-nightly.983.1">
-
 ![OpenNOW console Guide (Ctrl+G, or the PS or Xbox button) over a live Forza Horizon 5 stream: the session line (2560×1440, 120 FPS, AV1, RTX 4080), Resume game focused, quick actions for screenshot, record, microphone, stats overlay, fullscreen and Anti-AFK, then Controllers & co-op, Shortcuts & help and End session, with a Screenshot saved toast.](/illustrations/troubleshooting-console-guide.webp "In the app · Console mode › Guide (Ctrl+G)")
-
-</Nightly>
 
 ## Input, controller, and microphone
 
@@ -140,11 +123,7 @@ Changing codec, resolution, FPS, bitrate, backend, and region together makes the
 - **Clipboard paste does nothing:** turn on **Settings → Controls → Clipboard paste** (default off), make sure keyboard input is active in the stream, then press `Ctrl+V` (`Command+V` on macOS). Each paste sends up to 64 KiB of text. There is no automatic clipboard sync.
 - **Microphone is silent:** grant microphone permission to OpenNOW at the operating-system level, set **Settings → Audio → Microphone** to **Open microphone** (default **Disabled**), and reconnect the stream so capture is negotiated again. If Settings says microphone capture is unavailable in this build, that build cannot capture audio.
 
-<Nightly since="v1.0.3-nightly.983.1">
-
 ![OpenNOW console Guide › Controllers & co-op over the stream: P1 DualSense Wireless Controller and P2 Xbox Wireless Controller connected with battery levels, P3 and P4 waiting for a controller to connect or press a button, and a note that remapping and controller settings live in Settings › Input & controllers.](/illustrations/troubleshooting-console-controllers.webp "In the app · Console mode › Guide › Controllers & co-op")
-
-</Nightly>
 
 See [Input and Controls](/docs/reference/input) for shortcuts, pointer behavior, and microphone modes.
 
@@ -152,11 +131,7 @@ See [Input and Controls](/docs/reference/input) for shortcuts, pointer behavior,
 
 The Qt desktop app streams through the in-process native streamer over NVST. There is no browser streamer to fall back to.
 
-<Nightly since="v1.0.3-nightly.875.1">
-
 To isolate a transport problem, set **Settings → Network → WebRTC compatibility mode** to **NVST** or **WebRTC** and start a new session. **Automatic** uses WebRTC for signed-in alliance-partner accounts and NVST for NVIDIA accounts. WebRTC needs direct UDP connectivity and has no microphone or clipboard text.
-
-</Nightly>
 
 1. Keep the **video backend** on **Auto** unless isolating a specific API.
 2. Restart the stream after changing codec, resolution, color quality, or backend.

@@ -1,24 +1,21 @@
 ---
 title: Protocol notes (WebRTC)
-description: Electron-era Chromium/WebRTC signaling history, the native WebRTC compatibility mode in nightly builds, and how NVIDIA's official client uses WebRTC pieces
+description: Electron-era Chromium/WebRTC signaling history, the native WebRTC compatibility transport, and how NVIDIA's official client uses WebRTC pieces
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Nightly } from '@/components/docs/Nightly';
 
 <Callout type="warn" title="Not the default desktop path">
-OpenNOW's Qt desktop client streams through the in-process native NVST runtime. It does **not** embed Chromium and does not use a renderer `RTCPeerConnection`. In v1.0.2 every desktop session uses NVST. Nightly builds add an opt-in native WebRTC transport, described below. For current desktop behavior, use [Native Streamer](/docs/reference/native-streamer/).
+OpenNOW's Qt desktop client streams through the in-process native NVST runtime. It does **not** embed Chromium and does not use a renderer `RTCPeerConnection`. In v1.0.3 NVST stays the default. An opt-in native WebRTC transport is described below. For current desktop behavior, use [Native Streamer](/docs/reference/native-streamer/).
 </Callout>
 
 This page has three parts:
 
-- **WebRTC compatibility mode**: a native WebRTC transport in the Qt app, in nightly builds only.
+- **WebRTC compatibility mode**: a native WebRTC transport in the Qt app.
 - **Electron era**: how the retired Electron client used Chromium WebRTC. It helps when reading older issues.
 - **NVIDIA's official client**: what research shows about the WebRTC-named parts of the official client.
 
 ## WebRTC compatibility mode
-
-<Nightly since="v1.0.3-nightly.875.1">
 
 **Settings → Network → Advanced → WebRTC compatibility mode** chooses the transport for new sessions. The setting is `webrtcCompatibilityMode`:
 
@@ -33,7 +30,7 @@ The core decides the transport before it validates the codec and allocates the s
 The WebRTC path is for compatibility and is slower than NVST. The core limits each WebRTC session:
 
 - H.264 (also used when the codec is Auto or AV1): at most 1920×1080 at 60 FPS, 8-bit 4:2:0.
-- H.265 <Nightly since="v1.0.3-nightly.983.1" />: keeps the selected resolution and frame rate (30 to 360 FPS) and allows 8-bit or 10-bit 4:2:0.
+- H.265 : keeps the selected resolution and frame rate (30 to 360 FPS) and allows 8-bit or 10-bit 4:2:0.
 - Always SDR and stereo. No microphone, no clipboard text, and no Cloud G-Sync.
 - Needs direct UDP connectivity.
 
@@ -49,8 +46,6 @@ The streamer runs the whole exchange itself and passes compressed frames to the 
 | `input_channel_v1` | ordered, reliable | Keyboard and control input |
 | `input_channel_partially_reliable` | unordered, lifetime from the offer's `ri.partialReliableThresholdMs` (30 ms if absent) | Partially reliable input |
 | `stats_channel` | unordered, no retransmits | Statistics |
-
-</Nightly>
 
 ## Electron era (historical)
 

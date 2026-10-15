@@ -4,7 +4,6 @@ description: Settings keys, defaults, ranges, Settings locations, and local data
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Nightly } from '@/components/docs/Nightly';
 import LocalDataLocationsTable from '@/components/docs/LocalDataLocationsTable';
 
 OpenNOW stores user settings as JSON in `settings.json` in the OpenNOW data directory. The Rust core owns load, migration, normalization, and save. The Qt Settings pages edit those values over the shell/core protocol.
@@ -17,7 +16,7 @@ The core repairs values on every load and write. A choice that is not in the all
 Desktop streaming defaults to native NVST (`streamClientMode: "native"`, `transportMode: "nvst"`). There is no web streamer setting to return to in the Qt app.
 </Callout>
 
-<Callout type="warn" title="Known issues in v1.0.2">
+<Callout type="warn" title="Known issues in v1.0.3">
 Prefer a **4:2:0** color profile. YUV **4:4:4** choices are labeled **Coming soon** because they are not working correctly. Alliance Partner sign-in remains available, but Alliance Partners may not work correctly. Keep NVIDIA as the fallback when an Alliance stream fails.
 </Callout>
 
@@ -42,7 +41,7 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 | `codec` | `string` | `"auto"` | `auto`, `av1`, `h265`, or `h264`. Codecs the detected decoder cannot handle are disabled. H.264 allows only `8bit_420`, and AV1 allows only 4:2:0 color. **Settings → Stream → Codec** |
 | `fallbackCodec` | `string` | `"auto"` | `auto`, `h264`, or `h265`. Used when the preferred codec is not offered. Shown only in console-mode Settings |
 | `colorQuality` | `string` | `"8bit_420"` | `8bit_420`, `10bit_420`, `8bit_444`, or `10bit_444`. The 4:4:4 choices are labeled **Coming soon**. 10-bit color requires a Performance or Ultimate membership. **Settings → Stream → Color quality** |
-| `dlssOverrides` <Nightly since="dev after v1.0.3-nightly.1107.1" /> | `object` | `{"srMode":0,"srModel":0,"srScale":100,"rrModel":0,"fgMode":0,"fgModel":0,"fgMultiplier":0}` | Cloud DLSS overrides the core sends with the next session. `0` leaves that feature to the game. `srMode` is In-game `0` or DLAA `5` (scale 100), Quality `3` (67), Balanced `2` (58), Performance `1` (50), Ultra Performance `4` (33), or Custom `6` (`srScale` 33–100, 75 if missing). `srModel` is 0–14, `rrModel` is 0–7, and `fgModel` is 0–3. Settings labels `0` In-game and `1` Recommended. Super Resolution offers presets A–F and J–M. Ray Reconstruction offers 0, 1, 5, and 7. Frame Generation offers 0–3. `fgMode` is In-game `0` or Dynamic `1`. `fgMultiplier` is `0` unless frame generation is Dynamic, then `3`, `4`, `5`, or `6`. A model left at `0` also leaves its mode to the game. The control offers Dynamic frame generation only when the membership entitles frame generation and at least one multiplier, and it disables multipliers the membership does not include. Separate from `frameGeneration`. **Settings → Stream → DLSS overrides**, directly after Color quality |
+| `dlssOverrides` | `object` | `{"srMode":0,"srModel":0,"srScale":100,"rrModel":0,"fgMode":0,"fgModel":0,"fgMultiplier":0}` | Cloud DLSS overrides the core sends with the next session. `0` leaves that feature to the game. `srMode` is In-game `0` or DLAA `5` (scale 100), Quality `3` (67), Balanced `2` (58), Performance `1` (50), Ultra Performance `4` (33), or Custom `6` (`srScale` 33–100, 75 if missing). `srModel` is 0–14, `rrModel` is 0–7, and `fgModel` is 0–3. Settings labels `0` In-game and `1` Recommended. Super Resolution offers presets A–F and J–M. Ray Reconstruction offers 0, 1, 5, and 7. Frame Generation offers 0–3. `fgMode` is In-game `0` or Dynamic `1`. `fgMultiplier` is `0` unless frame generation is Dynamic, then `3`, `4`, `5`, or `6`. A model left at `0` also leaves its mode to the game. The control offers Dynamic frame generation only when the membership entitles frame generation and at least one multiplier, and it disables multipliers the membership does not include. Separate from `frameGeneration`. **Settings → Stream → DLSS overrides**, directly after Color quality |
 | `streamClientMode` | `string` | `"native"` | Always `native` |
 | `transportMode` | `string` | `"nvst"` | Always `nvst`. The core rewrites any other value on load |
 | `nativeVideoBackend` | `string` | `"auto"` | `auto`, `d3d11`, `d3d12`, `nvdec`, `cuda`, `vaapi`, `v4l2`, `vulkan`, `videotoolbox`, or `software`. Settings lists only the backends available on your platform. Applies to the next stream. **Settings → Stream → Advanced → Video backend** |
@@ -58,8 +57,8 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 | `sessionProxyUrl` | `string` | `""` | `http://`, `https://`, `socks4://`, or `socks5://` URL with host and port. **Settings → Network → Advanced → Proxy address** |
 | `enableL4S` | `boolean` | `false` | Requests scalable low-latency transport for the next session. **Settings → Network → Advanced → L4S** |
 | `networkTest` | `boolean` | `false` | Measures UDP payload reachability of the selected zone before streaming. **Settings → Network → Advanced → Network test** |
-| `webrtcCompatibilityMode` <Nightly since="v1.0.3-nightly.875.1" /> | `string` | `"auto"` | `auto`, `on` (WebRTC), or `off` (NVST). Auto uses WebRTC for signed-in alliance accounts and NVST for NVIDIA accounts. Applies to new sessions. See [Protocol notes](/docs/reference/webrtc/). **Settings → Network → Advanced → WebRTC compatibility mode** |
-| `suppressAwdlWhileStreaming` <Nightly since="v1.0.3-nightly.1046.1" /> | `boolean` | `false` | macOS only. Turns off AWDL while a stream is active to reduce Wi-Fi latency spikes. Interrupts AirDrop, AirPlay, Sidecar, and other Continuity features until the stream ends. Needs a privileged helper that you install once with administrator approval. **Settings → Network → macOS Wi-Fi** |
+| `webrtcCompatibilityMode` | `string` | `"auto"` | `auto`, `on` (WebRTC), or `off` (NVST). Auto uses WebRTC for signed-in alliance accounts and NVST for NVIDIA accounts. Applies to new sessions. See [Protocol notes](/docs/reference/webrtc/). **Settings → Network → Advanced → WebRTC compatibility mode** |
+| `suppressAwdlWhileStreaming` | `boolean` | `false` | macOS only. Turns off AWDL while a stream is active to reduce Wi-Fi latency spikes. Interrupts AirDrop, AirPlay, Sidecar, and other Continuity features until the stream ends. Needs a privileged helper that you install once with administrator approval. **Settings → Network → macOS Wi-Fi** |
 | `enableCloudGsync` | `boolean` | `false` | Requests Cloud G-Sync (variable refresh) and NVIDIA Reflex. Reflex is also requested at 120 FPS and above. Labeled **Reflex low latency** in **Settings → Stream** and **Cloud G-Sync** in console-mode Settings |
 | `identifyAsSteamDeck` | `boolean` | `false` | Advertises a Steam Deck client to unlock Deck resolutions and 90 FPS. Refreshes entitlements. **Settings → Stream → Advanced → Steam Deck identity** |
 | `steamBigPictureMode` | `boolean` | `false` | Requests gamepad-friendly launchers such as Steam Big Picture. Applies to new sessions. **Settings → Stream → Steam Big Picture mode** |
@@ -71,11 +70,7 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 
 ![OpenNOW onboarding, step 03 Picture (Pick your picture): the detected GPU, monitor, HDR, hardware codecs and measured line, then Resolution 1440p, Frame rate 120, HDR on, Codec AV1 and Bitrate 75 Mbps, next to a live preview of the stream and a line budget bar.](/illustrations/configuration-picture.webp "In the app · Onboarding › Pick your picture")
 
-<Nightly since="v1.0.3-nightly.983.1">
-
 ![OpenNOW console mode, Settings › Streaming: Codec with Auto, AV1, H.264 and H.265, Color quality focused on 10-bit 4:2:0, HDR off because the display does not report HDR support, Max bitrate 75 Mbps, Fallback codec Auto, Frame generation (experimental) off, Cloud G-Sync on and Stats overlay on launch, each marked as applying from the next session.](/illustrations/configuration-streaming.webp "In the app · Console mode › Settings › Streaming")
-
-</Nightly>
 
 ## Capture and recording
 
@@ -85,7 +80,7 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 | `replayBufferSeconds` | `number` | `30` | Target clip length, 15–120 seconds. Memory limits and keyframe spacing can shorten a clip. **Settings → Recording → Replay duration** |
 | `replayBufferMemoryMiB` | `number` | `256` | Memory limit for buffered media, 64–512 MiB. Higher bitrates fill it sooner. **Settings → Recording → Replay memory limit** |
 
-Recordings and clips copy the incoming stream without re-encoding, so they use the stream's resolution, frame rate, and bitrate. The keys `recordingResolution` (`"720p"`), `recordingFps` (`30`), and `recordingBitrateMbps` (`null`) still exist in `settings.json`, but v1.0.2 does not read them. Recordings are Matroska (`.mkv`) files under the OpenNOW Pictures folder. See [Media](/docs/reference/media/).
+Recordings and clips copy the incoming stream without re-encoding, so they use the stream's resolution, frame rate, and bitrate. The keys `recordingResolution` (`"720p"`), `recordingFps` (`30`), and `recordingBitrateMbps` (`null`) still exist in `settings.json`, but v1.0.3 does not read them. Recordings are Matroska (`.mkv`) files under the OpenNOW Pictures folder. See [Media](/docs/reference/media/).
 
 ## Input and shortcuts
 
@@ -94,7 +89,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
 | `clipboardPaste` | `boolean` | `false` | Pastes local text into the stream with Ctrl+V (Command+V on macOS), up to 64 KiB per paste. **Settings → Controls → Clipboard paste** |
-| `mouseSensitivity` | `number` | `1` | Multiplier for relative mouse movement, 0.1–3.0. v1.0.2 passes it only to the external renderer process, not to the embedded stream view. **Settings → Controls → Mouse sensitivity** |
+| `mouseSensitivity` | `number` | `1` | Multiplier for relative mouse movement, 0.1–3.0. v1.0.3 passes it only to the external renderer process, not to the embedded stream view. **Settings → Controls → Mouse sensitivity** |
 | `keyboardLayout` | `string` | `"en-US"` | Match your physical keyboard. Sent to GeForce NOW at session start; restart or resume after changing. See [Input](/docs/reference/input/) for the 21 values. **Settings → Controls → Keyboard layout** |
 | `gameLanguage` | `string` | `"en_US"` | Language requested for game metadata and the session. **Settings → Controls → Game language** |
 | `shortcutToggleStats` | `string` | `"Ctrl+N"` | Stats overlay |
@@ -111,9 +106,9 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `controllerLeftStickDeadzone` | `number` | `5` | Left-stick dead zone in percent, 0–50. **Settings → Controls → Left stick dead zone** |
 | `controllerRightStickDeadzone` | `number` | `5` | Right-stick dead zone in percent, 0–50. **Settings → Controls → Right stick dead zone** |
 | `controllerVibrationIntensity` | `number` | `100` | Vibration strength in percent, 0–100. **Settings → Controls → Controller vibration** |
-| `controllerProfiles` <Nightly since="v1.0.3-nightly" /> | `object` | `{}` | Per-controller dead zones and vibration, keyed by controller. A controller without its own values uses the three settings above. Edited in the `Ctrl+G` drawer under **Controllers** |
-| `forwardFlightControls` <Nightly since="v1.0.3-nightly" /> | `boolean` | `true` | Forwards supported flight sticks, throttles, pedals, and wheels to the game as the real HID device instead of an Xbox controller. **Settings → Controls → Forward flight sticks and wheels as native devices** |
-| `enableGyroscopeControls` | `boolean` | `false` | **Settings → Controls → Gyroscope**. v1.0.2 stores this toggle but does not send motion data |
+| `controllerProfiles` | `object` | `{}` | Per-controller dead zones and vibration, keyed by controller. A controller without its own values uses the three settings above. Edited in the `Ctrl+G` drawer under **Controllers** |
+| `forwardFlightControls` | `boolean` | `true` | Forwards supported flight sticks, throttles, pedals, and wheels to the game as the real HID device instead of an Xbox controller. **Settings → Controls → Forward flight sticks and wheels as native devices** |
+| `enableGyroscopeControls` | `boolean` | `false` | **Settings → Controls → Gyroscope**. v1.0.3 stores this toggle but does not send motion data |
 
 ## Statistics and session overlays
 
@@ -127,9 +122,9 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `sessionCounterEnabled` | `boolean` | `false` | Shows a small session timer independently of the statistics overlay. **Settings → Stream → Statistics overlay → Standalone session timer** |
 | `sessionClockShowEveryMinutes` | `number` | `60` | How often the session clock reappears, 1–240 minutes. Console-mode Settings |
 | `sessionClockShowDurationSeconds` | `number` | `30` | How long the session clock stays visible, 1–120 seconds. Console-mode Settings |
-| `showAntiAfkIndicator` | `boolean` | `true` | Shows a badge while Anti-AFK is on. Console-mode Settings; desktop **Settings → Stream** <Nightly since="v1.0.3-nightly" /> |
-| `antiAfkReminderEveryMinutes` | `number` | `15` | With the indicator hidden, how often the reminder reappears, 1–120 minutes. Console-mode Settings; desktop **Settings → Stream** <Nightly since="v1.0.3-nightly" /> |
-| `antiAfkReminderDurationSeconds` | `number` | `5` | How long each reminder stays visible, 1–60 seconds. Console-mode Settings; desktop **Settings → Stream** <Nightly since="v1.0.3-nightly" /> |
+| `showAntiAfkIndicator` | `boolean` | `true` | Shows a badge while Anti-AFK is on. Console-mode Settings; desktop **Settings → Stream** |
+| `antiAfkReminderEveryMinutes` | `number` | `15` | With the indicator hidden, how often the reminder reappears, 1–120 minutes. Console-mode Settings; desktop **Settings → Stream** |
+| `antiAfkReminderDurationSeconds` | `number` | `5` | How long each reminder stays visible, 1–60 seconds. Console-mode Settings; desktop **Settings → Stream** |
 | `showSessionReport` | `boolean` | `true` | Shows performance and recovery results after a session ends. Console-mode Settings |
 
 ## Shell, console, and app behavior
@@ -139,7 +134,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `launchInConsoleMode` | `boolean` | `false` | Starts OpenNOW in console mode. Turning it off also turns off `switchToConsoleOnPad`. **Settings → Console mode → Start in console mode** |
 | `switchToConsoleOnPad` | `boolean` | `false` | Enters console mode when a gamepad is the only input. Ignored while a mouse has moved in the last 30 seconds. **Settings → Console mode** |
 | `leaveConsoleOnPointer` | `boolean` | `true` | Leaves console mode on keyboard or mouse input. **Settings → Console mode** |
-| `startAsLastUsedAccount` <Nightly since="v1.0.3-nightly.1046.1" /> | `boolean` | `false` | Skips **Who's playing?** at launch and starts as the last-used account. **Settings → Account → Skip "Who's playing?"** |
+| `startAsLastUsedAccount` | `boolean` | `false` | Skips **Who's playing?** at launch and starts as the last-used account. **Settings → Account → Skip "Who's playing?"** |
 | `autoFullScreen` | `boolean` | `true` | Enters fullscreen when the session is ready. **Settings → Stream → Fullscreen when session is ready** |
 | `appTheme` | `string` | `"auto"` | `auto`, `dark`, or `light`. Choosing a theme pack sets this value. **Settings → Appearance → Appearance** |
 | `appLanguage` | `string` | `"system"` | `system`, `de`, `en`, `es`, `fr`, `ja`, `ko`, `nl`, `pl`, `ro`, `ru`, `tr`, or `zh`. **Settings → Appearance → Interface language** |
@@ -154,27 +149,23 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `desktopBackgroundImage` | `string` | `""` | `file://` URL of the custom background image |
 | `desktopBackgroundOpacity` | `number` | `30` | Custom image opacity in percent, 0–100. **Settings → Appearance → Image opacity** |
 | `reducedMotion` | `boolean` | `false` | Cuts parallax and cover animations. **Settings → Appearance → Reduce motion** |
-| `uiSoundsEnabled` <Nightly since="v1.0.3-nightly.983.1" /> | `boolean` | `true` | Plays the Game Mode startup sound. **Settings → Appearance → UI sounds** |
-| `confirmQuitWhenIdle` <Nightly since="v1.0.3-nightly.1107.1" /> | `boolean` | `true` | Asks before closing OpenNOW from the title bar. Off skips that prompt only while idle: nothing launching, streaming, recovering, or waiting to resume. **Settings → Appearance → Confirm before quitting** |
+| `uiSoundsEnabled` | `boolean` | `true` | Plays the Game Mode startup sound. **Settings → Appearance → UI sounds** |
+| `confirmQuitWhenIdle` | `boolean` | `true` | Asks before closing OpenNOW from the title bar. Off skips that prompt only while idle: nothing launching, streaming, recovering, or waiting to resume. **Settings → Appearance → Confirm before quitting** |
 | `showTileLabels` | `boolean` | `true` | Shows game names under tiles. Console-mode Settings |
-| `autoCheckForUpdates` | `boolean` | `true` | Checks for updates every six hours while no stream is active. **Settings → About & support** |
-| `autoDownloadUpdates` | `boolean` | `false` | Downloads verified updates while idle. Installation always asks first. **Settings → About & support** |
-| `updateChannel` | `string` | build-dependent | `stable` or `nightly`. The default follows the build's version. **Settings → About & support → Update channel** |
+| `autoCheckForUpdates` | `boolean` | `true` | Checks for updates every six hours while no stream is active. **Settings → Updates** |
+| `autoDownloadUpdates` | `boolean` | `false` | Downloads verified updates while idle. Installation always asks first. **Settings → Updates** |
+| `updateChannel` | `string` | build-dependent | `stable` or `nightly`. The default follows the build's version. **Settings → Updates → Update channel** |
 | `discordRichPresence` | `boolean` | `false` | Shows the streamed game as Discord activity. **Settings → Account → Show what I am playing** |
 | `errorReportingConsent` | `string` | `"unset"` | `unset`, `granted`, or `denied`. **Settings → Account → Crash reports** |
-| `automaticBugReports` <Nightly since="v1.0.3-nightly.866.1" /> | `string` | `"unset"` | `unset`, `enabled`, or `disabled`. Sends usage statistics and error reports with logs. Starts as `disabled` if `errorReportingConsent` is `denied`. **Settings → Account → Usage & bug reports · Experimental** |
+| `automaticBugReports` | `string` | `"unset"` | `unset`, `enabled`, or `disabled`. Sends usage statistics and error reports with logs. Starts as `disabled` if `errorReportingConsent` is `denied`. **Settings → Account → Usage & bug reports · Experimental** |
 
-<Nightly since="dev after v1.0.3-nightly.1107.1">
+On desktop, `autoCheckForUpdates`, `autoDownloadUpdates`, and `updateChannel` are edited on **Settings → Updates**. **About & support** keeps the version line and an **Open Updates** button.
 
-On desktop, `autoCheckForUpdates`, `autoDownloadUpdates`, and `updateChannel` are edited on **Settings → Updates**. **About & support** keeps the version line and an **Open Updates** button. v1.0.3-nightly.1107.1 still uses **Settings → About & support**.
+### Stored but unused in v1.0.3
 
-</Nightly>
+These keys exist in `settings.json` and are normalized, but no v1.0.3 Settings page or stream path reads them: `aspectRatio` (`"16:9"`), `recordingResolution`, `recordingFps`, `recordingBitrateMbps`, `allowEscapeToExitFullscreen` (`false`), `hideStreamButtons` (`false`), and `hideServerSelector` (`false`). `mouseAcceleration` (`1`, range 1–150) and `nativeCursorOverlay` (`true`, **Settings → Controls → Advanced → Cursor overlay**) are read only by the external renderer process. The embedded stream view that the packaged app uses does not read them.
 
-### Stored but unused in v1.0.2
-
-These keys exist in `settings.json` and are normalized, but no v1.0.2 Settings page or stream path reads them: `aspectRatio` (`"16:9"`), `recordingResolution`, `recordingFps`, `recordingBitrateMbps`, `allowEscapeToExitFullscreen` (`false`), `hideStreamButtons` (`false`), and `hideServerSelector` (`false`). `mouseAcceleration` (`1`, range 1–150) and `nativeCursorOverlay` (`true`, **Settings → Controls → Advanced → Cursor overlay**) are read only by the external renderer process. The embedded stream view that the packaged app uses does not read them.
-
-`consoleProfilePickerOnLaunch` (default `true`) is a v1.0.2 setting. **Settings → Console mode → Controller profile picker** ("Choose a saved profile when console mode starts") stores it, and nothing reads it. From v1.0.3-nightly.1046.1 it is no longer a setting. If `startAsLastUsedAccount` is missing and the saved value is `false`, load sets `startAsLastUsedAccount` to `true`. The old key stays in the file and is not shown.
+`consoleProfilePickerOnLaunch` (default `true`) was a v1.0.2 setting. **Settings → Console mode → Controller profile picker** ("Choose a saved profile when console mode starts") stored it, and nothing read it. It is no longer a setting in v1.0.3. If `startAsLastUsedAccount` is missing and the saved value is `false`, load sets `startAsLastUsedAccount` to `true`. The old key stays in the file and is not shown.
 
 ## Diagnostics
 
