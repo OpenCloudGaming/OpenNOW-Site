@@ -4,6 +4,7 @@ description: Qt/CMake/Cargo local setup, checks, CI, and release packaging
 ---
 
 import ReleasePackageMatrixTable from '@/components/docs/ReleasePackageMatrixTable';
+import { Nightly } from '@/components/docs/Nightly';
 
 OpenNOW's active desktop client lives in `opennow-qt/` in the [OpenCloudGaming/OpenNOW](https://github.com/OpenCloudGaming/OpenNOW) repository, with Rust services under `native/`. This site is the canonical public documentation for that codebase. You do not need Node.js or npm to build or run the desktop app.
 
@@ -86,5 +87,11 @@ The v1.0.2 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; 
 Current package matrix:
 
 <ReleasePackageMatrixTable />
+
+<Nightly since="v1.0.3-nightly.1107.1">
+
+The Linux row above describes the stable packages. From this nightly, GitHub Releases also include `OpenNOW-Qt-<version>-Linux-x64.flatpak` and `OpenNOW-Qt-<version>-Linux-arm64.flatpak`. They are not on Flathub. v1.0.2 has no Flatpak. The manual **Qt Flatpak build** workflow still uploads an artifact and does not publish a release by itself.
+
+</Nightly>
 
 Manual publication details live in the upstream [nightly guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-nightly-release.md), [release-candidate guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-release-candidate.md), and [stable release guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-unsigned-stable-release.md). Prefer those docs over historical Electron packaging notes.

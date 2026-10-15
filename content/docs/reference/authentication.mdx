@@ -90,6 +90,12 @@ The sidebar has an account switcher that opens with `Ctrl+Shift+A` from anywhere
 
 The Settings account section uses NVIDIA's GraphQL endpoint (`https://games.geforce.com/graphql`) to discover supported store providers and read the current user's linked and synced accounts. Providers are normalized to stable codes: `UPLAY`, `BATTLENET`, `EPIC`, `GAIJIN`, `STEAM`, and `XBOX`. Bundled provider definitions are used if the provider query fails.
 
+<Nightly since="v1.0.3-nightly.1107.1">
+
+The bundled codes also include `GOG`. Linking and sync follow the server's feature flags. A store with no supported link or sync action is not shown. Steam stays visible because sync is supported.
+
+</Nightly>
+
 Linking uses the ALS API (`https://als.geforcenow.com/v1`) to request a provider login URL, opens the external browser, and waits for the result on the first free local port of 2259, 6460, 7119, 8870, and 9096. Link, unlink, and resync actions invalidate account-scoped game/library/catalog caches, including proxy-scoped cache keys when a session proxy is configured, so the library can refresh after account changes.
 
 ## Implementation notes
