@@ -23,7 +23,7 @@ The GitHub Latest release is **v1.0.2** (published 2026-10-03). Its packages sta
 | Windows x64 / ARM64 | `.msi`, portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe` |
 | Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it. A `.AppImage.zsync` sidecar is published for external delta-update tools |
 | Linux x64 / ARM64 | `.deb` | Bundles Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. Install with `sudo apt install ./OpenNOW-Qt-1.0.2-Linux-x64.deb` (or `-arm64.deb`) so APT installs the remaining system dependencies |
-| Linux x86_64 | Flatpak (local build) | Build and install from `opennow-qt/packaging/flatpak` (app ID `io.github.opencloudgaming.OpenNOW`) or the **Qt Flatpak build** workflow artifact. Not published on Flathub or GitHub Releases. Flatpak installs disable the in-app updater. ARM64 (`aarch64`) bundles and shareable bundles: <Nightly since="v1.0.3-nightly.983.1" /> |
+| Linux x86_64 | Flatpak (local build) | Build and install from `opennow-qt/packaging/flatpak` (app ID `io.github.opencloudgaming.OpenNOW`) or the **Qt Flatpak build** workflow artifact. Not published on Flathub. The v1.0.2 GitHub Release has no Flatpak. Flatpak installs disable the in-app updater. ARM64 (`aarch64`) bundles and shareable bundles: <Nightly since="v1.0.3-nightly.983.1" /> |
 | macOS Apple Silicon, macOS 13+ | `.dmg`, `.zip` | Open the DMG and drag OpenNOW into Applications, or extract the ZIP. Intel Macs are not included |
 | macOS (OpenNOW Mac) | [Release `.zip`](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) | Separate performance-focused macOS build maintained by Jayian1890 |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release; separate from the Qt desktop app |
@@ -31,11 +31,23 @@ The GitHub Latest release is **v1.0.2** (published 2026-10-03). Its packages sta
 | iOS | [TestFlight beta](https://testflight.apple.com/join/u1XPJKH2) | Install through Apple's TestFlight while the iOS build is in beta |
 | Nintendo Switch | [OpenNOW-Switch release](https://github.com/OpenCloudGaming/OpenNOW-Switch/releases/latest) | Native Horizon OS homebrew client for modded Switch systems; follow the [Switch installation guide](/docs/guides/nintendo-switch) |
 
+<Nightly since="v1.0.3-nightly.1107.1">
+
+Nightly GitHub Releases include Linux x64 and ARM64 Flatpak bundles, `OpenNOW-Qt-<version>-Linux-x64.flatpak` and `OpenNOW-Qt-<version>-Linux-arm64.flatpak`. They are not on Flathub. Install one with `flatpak install --user ./OpenNOW-Qt-<version>-Linux-x64.flatpak` (use the arm64 file on ARM). Flatpak installs still have no in-app updater.
+
+</Nightly>
+
 ### Signing and updates
 
 Every v1.0.2 package has a sibling `<package>.manifest.json` with an Ed25519 signature. The built-in updater verifies that signature before it installs an update. Apple Silicon DMG and ZIP builds are Developer ID–signed and notarized. Windows packages are not Authenticode-signed, so SmartScreen or an unknown-publisher warning can appear. `SHA256SUMS` detects corrupted downloads; it does not verify who published a package.
 
 **Settings → About & support** has **Check for updates**, optional automatic checks and downloads, and an **Update channel** choice (**Stable** or **Nightly**). Installing an update always asks for confirmation. v1.0.1 already trusts the same update key, so it can update in-app. v1.0.0 and other builds without the pinned key need one manual install of v1.0.2. Nightlies are not notarized and use ad-hoc macOS signatures, so install manually once when you switch between the stable and nightly channels on macOS. Flatpak builds have no in-app update path.
+
+<Nightly since="dev after v1.0.3-nightly.1107.1">
+
+On desktop, **Check for updates**, automatic checks and downloads, and **Update channel** live on **Settings → Updates**. **About & support** keeps the version line and an **Open Updates** button. A status-bar chip appears when an update needs an action, and stays hidden while OpenNOW is up to date. v1.0.3-nightly.1107.1 still uses **Settings → About & support**. The console update screen is unchanged.
+
+</Nightly>
 
 ## First launch
 

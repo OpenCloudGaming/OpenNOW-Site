@@ -109,6 +109,12 @@ Start with **H.264 · 1920×1080 · 60 FPS** and a bitrate your connection can s
 | In-app update fails or does not install | Installation needs your confirmation and no active or recovering stream. Portable Windows installs on FAT or exFAT drives cannot be replaced in place. Builds older than v1.0.1 do not trust the update key | End the stream and retry **Settings → About & support → Check for updates**; note the failure message the updater shows. Move a portable install to an NTFS drive, or update it manually. Install v1.0.2 manually once if you come from v1.0.0 |
 | Entire app window is black vs only the video surface | Note which one you see before changing settings | Export diagnostics and include both `native-streamer.log` and `qt-native.log` |
 
+<Nightly since="dev after v1.0.3-nightly.1107.1">
+
+On desktop, **Check for updates** is on **Settings → Updates**, not under About & support. v1.0.3-nightly.1107.1 still uses **Settings → About & support → Check for updates**.
+
+</Nightly>
+
 <Callout type="warn" title="Change one variable at a time">
 Changing codec, resolution, FPS, bitrate, backend, and region together makes the result impossible to interpret. Begin with the conservative profile, then restore one option per stream.
 </Callout>

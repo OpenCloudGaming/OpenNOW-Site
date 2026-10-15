@@ -154,6 +154,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `desktopBackgroundOpacity` | `number` | `30` | Custom image opacity in percent, 0–100. **Settings → Appearance → Image opacity** |
 | `reducedMotion` | `boolean` | `false` | Cuts parallax and cover animations. **Settings → Appearance → Reduce motion** |
 | `uiSoundsEnabled` <Nightly since="v1.0.3-nightly.983.1" /> | `boolean` | `true` | Plays the Game Mode startup sound. **Settings → Appearance → UI sounds** |
+| `confirmQuitWhenIdle` <Nightly since="v1.0.3-nightly.1107.1" /> | `boolean` | `true` | Asks before closing OpenNOW from the title bar. Off skips that prompt only while idle: nothing launching, streaming, recovering, or waiting to resume. **Settings → Appearance → Confirm before quitting** |
 | `showTileLabels` | `boolean` | `true` | Shows game names under tiles. Console-mode Settings |
 | `autoCheckForUpdates` | `boolean` | `true` | Checks for updates every six hours while no stream is active. **Settings → About & support** |
 | `autoDownloadUpdates` | `boolean` | `false` | Downloads verified updates while idle. Installation always asks first. **Settings → About & support** |
@@ -161,6 +162,12 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `discordRichPresence` | `boolean` | `false` | Shows the streamed game as Discord activity. **Settings → Account → Show what I am playing** |
 | `errorReportingConsent` | `string` | `"unset"` | `unset`, `granted`, or `denied`. **Settings → Account → Crash reports** |
 | `automaticBugReports` <Nightly since="v1.0.3-nightly.866.1" /> | `string` | `"unset"` | `unset`, `enabled`, or `disabled`. Sends usage statistics and error reports with logs. Starts as `disabled` if `errorReportingConsent` is `denied`. **Settings → Account → Usage & bug reports · Experimental** |
+
+<Nightly since="dev after v1.0.3-nightly.1107.1">
+
+On desktop, `autoCheckForUpdates`, `autoDownloadUpdates`, and `updateChannel` are edited on **Settings → Updates**. **About & support** keeps the version line and an **Open Updates** button. v1.0.3-nightly.1107.1 still uses **Settings → About & support**.
+
+</Nightly>
 
 ### Stored but unused in v1.0.2
 
