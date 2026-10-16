@@ -35,7 +35,7 @@ There is no separate streamer window, helper application, or packaged standalone
 | `nativeVideoBackend` | `"auto"` | **Settings → Stream → Advanced → Video backend**. Applies to the next stream. A forced backend that is unavailable fails instead of switching to another API |
 | `codec` | `"auto"` | Codec preference. The core resolves Auto against the streamer's capability report before CloudMatch allocates a seat |
 | `colorQuality` | `"8bit_420"` | Bit depth and chroma. Choices the current backend, codec, or membership cannot use are disabled with a reason |
-| `enableHdr` | `false` | HDR request for new sessions; needs an HDR-capable display and a 10-bit HEVC or AV1 decoder |
+| `enableHdr` | `false` | HDR request for new sessions; needs an HDR-capable display and a 10-bit HEVC or AV1 decoder. A store version whose catalog entry does not list HDR streams in SDR, with a one-time **Streaming in SDR** notice |
 | `audioOutputDevice` | `""` | Opaque output device ID from native enumeration; empty means system default |
 | `showNativeStreamerStats` | `false` | Native stats overlay preference |
 | `enableCloudGsync` | `false` | Cloud G-Sync/VRR request |

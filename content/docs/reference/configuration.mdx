@@ -47,7 +47,7 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 | `nativeVideoBackend` | `string` | `"auto"` | `auto`, `d3d11`, `d3d12`, `nvdec`, `cuda`, `vaapi`, `v4l2`, `vulkan`, `videotoolbox`, or `software`. Settings lists only the backends available on your platform. Applies to the next stream. **Settings → Stream → Advanced → Video backend** |
 | `audioOutputDevice` | `string` | `""` | Opaque audio output ID; empty means the system default. Applies to the next session. **Settings → Audio → Output device** |
 | `windowsGpuDeviceId` | `string` | `""` | Selected GPU; empty means the first GPU that can hardware-decode. Applies after restarting OpenNOW. **Settings → Stream → Graphics processor** (shown when more than one GPU is available) |
-| `enableHdr` | `boolean` | `false` | Requests HDR10. Requires a Performance or Ultimate membership and a 10-bit H.265 or AV1 hardware decoder. **Settings → Stream → HDR** |
+| `enableHdr` | `boolean` | `false` | Requests HDR10. Requires a Performance or Ultimate membership and a 10-bit H.265 or AV1 hardware decoder. A store version whose catalog entry does not list HDR streams in SDR, with a one-time **Streaming in SDR** notice for that game; the setting stays on and unknown catalog data keeps the HDR request. **Settings → Stream → HDR** |
 | `upscaling` | `string` | `"off"` | `off`, `metalfx` (macOS), or `fsr1` (Windows and Linux). **Settings → Stream → Upscaling** |
 | `upscalingSharpness` | `number` | `10` | Clarity, 0–15. MetalFX sharpens before upscaling; FSR 1 sharpens after. **Settings → Stream → Clarity** |
 | `upscalingDenoise` | `number` | `0` | Noise reduction, 0–20, before MetalFX upscaling. macOS only. **Settings → Stream → Noise Reduction** |
