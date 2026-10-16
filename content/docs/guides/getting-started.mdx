@@ -14,7 +14,7 @@ OpenNOW's desktop client replaces the retired Electron/`opennow-stable` app. The
 
 ## Download a release
 
-These docs describe **v1.0.3**, the release promoted to `main` on 2026-10-15. Its packages start with `OpenNOW-Qt-1.0.3-`. Download the newest published packages from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Nightly prereleases (`v1.0.3-nightly.*`) are built from `dev` and use the same file layout. Historical tags such as v0.5.5 may still contain the retired Electron app.
+These docs describe **v1.0.3**, published as the Latest release on 2026-10-16. Its packages start with `OpenNOW-Qt-1.0.3-`. Download them from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Nightly prereleases (`v1.0.3-nightly.*`) are built from `dev` and use the same file layout. Historical tags such as v0.5.5 may still contain the retired Electron app.
 
 | Platform | Qt package | How to run it |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ Use `main` for the v1.0.3 release source or `dev` for ongoing development. Befor
 - CMake 3.24+ and a C++20 toolchain
 - SDL3, Rust with Cargo, and the media dependencies for your platform
 
-Linux also needs `pkg-config`, `libwayland-dev`, and `wayland-protocols`, even for X11 builds, plus the `libva` and `libva-drm` development packages and libclang for the native streamer. ARM64 Linux also needs `libdrm` and `libudev` development packages. You do not need Node.js or npm to build or run the desktop app.
+Linux also needs `pkg-config`, `libwayland-dev`, and `wayland-protocols`, even for X11 builds, plus the `libva`, `libva-drm`, and `libdrm` development packages and libclang for the native streamer. ARM64 Linux also needs the `libudev` development package. You do not need Node.js or npm to build or run the desktop app.
 
 ```bash
 git clone --branch main https://github.com/OpenCloudGaming/OpenNOW.git
