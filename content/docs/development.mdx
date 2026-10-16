@@ -35,7 +35,7 @@ ctest --test-dir build/opennow-qt --output-on-failure
 | `cmake --build build/opennow-qt` | Build the desktop app |
 | `ctest --test-dir build/opennow-qt --output-on-failure` | Run Qt/C++ and related tests |
 | `cmake --build build/opennow-qt --target opennow-ci-unit-tests` then `ctest --test-dir build/opennow-qt -L ci-unit --output-on-failure` | Run only the headless `ci-unit` Qt tests that CI runs |
-| `cmake --build build/opennow-qt --config Release --target package` | Create CPack packages: WiX MSI and ZIP on Windows, DMG and ZIP on macOS, DEB on Linux |
+| `cmake --build build/opennow-qt --config Release --target package` | Create CPack packages: ZIP on Windows, DMG and ZIP on macOS, DEB on Linux |
 
 The Qt CMake build compiles `opennow-streamer-ffi` with Cargo's release profile and links the resulting shared library into the app, including in Debug builds. On Linux it enables the bundled FFmpeg software decoder and native H.264 VA-API. There is no separate packaged streamer executable.
 
@@ -79,7 +79,7 @@ Workflows in `.github/workflows/` on `main`:
 | `Qt update-signed stable release` (`qt-stable-release.yml`) | Manual, on `main` | Promotes a successful `qt-release-candidate` run for the exact `main` commit to a public Latest release without rebuilding |
 | `CodeQL Advanced` (`codeql.yml`) | Pushes, pull requests, weekly schedule | Code scanning |
 
-Public Qt packages use names like `OpenNOW-Qt-<version>-…`. `main` now carries **v1.0.3**; each stable release is published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`v1.0.3-nightly.<run>.<attempt>`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release.
+Public Qt packages use names like `OpenNOW-Qt-<version>-…`. `main` now carries **v1.0.3**; each stable release is published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`vX.Y.Z-nightly.<run>.<attempt>`, currently `v1.0.4-nightly.*`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release. Windows packages now ship as `-setup.exe` and portable `.zip` only: the `.msi` installer is no longer built, so v1.0.3 is the last release that published one.
 
 The v1.0.3 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; Linux x64/ARM64 `.AppImage`, `.deb`, and `.flatpak`; macOS Apple Silicon `.dmg` and `.zip`; two `.AppImage.zsync` sidecars; one `<asset>.manifest.json` per asset; `RELEASE-INFO.json`; and `SHA256SUMS`. Nightlies publish the macOS DMG only; their macOS ZIP is a CI validation artifact.
 

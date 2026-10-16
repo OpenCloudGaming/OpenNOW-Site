@@ -14,12 +14,12 @@ OpenNOW's desktop client replaces the retired Electron/`opennow-stable` app. The
 
 ## Download a release
 
-These docs describe **v1.0.3**, published as the Latest release on 2026-10-16. Its packages start with `OpenNOW-Qt-1.0.3-`. Download them from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Nightly prereleases (`v1.0.3-nightly.*`) are built from `dev` and use the same file layout. Historical tags such as v0.5.5 may still contain the retired Electron app.
+These docs describe **v1.0.3**, published as the Latest release on 2026-10-16. Its packages start with `OpenNOW-Qt-1.0.3-`. Download them from [GitHub Releases](https://github.com/OpenCloudGaming/OpenNOW/releases/latest) or the [download picker](/#downloads). Nightly prereleases (`vX.Y.Z-nightly.*`, currently `v1.0.4-nightly.*`) are built from `dev` and use the same file layout, minus the Windows `.msi`. Historical tags such as v0.5.5 may still contain the retired Electron app.
 
 | Platform | Qt package | How to run it |
 | --- | --- | --- |
 | Windows x64 / ARM64 | `-setup.exe` | Installs the portable layout for the current user in `%LOCALAPPDATA%\OpenNOW` without administrator rights. If an MSI copy of OpenNOW is registered, setup offers to uninstall it first |
-| Windows x64 / ARM64 | `.msi`, portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe` |
+| Windows x64 / ARM64 | `.msi` (v1.0.3 and earlier), portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe`. `.msi` installers are no longer published, so nightlies and later releases ship `-setup.exe` and `.zip` only |
 | Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it. A `.AppImage.zsync` sidecar is published for external delta-update tools |
 | Linux x64 / ARM64 | `.deb` | Bundles Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. Install with `sudo apt install ./OpenNOW-Qt-1.0.3-Linux-x64.deb` (or `-arm64.deb`) so APT installs the remaining system dependencies |
 | Linux x64 / ARM64 | `.flatpak` | Download the bundle from GitHub Releases and install it with `flatpak install --user ./<file>`, or build it from `opennow-qt/packaging/flatpak` (app ID `io.github.opencloudgaming.OpenNOW`). Not published on Flathub. Flatpak installs disable the in-app updater |
