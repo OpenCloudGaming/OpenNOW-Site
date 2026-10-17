@@ -57,7 +57,7 @@ The streamer requests retransmission of lost video packets, uses forward error c
 
 - After unrecoverable loss, the streamer reports the lost frame range to the server (reference-frame invalidation) and holds back frames that depend on it until a recovery frame arrives. An IDR request remains the backstop.
 - When the chosen codec, chroma, or HDR mode cannot be decoded, launch falls back to a profile that can be (for example 4:4:4 to 4:2:0, or HDR to SDR) instead of failing. Each fallback is recorded in diagnostics.
-- Game audio passes through a timestamp-ordered jitter buffer (45 to 200 ms), and the microphone can send redundant audio (RED) when the server offers it.
+- Game audio passes through a timestamp-ordered jitter buffer (45 to 200 ms), and the microphone sends plain Opus on the bundle's fixed payload type 111 and SSRC 1.
 
 ## Packaging
 

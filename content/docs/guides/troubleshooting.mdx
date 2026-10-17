@@ -57,6 +57,9 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
   <Accordion title="The QR code expires or authorization never completes">
     Start a new attempt and approve it before the **Code expires in** timer runs out. If the provider asks OpenNOW to slow down, OpenNOW lengthens its polling interval automatically. Make sure the phone and OpenNOW use the same intended NVIDIA or alliance-provider account.
   </Accordion>
+  <Accordion title="Sign-in fails and OpenNOW says the clock is wrong">
+    OpenNOW compares your computer's clock with GeForce NOW's and refuses to start a sign-in when the two differ by more than five minutes. The **Check your computer's clock** dialog and the sign-in screen both report how far ahead or behind your clock is, and ask you to turn on **automatic date and time** in your system settings. Signing in, your library, and your server list all need the correct time, so correct the clock and sign in again.
+  </Accordion>
   <Accordion title="OpenNOW asks you to sign in again">
     The saved access and refresh tokens may have expired or been rejected. Sign in again first. If every restart loses a valid session, close OpenNOW, back up auth/session files under the OpenNOW data directory, remove them, and retry so the app can create clean authentication state. When the OS keychain is unavailable, OpenNOW warns that session tokens are saved unencrypted on disk — unlock the keychain and restart when you can. A Steam Deck does not use the OS keychain, so there is nothing to unlock there and no warning appears.
   </Accordion>

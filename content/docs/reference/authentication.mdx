@@ -30,6 +30,8 @@ For the Digevo alliance provider, the core falls back to `latam-west.dig.geforce
 6. When the request is authorized, the core reads the user profile and creates the session. With **Stay signed in on this PC** off, the session is kept in memory only.
 7. Cancelling or expiring an attempt removes it. Your previous account state is unchanged.
 
+If your computer's clock differs from GeForce NOW's by more than five minutes, no attempt is created: the request fails and OpenNOW asks you to turn on automatic date and time, then sign in again.
+
 ### Key constants
 
 | Item | Value |
