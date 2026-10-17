@@ -66,7 +66,7 @@ The app also sets variables for its own use. Do not set them by hand: `OPENNOW_A
 
 - **Reference-frame invalidation.** After unrecoverable loss, the streamer sends the lost frame range as control command `0x301`, withholds dependent frames, and resumes on the next I, intra-refresh, or reference-picture-invalidation frame. An IDR request is the bounded backstop.
 - **Launch fallback.** Unsupported codec, chroma, or HDR requests degrade before a seat is allocated: missing HDR output clears HDR, software decode becomes 8-bit 4:2:0 SDR, 4:4:4 selects HEVC when it can decode it and otherwise drops to 4:2:0, and undecodable 10-bit SDR drops to 8-bit. Each step is logged as a `stream_profile_fallback` diagnostics event.
-- **Audio.** NVST audio RTP is reordered by timestamp in a jitter buffer that starts at 45 ms and grows by 20 ms per late-arrival burst, up to 200 ms. The microphone wraps Opus in RFC 2198 RED when the server offers it.
+- **Audio.** NVST audio RTP is reordered by timestamp in a jitter buffer that starts at 45 ms and grows by 20 ms per late-arrival burst, up to 200 ms. The microphone sends plain Opus on the bundle's fixed payload type 111 and SSRC 1, and does not send redundant audio.
 - **Server timers.** Server idle-warning and termination control messages are parsed.
 
 **DroidDeck MediaCodec decode (Linux, opt-in).** With `OPENNOW_NATIVE_VIDEO_BACKEND=mediacodec` inside a DroidDeck session that has the bridge enabled, H.264 decodes on Android's hardware decoder. Decoded NV12 pixels are copied into the Vulkan uploader; this path is not zero-copy.
