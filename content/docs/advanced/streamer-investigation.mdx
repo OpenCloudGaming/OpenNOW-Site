@@ -125,13 +125,13 @@ This section describes NVIDIA's official GeForce NOW client, not OpenNOW. It com
 | Audio channels | Up to 8 | Stereo |
 | Microphone | Echo cancellation | No echo cancellation |
 | Clipboard | Custom-message paste protocol | Text submitted through the streamer as input |
-| 4:4:4 in ANNOUNCE | Chroma value `1` | Chroma value `3` (`chroma_format_idc`); server acceptance is unknown |
+| 4:4:4 in ANNOUNCE | Chroma value `1` | Chroma value `3` (`chroma_format_idc`) in v1.0.3; `dev` sends the official 4:4:4 flag (`0` for 4:2:0, `1` for 4:4:4) |
 | PLAY response | Only 200 starts the stream | 200 or 455 |
 | Idle warning | Parsed from server timer messages | Parsed |
 
 ### Still unknown
 
-- Whether servers accept every codec, bit depth, chroma, and HDR combination, and whether they accept OpenNOW's chroma encoding.
+- Whether servers accept every codec, bit depth, chroma, and HDR combination, and whether 10-bit sessions start now that the chroma announcement uses the official flag.
 - How alliance-partner seats differ from NVIDIA-operated seats.
 - HDR at runtime: none of the logged sessions used HDR.
 - The FEC algorithm details, the frame capture-time units, and which frame types the server sends in response to invalidation.
