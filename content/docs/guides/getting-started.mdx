@@ -18,12 +18,12 @@ These docs describe **v1.0.3**, published as the Latest release on 2026-10-16. I
 
 | Platform | Qt package | How to run it |
 | --- | --- | --- |
-| Windows x64 / ARM64 | `-setup.exe` | Installs the portable layout for the current user in `%LOCALAPPDATA%\OpenNOW` without administrator rights. If an MSI copy of OpenNOW is registered, setup offers to uninstall it first |
+| Windows x64 / ARM64 | `-setup.exe` | Installs the portable layout for the current user without administrator rights. v1.0.3 installs to `%LOCALAPPDATA%\OpenNOW` without asking. `dev` builds default to that folder and let you choose another one; a reinstall reuses the previous folder, and uninstall removes only the folders setup installed. If an MSI copy of OpenNOW is registered, setup offers to uninstall it first |
 | Windows x64 / ARM64 | `.msi` (v1.0.3 and earlier), portable `.zip` | Install the MSI, or extract the entire ZIP and run `bin/OpenNOW.exe`. `.msi` installers are no longer published, so nightlies and later releases ship `-setup.exe` and `.zip` only |
 | Linux x64 / ARM64 | `.AppImage` (recommended) | Make the file executable, then launch it. A `.AppImage.zsync` sidecar is published for external delta-update tools |
 | Linux x64 / ARM64 | `.deb` | Bundles Qt, QML plugins, SDL3, and the media runtime under `/opt/opennow`. Install with `sudo apt install ./OpenNOW-Qt-1.0.3-Linux-x64.deb` (or `-arm64.deb`) so APT installs the remaining system dependencies |
 | Linux x64 / ARM64 | `.flatpak` | Download the bundle from GitHub Releases and install it with `flatpak install --user ./<file>`, or build it from `opennow-qt/packaging/flatpak` (app ID `io.github.opencloudgaming.OpenNOW`). Not published on Flathub. Flatpak installs disable the in-app updater |
-| macOS Apple Silicon, macOS 13+ | `.dmg`, `.zip` | Open the DMG and drag OpenNOW into Applications, or extract the ZIP. Intel Macs are not included |
+| macOS 13+ (Apple Silicon; Intel x64 on `dev`) | `.dmg`, `.zip` | Open the DMG and drag OpenNOW into Applications, or extract the ZIP. v1.0.3 ships the Apple Silicon DMG and ZIP only |
 | macOS (OpenNOW Mac) | [Release `.zip`](https://github.com/OpenCloudGaming/OpenNOW-Mac/releases) | Separate performance-focused macOS build maintained by Jayian1890 |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=com.opencloudgaming.opennow) | Stable Android release; separate from the Qt desktop app |
 | Android beta | [Direct `.apk`](https://grid.printedwaste.com/download/3770b4c2c342a60242a18db9) | Sideload the beta only when testing pre-release Android builds |

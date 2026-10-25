@@ -72,7 +72,7 @@ Workflows in `.github/workflows/` on `main`:
 
 | Workflow (file) | Trigger | Purpose |
 | --- | --- | --- |
-| `qt-ci` (`qt-ci.yml`) | Pull requests and pushes to `dev` or `main` that touch the app, native code, locales, or workflows; manual dispatch | Lint, packaging-contract and localization checks, then native tests on `linux-x64`, `windows-x64`, and `macos-arm64`. A manual run also builds all five package platforms. With `publish_nightly=true` it publishes a nightly prerelease with signed update manifests |
+| `qt-ci` (`qt-ci.yml`) | Pull requests and pushes to `dev` or `main` that touch the app, native code, locales, or workflows; manual dispatch | Lint, packaging-contract and localization checks, then native tests on `linux-x64`, `windows-x64`, `macos-arm64`, and `macos-x64`. A manual run also builds all six package platforms. With `publish_nightly=true` it publishes a nightly prerelease with signed update manifests |
 | `Qt checks` (`qt-checks.yml`) and `Qt unsigned build` (`qt-build.yml`) | Called by other workflows | Shared checks and package builds |
 | `Qt Flatpak build` (`qt-flatpak.yml`) | Manual | Builds and checks an x86_64 Flatpak bundle and uploads it as an artifact. It creates no release |
 | `qt-release-candidate` (`qt-release-candidate.yml`) | Manual, with an exact 40-character commit | Builds a signed production candidate: macOS Developer ID signing and notarization, optional Windows Authenticode, and isolated Ed25519 update signing. It does not publish a release |
@@ -81,7 +81,7 @@ Workflows in `.github/workflows/` on `main`:
 
 Public Qt packages use names like `OpenNOW-Qt-<version>-…`. `main` now carries **v1.0.3**; each stable release is published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`vX.Y.Z-nightly.<run>.<attempt>`, currently `v1.0.4-nightly.*`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release. Windows packages now ship as `-setup.exe` and portable `.zip` only: the `.msi` installer is no longer built, so v1.0.3 is the last release that published one.
 
-The v1.0.3 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; Linux x64/ARM64 `.AppImage`, `.deb`, and `.flatpak`; macOS Apple Silicon `.dmg` and `.zip`; two `.AppImage.zsync` sidecars; one `<asset>.manifest.json` per asset; `RELEASE-INFO.json`; and `SHA256SUMS`. Nightlies publish the macOS DMG only; their macOS ZIP is a CI validation artifact.
+The v1.0.3 release contains Windows x64/ARM64 `-setup.exe`, `.msi`, and `.zip`; Linux x64/ARM64 `.AppImage`, `.deb`, and `.flatpak`; macOS Apple Silicon `.dmg` and `.zip`; two `.AppImage.zsync` sidecars; one `<asset>.manifest.json` per asset; `RELEASE-INFO.json`; and `SHA256SUMS`. Nightlies publish the macOS DMGs only, one for Apple Silicon and one for Intel; their macOS ZIPs are CI validation artifacts.
 
 Current package matrix:
 

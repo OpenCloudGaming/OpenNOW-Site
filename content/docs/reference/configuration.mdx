@@ -90,6 +90,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | --- | --- | --- | --- |
 | `clipboardPaste` | `boolean` | `false` | Pastes local text into the stream with Ctrl+V (Command+V on macOS), up to 64 KiB per paste. **Settings → Controls → Clipboard paste** |
 | `mouseSensitivity` | `number` | `1` | Multiplier for relative mouse movement, 0.1–3.0. v1.0.3 passes it only to the external renderer process, not to the embedded stream view. **Settings → Controls → Mouse sensitivity** |
+| `macPointerLockEnabled` | `boolean` | `true` | macOS only. Keeps the mouse captured for the stream view so it cannot leave the window. `F8` or the **Ctrl+G** menu's **Pointer lock** row toggles and saves it. `dev` adds this key; v1.0.3 has no pointer-lock setting and follows the game's cursor messages. **Settings → Controls → Pointer lock** |
 | `keyboardLayout` | `string` | `"en-US"` | Match your physical keyboard. Sent to GeForce NOW at session start; restart or resume after changing. See [Input](/docs/reference/input/) for the 21 values. **Settings → Controls → Keyboard layout** |
 | `gameLanguage` | `string` | `"en_US"` | Language requested for game metadata and the session. **Settings → Controls → Game language** |
 | `shortcutToggleStats` | `string` | `"Ctrl+N"` | Stats overlay |

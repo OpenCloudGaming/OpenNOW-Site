@@ -113,8 +113,8 @@ The core rejects any other value. A saved alias keeps working and is sent as the
 
 ## Pointer lock and mouse
 
-- By default the stream view follows the game's cursor. When the game hides its cursor, OpenNOW switches to relative mouse mode and locks the pointer. When the game shows a cursor, OpenNOW uses absolute mode.
-- `F8` (`shortcutTogglePointerLock`) overrides the automatic choice and grabs or releases the mouse.
+- By default the stream view follows the game's cursor. When the game hides its cursor, OpenNOW switches to relative mouse mode and locks the pointer. When the game shows a cursor, OpenNOW uses absolute mode. On macOS in `dev`, capture follows **Settings → Controls → Pointer lock** instead, so the game's cursor messages no longer decide it.
+- `F8` (`shortcutTogglePointerLock`) overrides the automatic choice and grabs or releases the mouse. On macOS in `dev` it flips the saved **Pointer lock** setting, the **Ctrl+G** menu shows the same ON or OFF state, and turning it off shows a **Pointer lock is off** notice with an **Enable pointer lock** button.
 - Focus loss and overlays such as the session menu release the pointer and all held input.
 - On Wayland, relative mode uses the pointer-constraints and relative-pointer protocols. On macOS it uses CoreGraphics pointer capture. On Windows the cursor is confined to the stream view while captured.
 - **Settings → Controls → Mouse sensitivity** (`mouseSensitivity`, default `1`, range 0.1–3.0) is passed only to the external renderer process in v1.0.3. The embedded stream view does not apply it.
