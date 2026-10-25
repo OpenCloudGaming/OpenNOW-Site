@@ -20,9 +20,9 @@ The Flatpak build has write access only to `OpenNOW/` in the Pictures folder (`-
 ## Screenshots
 
 - Press the screenshot shortcut (default `Ctrl+F11`) during a stream.
-- OpenNOW captures the stream area of the window as it appears on screen and saves it as PNG.
-- File name: `<game title>-<yyyyMMdd-HHmmss-zzz>.png`, with a UTC timestamp. Characters other than letters, digits, `.`, `_`, and `-` in the title become `-`.
-- The capture must be at least 64×64 pixels. If the desktop compositor blocks screen capture, OpenNOW shows "The desktop compositor did not allow OpenNOW to capture the stream."
+- OpenNOW copies the current stream frame and saves it as PNG, up to 3840×2160. Local overlays are not drawn into it. v1.0.3 grabs the stream area of the window as it appears on screen instead, so overlays are included.
+- File name: `<game title>-<yyyyMMdd-HHmmss-zzz>-<uuid>.png`, with a UTC timestamp. Characters other than letters, digits, `.`, `_`, and `-` in the title become `-`. v1.0.3 uses `<game title>-<yyyyMMdd-HHmmss-zzz>.png`, without the UUID.
+- If no video frame is available or the file cannot be saved, OpenNOW shows **Screenshot capture failed**. v1.0.3 requires at least 64×64 pixels and reports a blocked desktop compositor instead.
 - From the Captures screen you can export a screenshot to another location as PNG, JPEG, or WebP.
 
 ## Recordings
