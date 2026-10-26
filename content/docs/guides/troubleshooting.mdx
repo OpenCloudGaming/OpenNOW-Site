@@ -81,6 +81,7 @@ OpenNOW depends on NVIDIA's login, catalog, CloudMatch, queue, and streaming ser
 | Wrong storefront launches for a multi-store title | The selected platform variant does not match the owned copy | Before launch, pick the store you own the game on (Steam, Xbox, Epic, and so on) in the game's details |
 | Sign-in or catalog requests fail only with the API proxy on | The address in **Settings → Network → Proxy address** is unreachable or wrong | Turn off **Use proxy** or fix the address. The proxy applies to API calls only; the stream always connects directly |
 | One game fails while others launch | The failure is likely title, storefront, SKU, or membership specific | Record the exact game and storefront before reporting it |
+| **STREAM ENDED** notice with an **Error code: 0x…** line | The cloud server closed the session instead of you. `dev` shows the code it returned; a session that ends normally shows no notice | Select **Copy** (**X** in console mode) and include the code and the game name in your report, then start the session again from the game |
 
 Do not repeatedly relaunch while an earlier CloudMatch session is still being released. Stop the session once, wait briefly, then make one clean attempt.
 
