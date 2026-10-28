@@ -1,8 +1,14 @@
 {
   "name": "opennow-site",
+  "main": "worker/index.ts",
   "compatibility_date": "2024-01-01",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+  "vars": {
+    "DATABUDDY_WEBSITE_ID": "68ffafef-93aa-4a06-bfe3-98ee8bf2fe1f"
   }
 }
