@@ -3,9 +3,9 @@ import * as React from 'react';
 import appCss from '@/styles/app.css?url';
 import nunitoUrl from '@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2?url';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import { PostHogProvider } from 'posthog-js/react';
+import { Databuddy } from '@databuddy/sdk/react';
 import SearchDialog from '@/components/search';
-import { POSTHOG_KEY, posthogOptions } from '@/lib/analytics';
+import { DATABUDDY_CLIENT_ID } from '@/lib/databuddy';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -39,11 +39,17 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body className="flex min-h-screen flex-col bg-ground">
-        <PostHogProvider apiKey={POSTHOG_KEY} options={posthogOptions}>
-          <RootProvider theme={{ enabled: false }} search={{ SearchDialog }}>
-            <Outlet />
-          </RootProvider>
-        </PostHogProvider>
+        <RootProvider theme={{ enabled: false }} search={{ SearchDialog }}>
+          <Databuddy
+            clientId={DATABUDDY_CLIENT_ID}
+            trackWebVitals
+            trackErrors
+            trackOutgoingLinks
+            trackInteractions
+            replay
+          />
+          <Outlet />
+        </RootProvider>
         <Scripts />
       </body>
     </html>

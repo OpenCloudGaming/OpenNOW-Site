@@ -14,6 +14,7 @@
     "generate:releases": "vite-node --config vite.generate.config.ts scripts/generate-releases-data.vite.ts"
   },
   "dependencies": {
+    "@databuddy/sdk": "^3.3.0",
     "@fontsource-variable/nunito": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@orama/orama": "^3.1.18",
@@ -24,7 +25,6 @@
     "fumadocs-mdx": "15.0.10",
     "fumadocs-ui": "16.9.3",
     "lucide-react": "^1.17.0",
-    "posthog-js": "^1.386.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tailwind-merge": "^3.6.0",
