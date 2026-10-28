@@ -7,7 +7,7 @@ import { gitConfig } from '@/lib/shared';
 import { loadDocsPageData } from '@/lib/docsLoader';
 import { DocsError } from '@/components/docs-error';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { Suspense, useEffect } from 'react';
+import { Suspense } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 import { track } from '@/lib/analytics';
 import { createConsoleSlots } from '@/components/docs-layout/slots';
@@ -68,10 +68,6 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const { pageTree, path, markdownUrl } = useFumadocsLoader(Route.useLoaderData());
-
-  useEffect(() => {
-    track('docs_page_viewed', { path, markdown_url: markdownUrl });
-  }, [path, markdownUrl]);
 
   return (
     <DocsLayout tree={pageTree} tabs={false} themeSwitch={{ enabled: false }} slots={layoutSlots}>
