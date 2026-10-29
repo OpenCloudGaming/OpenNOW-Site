@@ -25,7 +25,7 @@ cmake --build build/opennow-qt
 ctest --test-dir build/opennow-qt --output-on-failure
 ```
 
-`main` matches the v1.0.3 release. Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable. The development executable is normally `build/opennow-qt/OpenNOW.exe` on Windows and `build/opennow-qt/opennow-qt` on Linux.
+`main` is the stable line: releases are published from it, and it also carries fixes merged since the newest release. Use `dev` instead of `main` for ongoing development. Point `CMAKE_PREFIX_PATH` at Qt and SDL3 when they are not already discoverable. The development executable is normally `build/opennow-qt/OpenNOW.exe` on Windows and `build/opennow-qt/opennow-qt` on Linux.
 
 ## Common commands
 
