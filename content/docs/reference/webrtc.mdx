@@ -36,7 +36,7 @@ The WebRTC path is for compatibility and is slower than NVST. The core limits ea
 
 The streamer runs the whole exchange itself and passes compressed frames to the same decoders and GPU presentation as NVST:
 
-1. It opens a secure WebSocket to the session's `signalingUrl` at the `/sign_in` path, with `peer_id`, `version=2`, `peer_role=1`, and `pairing_id` query parameters. The request sends `Origin: https://play.geforcenow.com` and the subprotocol `x-nv-sessionid.{sessionId}`.
+1. It opens a secure WebSocket to the session's `signalingUrl` at the `/sign_in` path, with `peer_id`, `version=3.0`, `peer_role=1`, and `pairing_id` query parameters. The request sends `Origin: https://play.geforcenow.com` and the subprotocol `x-nv-sessionid.{sessionId}`.
 2. It sends a `peer_info` message and a `{"hb":1}` heartbeat every 5 seconds.
 3. It answers the server's SDP offer, adds an NVIDIA quality SDP (viewport, frame rate, bit depth, bitrates, input options), and exchanges ICE candidates.
 4. It opens three data channels:

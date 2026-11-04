@@ -22,6 +22,7 @@ These stream shortcuts can be changed in **Settings → Controls → Shortcuts**
 | `Ctrl+Shift+Q` | End the session (asks for confirmation) | `shortcutStopStream` |
 | `Ctrl+Shift+K` | Toggle Anti-AFK | `shortcutToggleAntiAfk` |
 | `Ctrl+Shift+M` | Mute or unmute the microphone (only with **Open microphone**) | `shortcutToggleMicrophone` |
+| `Ctrl+Shift+G` | Turn frame generation on or off in the running stream (`dev` only) | `shortcutToggleFrameGeneration` |
 
 On macOS the UI may display modifier labels differently while the stored binding uses the same setting string.
 
@@ -56,6 +57,8 @@ These shortcuts are fixed:
 In console mode the same shortcut opens the console Guide.
 
 Its quick toggles (statistics overlay, fullscreen, microphone, Anti-AFK) keep the menu open. Quality, bitrate, and codec changes apply from the next session.
+
+In `dev`, the drawer also has a **Frame generation** tile once the capability test has unlocked a level for the current resolution and frame rate. `Ctrl+Shift+G` turns frame generation on or off for the running stream at once; the levels, the output rate, and the capability test stay in **Settings → Stream**.
 
 The **Controllers** page in the drawer shows each connected pad. For each pad you can set left and right stick dead zones and vibration strength, test the sticks and rumble, apply the values to all pads, or reset the pad to the defaults from **Settings → Controls**. Values are saved per pad in `controllerProfiles` and apply immediately. You can also make one pad the only Player 1 until the app restarts.
 
