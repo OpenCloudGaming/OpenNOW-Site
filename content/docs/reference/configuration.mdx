@@ -51,7 +51,11 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 | `upscaling` | `string` | `"off"` | `off`, `metalfx` (macOS), or `fsr1` (Windows and Linux). **Settings → Stream → Upscaling** |
 | `upscalingSharpness` | `number` | `10` | Clarity, 0–15. MetalFX sharpens before upscaling; FSR 1 sharpens after. **Settings → Stream → Clarity** |
 | `upscalingDenoise` | `number` | `0` | Noise reduction, 0–20, before MetalFX upscaling. macOS only. **Settings → Stream → Noise Reduction** |
-| `frameGeneration` | `string` | `"off"` | `off` or `2x`. Targets 120 displayed FPS from a 60 FPS stream. **Settings → Stream → Frame generation (Experimental)** |
+| `frameGeneration` | `string` | `"off"` | `off`, `2x`, `3x`, or `4x`: displayed frames per source frame. v1.0.3 accepts only `off` or `2x`, which doubles the stream frame rate (60 FPS becomes 120 displayed FPS). `dev` adds the 3× and 4× levels, and frame generation stays unavailable until the capability test has measured this GPU at the streaming resolution; levels the measurement or the display cannot sustain stay locked. **Settings → Stream → Frame generation (Experimental)** |
+| `frameGenerationMode` | `string` | `"off"` | `dev` only. How the output rate is chosen: `off`, `multiplier` (the `frameGeneration` level), `target` (the rate in `frameGenerationTargetFps`), or `display` (the refresh rate of the display OpenNOW is on). A saved level with mode `off` becomes `multiplier`. **Settings → Stream → Frame generation** |
+| `frameGenerationTargetFps` | `number` | `0` | `dev` only. Output rate in FPS for mode `target`, 0–1000. `0` follows the level; otherwise the level is the target divided by the stream frame rate, rounded and held to 2×–4×. **Settings → Stream → Frame generation → Output rate** |
+| `frameGenerationDisplayHz` | `number` | `0` | `dev` only. Display refresh override in Hz, 0–1000. `0` detects the refresh rate of the display OpenNOW is on; set it when detection is wrong or finds nothing. **Settings → Stream → Advanced → Display refresh override** |
+| `frameGenerationProfiles` | `object` | `{}` | `dev` only. Capability-test results keyed by engine, GPU, and stream resolution, 64 entries at most. Each entry keeps the measured cost per generated frame at 2×, 3×, and 4×, and the levels that fit are worked out from it for the selected frame rate and display. Entries the core cannot parse are dropped. **Settings → Stream → Frame generation capability test** |
 | `region` | `string` | `""` | Preferred region URL; empty means automatic (lowest latency). The core remembers one region per sign-in provider. **Settings → Network → Server region** |
 | `sessionProxyEnabled` | `boolean` | `false` | Sends API calls through the proxy in `sessionProxyUrl`. The stream itself always connects directly. **Settings → Network → Advanced → Use proxy** |
 | `sessionProxyUrl` | `string` | `""` | `http://`, `https://`, `socks4://`, or `socks5://` URL with host and port. **Settings → Network → Advanced → Proxy address** |
@@ -102,6 +106,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `shortcutStopStream` | `string` | `"Ctrl+Shift+Q"` | End the session (asks for confirmation) |
 | `shortcutToggleAntiAfk` | `string` | `"Ctrl+Shift+K"` | Toggle Anti-AFK |
 | `shortcutToggleMicrophone` | `string` | `"Ctrl+Shift+M"` | Toggle microphone. Active only when the microphone mode is `voice-activity` |
+| `shortcutToggleFrameGeneration` | `string` | `"Ctrl+Shift+G"` | Turn frame generation on or off in the running stream. `dev` only |
 | `microphoneMode` | `string` | `"disabled"` | `disabled` or `voice-activity` (labeled **Open microphone**). Applies to the next session. **Settings → Audio → Microphone** |
 | `controllerMode` | `boolean` | `true` | Lets controllers drive the OpenNOW interface outside gameplay. **Settings → Controls → Controller input** |
 | `controllerLeftStickDeadzone` | `number` | `5` | Left-stick dead zone in percent, 0–50. **Settings → Controls → Left stick dead zone** |
