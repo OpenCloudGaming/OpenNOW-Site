@@ -115,7 +115,7 @@ export const pageTree = {
             "$id": "reference/webrtc.mdx",
             "type": "page",
             "name": "Protocol notes (WebRTC)",
-            "description": "Electron-era Chromium/WebRTC signaling history, the native WebRTC compatibility mode in nightly builds, and how NVIDIA's official client uses WebRTC pieces",
+            "description": "Electron-era Chromium/WebRTC signaling history, the native WebRTC compatibility transport, and how NVIDIA's official client uses WebRTC pieces",
             "url": "/docs/reference/webrtc",
             "$ref": "reference/webrtc.mdx"
           },

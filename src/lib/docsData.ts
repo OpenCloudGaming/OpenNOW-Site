@@ -173,8 +173,8 @@ export const gstreamerRuntimeStrategies: GStreamerRuntimeStrategy[] = [
     platform: 'Windows x64 / ARM64',
     referenceStrategy: 'CMake builds and links `opennow-streamer-ffi` into the Qt app; no separate streamer executable',
     releaseBehavior:
-      'Qt package embeds the streamer library beside `OpenNOW` and `opennow-core`. `setup.exe` installs per user into `%LOCALAPPDATA%\\OpenNOW`; the MSI and portable ZIP carry the same binaries. Not Authenticode-signed, so SmartScreen can warn',
-    artifacts: '`OpenNOW-Qt-<version>-Windows-<arch>-setup.exe`, `.msi`, portable `.zip`',
+      'Qt package embeds the streamer library beside `OpenNOW` and `opennow-core`. `setup.exe` installs per user into `%LOCALAPPDATA%\\OpenNOW` (Latest v1.0.3 has no directory page; `main` / upcoming 1.0.4 lets you choose the folder). The MSI and portable ZIP carry the same binaries. Not Authenticode-signed, so SmartScreen can warn',
+    artifacts: '`OpenNOW-Qt-<version>-Windows-<arch>-setup.exe`, `.msi` (through v1.0.3), portable `.zip`',
   },
   {
     platform: 'Linux x64 / ARM64',
@@ -185,11 +185,13 @@ export const gstreamerRuntimeStrategies: GStreamerRuntimeStrategy[] = [
     artifacts: '`OpenNOW-Qt-<version>-Linux-<arch>.AppImage`, `.AppImage.zsync`, `.deb`; Flatpak via workflow or local build',
   },
   {
-    platform: 'macOS Apple Silicon',
+    platform: 'macOS Apple Silicon / Intel',
     referenceStrategy:
       'Embedded FFI inside the app bundle; stable packages are Developer ID–signed and notarized, nightlies use ad-hoc signatures and are not notarized',
-    releaseBehavior: 'DMG or ZIP installs to Applications on macOS 13 or later; Intel Macs are not included. Nightlies publish the DMG only',
-    artifacts: '`OpenNOW-Qt-<version>-Darwin-arm64.dmg`, `.zip`',
+    releaseBehavior:
+      'DMG or ZIP installs to Applications on macOS 13 or later. Published Latest v1.0.3 is Apple Silicon only; `main`, nightlies, and the planned 1.0.4 inventory also include Intel. Nightlies publish the DMGs only',
+    artifacts:
+      '`OpenNOW-Qt-<version>-Darwin-arm64.dmg`, `.zip`; Intel `Darwin-x64.dmg` (and `.zip` when published)',
   },
 ];
 
