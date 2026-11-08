@@ -72,11 +72,13 @@ Workflows in `.github/workflows/` on `main`:
 
 | Workflow (file) | Trigger | Purpose |
 | --- | --- | --- |
-| `qt-ci` (`qt-ci.yml`) | Pull requests and pushes to `dev` or `main` that touch the app, native code, locales, or workflows; manual dispatch | Lint, packaging-contract and localization checks, then native tests on `linux-x64`, `windows-x64`, `macos-arm64`, and `macos-x64`. A manual run also builds all six package platforms. With `publish_nightly=true` it publishes a nightly prerelease with signed update manifests |
+| `qt-ci` (`qt-ci.yml`) | Pull requests and pushes to `dev` or `main` that touch the app, native code, locales, or workflows; manual dispatch | Lint, packaging-contract and localization checks, then native tests on `linux-x64`, `windows-x64`, and `macos-arm64`. A manual run also builds all six package platforms, including both macOS architectures. With `publish_nightly=true` it publishes a nightly prerelease with signed update manifests |
 | `Qt checks` (`qt-checks.yml`) and `Qt unsigned build` (`qt-build.yml`) | Called by other workflows | Shared checks and package builds |
-| `Qt Flatpak build` (`qt-flatpak.yml`) | Manual | Builds and checks an x86_64 Flatpak bundle and uploads it as an artifact. It creates no release |
+| `Qt Flatpak build` (`qt-flatpak.yml`) | Called by `qt-build` and `qt-release-candidate`; manual | Builds and checks one Flatpak bundle per architecture (`x86_64` and `aarch64`); a manual run picks the architecture. It uploads an artifact and creates no release |
+| `Qt Linux ARM64 cross-build` (`qt-linux-arm64-cross.yml`) | Called by `qt-build` when `linux_arm64_host` is `x64` | Compiles and measures the Linux ARM64 package on an x64 host. It creates no release |
 | `qt-release-candidate` (`qt-release-candidate.yml`) | Manual, with an exact 40-character commit | Builds a signed production candidate: macOS Developer ID signing and notarization, optional Windows Authenticode, and isolated Ed25519 update signing. It does not publish a release |
 | `Qt update-signed stable release` (`qt-stable-release.yml`) | Manual, on `main` | Promotes a successful `qt-release-candidate` run for the exact `main` commit to a public Latest release without rebuilding |
+| `decky` (`decky.yml`) | Pull requests and pushes to `dev` or `main` that touch `decky/`, the update public key, or the workflow | Runs the plugin's backend and frontend tests, typecheck, build, and package. A push to `dev` publishes one immutable `decky-v<version>` prerelease per plugin version in `decky/package.json`, and an existing tag is not republished |
 | `CodeQL Advanced` (`codeql.yml`) | Pushes, pull requests, weekly schedule | Code scanning |
 
 Public Qt packages use names like `OpenNOW-Qt-<version>-…`. `main` now carries the promoted **1.0.4** source (`project(OpenNOWQt VERSION 1.0.4)`); the published Latest GitHub release is still **v1.0.3**. Each stable release is published from `main` through `qt-release-candidate` → `qt-stable-release`. Nightlies (`vX.Y.Z-nightly.<run>.<attempt>`, currently `v1.0.4-nightly.*`) are published from `dev` by a manual `qt-ci` run with `publish_nightly=true`. They are prereleases and never replace the Latest release. Windows packages now ship as `-setup.exe` and portable `.zip` only: the `.msi` installer is no longer built, so v1.0.3 is the last release that published one.
@@ -87,6 +89,6 @@ Current package matrix:
 
 <ReleasePackageMatrixTable />
 
-The Linux row above covers the AppImage and DEB. GitHub Releases also include `OpenNOW-Qt-<version>-Linux-x64.flatpak` and `OpenNOW-Qt-<version>-Linux-arm64.flatpak`. They are not on Flathub. The manual **Qt Flatpak build** workflow still uploads an artifact and does not publish a release by itself.
+The Linux row above covers the AppImage and DEB. GitHub Releases also include `OpenNOW-Qt-<version>-Linux-x64.flatpak` and `OpenNOW-Qt-<version>-Linux-arm64.flatpak`. They are not on Flathub. The **Qt Flatpak build** workflow uploads artifacts and does not publish a release by itself.
 
 Manual publication details live in the upstream [nightly guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-nightly-release.md), [release-candidate guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-release-candidate.md), and [stable release guide](https://github.com/OpenCloudGaming/OpenNOW/blob/main/docs/qt-unsigned-stable-release.md). Prefer those docs over historical Electron packaging notes.
