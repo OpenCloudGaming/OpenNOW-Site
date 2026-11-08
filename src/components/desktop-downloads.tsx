@@ -63,11 +63,13 @@ const PLATFORMS: DesktopOs[] = [
     id: 'macos',
     label: 'macOS',
     logo: 'apple',
-    note: 'Apple silicon · macOS 13 or later',
-    help: 'Open it and drag OpenNOW into Applications. Intel Macs are not supported.',
+    note: 'macOS 13 or later · Apple silicon (Latest) · Intel on nightlies',
+    help: 'Open it and drag OpenNOW into Applications. Latest stable packages are Apple Silicon only; nightlies also publish an Intel DMG.',
     files: [
       { recommended: 'Disk image (recommended)', title: 'Disk image .dmg', detail: 'Drag OpenNOW into Applications.', format: '.dmg', arch: 'arm64', pattern: /-Darwin-arm64\.dmg$/ },
       { title: 'App .zip', detail: 'The same app without the disk image.', format: '.zip', arch: 'arm64', pattern: /-Darwin-arm64\.zip$/ },
+      { title: 'Intel disk image .dmg', detail: 'Intel Macs. Present on nightlies and planned for 1.0.4; not in Latest v1.0.3.', format: '.dmg', arch: 'x64', pattern: /-Darwin-x64\.dmg$/ },
+      { title: 'Intel app .zip', detail: 'Intel Macs without the disk image, when published.', format: '.zip', arch: 'x64', pattern: /-Darwin-x64\.zip$/ },
     ],
   },
   {
@@ -141,7 +143,8 @@ async function fetchRelease(channel: Channel): Promise<Release> {
   return nightly;
 }
 
-const archLabel = (arch: Arch, os: Os) => (os === 'macos' ? 'Apple silicon' : arch === 'x64' ? 'x64' : 'ARM64');
+const archLabel = (arch: Arch, os: Os) =>
+  os === 'macos' ? (arch === 'x64' ? 'Intel' : 'Apple silicon') : arch === 'x64' ? 'x64' : 'ARM64';
 
 function OsCard({ platform, release, channel, system }: { platform: DesktopOs; release?: Release; channel: Channel; system: System }) {
   const detected = system.os === platform.id;

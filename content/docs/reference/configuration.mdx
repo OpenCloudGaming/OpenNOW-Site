@@ -16,8 +16,8 @@ The core repairs values on every load and write. A choice that is not in the all
 Desktop streaming defaults to native NVST (`streamClientMode: "native"`, `transportMode: "nvst"`). There is no web streamer setting to return to in the Qt app.
 </Callout>
 
-<Callout type="warn" title="Known issues in v1.0.3">
-Prefer a **4:2:0** color profile. YUV **4:4:4** choices are labeled **Coming soon** because they are not working correctly. Alliance Partner sign-in remains available, but Alliance Partners may not work correctly. Keep NVIDIA as the fallback when an Alliance stream fails.
+<Callout type="warn" title="Known remaining limits">
+Prefer a **4:2:0** color profile. YUV **4:4:4** choices are labeled **Coming soon** because they are not working correctly. Alliance Partner sign-in remains available, but Alliance Partners may not work correctly. Keep NVIDIA as the fallback when an Alliance stream fails. Both limits remain on `main` for the upcoming 1.0.4.
 </Callout>
 
 ## File locations
@@ -34,7 +34,7 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `resolution` | `string` | `"1920x1080"` | Stream resolution as `WIDTHxHEIGHT`. Width 640–7680 and height 480–4320, both even; other values reset to the default. **Settings → Stream** |
+| `resolution` | `string` | `"1920x1080"` | Stream resolution as `WIDTHxHEIGHT`. Width 640–7680 and height 480–4320, both even; other values reset to the default. Settings groups shared presets: **16:9** `1280x720`, `1366x768`, `1600x900`, `1920x1080`, `2560x1440`, `3200x1800`, `3840x2160`, `5120x2880`, `7680x4320`; **16:10** `1280x800`, `1440x900`, `1680x1050`, `1920x1200`, `2560x1600`, Mac **3.5K** `3456x2160`, `3840x2400`; **21:9** `1680x720`, `2560x1080`, `3440x1440`, `3840x1600`, `3840x1800`, `5120x2160`; **32:9** `3840x1080`, `5120x1440`; **custom ultrawide** literal `3640x1080`; **4:3** `1024x768`, `1112x834`, `1600x1200`; **5:4** `1280x1024`. Membership and server constraints still apply. **Settings → Stream** |
 | `fps` | `number` | `60` | Target frame rate, clamped to 30–360. Settings offers 30, 60, 90, 120, 144, 165, 240, and 360. Rates your membership or decoder does not allow are locked. **Settings → Stream → Frame rate** |
 | `maxBitrateMbps` | `number` | `75` | Maximum requested bitrate in Mbps, 0.22–200, rounded to 0.01. **Settings → Stream → Bitrate** |
 | `saveBandwidth` | `boolean` | `false` | Lets the server trade resolution and image quality for a steadier frame rate when the connection cannot sustain the selected profile. Applies to new sessions. **Settings → Stream → Save bandwidth** |
@@ -51,11 +51,11 @@ Settings locations below refer to the desktop Settings screen. Rows marked "Adva
 | `upscaling` | `string` | `"off"` | `off`, `metalfx` (macOS), or `fsr1` (Windows and Linux). **Settings → Stream → Upscaling** |
 | `upscalingSharpness` | `number` | `10` | Clarity, 0–15. MetalFX sharpens before upscaling; FSR 1 sharpens after. **Settings → Stream → Clarity** |
 | `upscalingDenoise` | `number` | `0` | Noise reduction, 0–20, before MetalFX upscaling. macOS only. **Settings → Stream → Noise Reduction** |
-| `frameGeneration` | `string` | `"off"` | `off`, `2x`, `3x`, or `4x`: displayed frames per source frame. v1.0.3 accepts only `off` or `2x`, which doubles the stream frame rate (60 FPS becomes 120 displayed FPS). `dev` adds the 3× and 4× levels, and frame generation stays unavailable until the capability test has measured this GPU at the streaming resolution; levels the measurement or the display cannot sustain stay locked. **Settings → Stream → Frame generation (Experimental)** |
-| `frameGenerationMode` | `string` | `"off"` | `dev` only. How the output rate is chosen: `off`, `multiplier` (the `frameGeneration` level), `target` (the rate in `frameGenerationTargetFps`), or `display` (the refresh rate of the display OpenNOW is on). A saved level with mode `off` becomes `multiplier`. **Settings → Stream → Frame generation** |
-| `frameGenerationTargetFps` | `number` | `0` | `dev` only. Output rate in FPS for mode `target`, 0–1000. `0` follows the level; otherwise the level is the target divided by the stream frame rate, rounded and held to 2×–4×. **Settings → Stream → Frame generation → Output rate** |
-| `frameGenerationDisplayHz` | `number` | `0` | `dev` only. Display refresh override in Hz, 0–1000. `0` detects the refresh rate of the display OpenNOW is on; set it when detection is wrong or finds nothing. **Settings → Stream → Advanced → Display refresh override** |
-| `frameGenerationProfiles` | `object` | `{}` | `dev` only. Capability-test results keyed by engine, GPU, and stream resolution, 64 entries at most. Each entry keeps the measured cost per generated frame at 2×, 3×, and 4×, and the levels that fit are worked out from it for the selected frame rate and display. Entries the core cannot parse are dropped. **Settings → Stream → Frame generation capability test** |
+| `frameGeneration` | `string` | `"off"` | `off`, `2x`, `3x`, or `4x`: displayed frames per source frame. On `main` (upcoming 1.0.4) and nightlies, 3× and 4× are available after the capability test; Published Latest v1.0.3 accepts only `off` or `2x`. Frame generation stays unavailable until the capability test has measured this GPU at the streaming resolution; levels the measurement or the display cannot sustain stay locked. Windows releases use the motion frame-generation engine by default. The unverified FlyHigh bridge is unavailable even if requested, so normal motion frame generation does not need a FlyHigh DLL or model bundle. **Settings → Stream → Frame generation (Experimental)** |
+| `frameGenerationMode` | `string` | `"off"` | How the output rate is chosen: `off`, `multiplier` (the `frameGeneration` level), `target` (the rate in `frameGenerationTargetFps`), or `display` (the refresh rate of the display OpenNOW is on). A saved level with mode `off` becomes `multiplier`. On `main` / upcoming 1.0.4; not in published Latest v1.0.3. **Settings → Stream → Frame generation** |
+| `frameGenerationTargetFps` | `number` | `0` | Output rate in FPS for mode `target`, 0–1000. `0` follows the level; otherwise the level is the target divided by the stream frame rate, rounded and held to 2×–4×. On `main` / upcoming 1.0.4; not in published Latest v1.0.3. **Settings → Stream → Frame generation → Output rate** |
+| `frameGenerationDisplayHz` | `number` | `0` | Display refresh override in Hz, 0–1000. `0` detects the refresh rate of the display OpenNOW is on; set it when detection is wrong or finds nothing. On `main` / upcoming 1.0.4; not in published Latest v1.0.3. **Settings → Stream → Advanced → Display refresh override** |
+| `frameGenerationProfiles` | `object` | `{}` | Capability-test results keyed by engine, GPU, and stream resolution, 64 entries at most. Each entry keeps the measured cost per generated frame at 2×, 3×, and 4×, and the levels that fit are worked out from it for the selected frame rate and display. Entries the core cannot parse are dropped. On `main` / upcoming 1.0.4; not in published Latest v1.0.3. **Settings → Stream → Frame generation capability test** |
 | `region` | `string` | `""` | Preferred region URL; empty means automatic (lowest latency). The core remembers one region per sign-in provider. **Settings → Network → Server region** |
 | `sessionProxyEnabled` | `boolean` | `false` | Sends API calls through the proxy in `sessionProxyUrl`. The stream itself always connects directly. **Settings → Network → Advanced → Use proxy** |
 | `sessionProxyUrl` | `string` | `""` | `http://`, `https://`, `socks4://`, or `socks5://` URL with host and port. **Settings → Network → Advanced → Proxy address** |
@@ -94,7 +94,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | --- | --- | --- | --- |
 | `clipboardPaste` | `boolean` | `false` | Pastes local text into the stream with Ctrl+V (Command+V on macOS), up to 64 KiB per paste. **Settings → Controls → Clipboard paste** |
 | `mouseSensitivity` | `number` | `1` | Multiplier for relative mouse movement, 0.1–3.0. v1.0.3 passes it only to the external renderer process, not to the embedded stream view. **Settings → Controls → Mouse sensitivity** |
-| `macPointerLockEnabled` | `boolean` | `true` | macOS only. Keeps the mouse captured for the stream view so it cannot leave the window. `F8` or the **Ctrl+G** menu's **Pointer lock** row toggles and saves it. `dev` adds this key; v1.0.3 has no pointer-lock setting and follows the game's cursor messages. **Settings → Controls → Pointer lock** |
+| `macPointerLockEnabled` | `boolean` | `true` | macOS only. Keeps the mouse captured for the stream view so it cannot leave the window. Enabled by default on `main`; `F8` or the **Ctrl+G** menu's **Pointer lock** row toggles and saves it, and an explicit opt-out remains. Published Latest v1.0.3 has no pointer-lock setting and follows the game's cursor messages. **Settings → Controls → Pointer lock** |
 | `keyboardLayout` | `string` | `"en-US"` | Match your physical keyboard. Sent to GeForce NOW at session start; restart or resume after changing. See [Input](/docs/reference/input/) for the 21 values. **Settings → Controls → Keyboard layout** |
 | `gameLanguage` | `string` | `"en_US"` | Language requested for game metadata and the session. **Settings → Controls → Game language** |
 | `shortcutToggleStats` | `string` | `"Ctrl+N"` | Stats overlay |
@@ -106,7 +106,7 @@ Stream shortcuts are edited in **Settings → Controls → Shortcuts**. The page
 | `shortcutStopStream` | `string` | `"Ctrl+Shift+Q"` | End the session (asks for confirmation) |
 | `shortcutToggleAntiAfk` | `string` | `"Ctrl+Shift+K"` | Toggle Anti-AFK |
 | `shortcutToggleMicrophone` | `string` | `"Ctrl+Shift+M"` | Toggle microphone. Active only when the microphone mode is `voice-activity` |
-| `shortcutToggleFrameGeneration` | `string` | `"Ctrl+Shift+G"` | Turn frame generation on or off in the running stream. `dev` only |
+| `shortcutToggleFrameGeneration` | `string` | `"Ctrl+Shift+G"` | Turn frame generation on or off in the running stream. On `main` / upcoming 1.0.4; not in published Latest v1.0.3 |
 | `microphoneMode` | `string` | `"disabled"` | `disabled` or `voice-activity` (labeled **Open microphone**). Applies to the next session. **Settings → Audio → Microphone** |
 | `controllerMode` | `boolean` | `true` | Lets controllers drive the OpenNOW interface outside gameplay. **Settings → Controls → Controller input** |
 | `controllerLeftStickDeadzone` | `number` | `5` | Left-stick dead zone in percent, 0–50. **Settings → Controls → Left stick dead zone** |

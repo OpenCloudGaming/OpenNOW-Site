@@ -125,7 +125,7 @@ This section describes NVIDIA's official GeForce NOW client, not OpenNOW. It com
 | Audio channels | Up to 8 | Stereo |
 | Microphone | Echo cancellation | No echo cancellation |
 | Clipboard | Custom-message paste protocol | Text submitted through the streamer as input |
-| 4:4:4 in ANNOUNCE | Chroma value `1` | Chroma value `3` (`chroma_format_idc`) in v1.0.3; `dev` sends the official 4:4:4 flag (`0` for 4:2:0, `1` for 4:4:4) |
+| 4:4:4 in ANNOUNCE | Chroma value `1` | Published Latest v1.0.3 sent chroma value `3` (`chroma_format_idc`); `main` / upcoming 1.0.4 sends the official 4:4:4 flag (`0` for 4:2:0, `1` for 4:4:4). YUV 4:4:4 remains a known remaining limit |
 | PLAY response | Only 200 starts the stream | 200 or 455 |
 | Idle warning | Parsed from server timer messages | Parsed |
 

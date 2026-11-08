@@ -8,7 +8,7 @@ interface NightlyProps {
   children?: ReactNode;
 }
 
-const stableRelease = 'v1.0.2';
+const stableRelease = 'v1.0.3';
 
 function NightlyBadge({ since }: { since: string }) {
   return (
