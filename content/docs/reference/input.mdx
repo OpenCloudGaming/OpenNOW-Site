@@ -81,10 +81,10 @@ The layout is fixed for the session when it starts. Changing it during a stream 
 | Platform | Behavior |
 | --- | --- |
 | Linux (X11 / Wayland) | Gameplay keys map from physical key positions (XKB keycodes) to the selected regional Windows layout, including AltGr and OEM punctuation (for example German and Swedish). AltGr is sent as right Alt and does not trigger local shortcuts. Unknown layouts and synthetic key events without a scan code fall back to the logical key. |
-| Windows | Uses the platform's virtual keys and physical-key mapping. The right Shift, Control, and Alt keys are sent as right-side keys, and Control with right Alt counts as AltGr and does not trigger local shortcuts. |
+| Windows | Uses the platform's virtual keys and physical-key mapping. The right Shift, Control, and Alt keys are sent as right-side keys, and Control with right Alt counts as AltGr and does not trigger local shortcuts. On `main` / upcoming 1.0.5, dead-key scan codes are preserved before local composition can drop the key press, so accent composition stays on the remote layout. |
 | macOS | Uses the platform's physical-key mapping, including native keycode zero. |
 
-Dead keys are sent as key events, and the remote Windows layout composes the character. Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; they do not transmit locally composed IME text. Dvorak, Turkish F, French BÉPO, and similar variants are not available as separate choices.
+Dead keys are sent as key events, and the remote Windows layout composes the character. On Windows in `main` / upcoming 1.0.5, OpenNOW keeps the dead-key scan code when Qt would otherwise consume the press for local composition. Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; they do not transmit locally composed IME text. Dvorak, Turkish F, French BÉPO, and similar variants are not available as separate choices.
 
 ### Supported layouts
 
