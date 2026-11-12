@@ -22,7 +22,7 @@ These stream shortcuts can be changed in **Settings → Controls → Shortcuts**
 | `Ctrl+Shift+Q` | End the session (asks for confirmation) | `shortcutStopStream` |
 | `Ctrl+Shift+K` | Toggle Anti-AFK | `shortcutToggleAntiAfk` |
 | `Ctrl+Shift+M` | Mute or unmute the microphone (only with **Open microphone**) | `shortcutToggleMicrophone` |
-| `Ctrl+Shift+G` | Turn frame generation on or off in the running stream (v1.0.4 and nightlies; not in v1.0.3) | `shortcutToggleFrameGeneration` |
+| `Ctrl+Shift+G` | Turn frame generation on or off in the running stream (v1.0.5 and v1.0.4, and nightlies; not in v1.0.3) | `shortcutToggleFrameGeneration` |
 
 On macOS the UI may display modifier labels differently while the stored binding uses the same setting string.
 
@@ -41,7 +41,7 @@ These shortcuts are fixed:
 | `F11` | Outside a stream | Toggle fullscreen |
 | Arrows, `Enter`, `Space`, `F`, `Shift+F10` | Library and store | Move, play or resume, game details, toggle favorite, context menu |
 
-`allowEscapeToExitFullscreen` is stored in `settings.json`, but v1.0.4 does not read it. Escape always goes to the game during a stream.
+`allowEscapeToExitFullscreen` is stored in `settings.json`, but v1.0.5 does not read it. Escape always goes to the game during a stream.
 
 `Ctrl+Shift+A` opens the account switcher from anywhere in the desktop shell. `Ctrl+1` through `Ctrl+9` switch to the matching saved account. See [Authentication](/docs/reference/authentication/).
 
@@ -58,7 +58,7 @@ In console mode the same shortcut opens the console Guide.
 
 Its quick toggles (statistics overlay, fullscreen, microphone, Anti-AFK) keep the menu open. Quality, bitrate, and codec changes apply from the next session.
 
-In v1.0.4 and nightlies, the drawer also has a **Frame generation** tile once the capability test has unlocked a level for the current resolution and frame rate. `Ctrl+Shift+G` turns frame generation on or off for the running stream at once; the levels, the output rate, and the capability test stay in **Settings → Stream**. v1.0.3 had no in-stream Frame generation tile.
+In v1.0.5 and v1.0.4, and in nightlies, the drawer also has a **Frame generation** tile once the capability test has unlocked a level for the current resolution and frame rate. `Ctrl+Shift+G` turns frame generation on or off for the running stream at once; the levels, the output rate, and the capability test stay in **Settings → Stream**. v1.0.3 had no in-stream Frame generation tile.
 
 The **Controllers** page in the drawer shows each connected pad. For each pad you can set left and right stick dead zones and vibration strength, test the sticks and rumble, apply the values to all pads, or reset the pad to the defaults from **Settings → Controls**. Values are saved per pad in `controllerProfiles` and apply immediately. You can also make one pad the only Player 1 until the app restarts.
 
@@ -81,10 +81,10 @@ The layout is fixed for the session when it starts. Changing it during a stream 
 | Platform | Behavior |
 | --- | --- |
 | Linux (X11 / Wayland) | Gameplay keys map from physical key positions (XKB keycodes) to the selected regional Windows layout, including AltGr and OEM punctuation (for example German and Swedish). AltGr is sent as right Alt and does not trigger local shortcuts. Unknown layouts and synthetic key events without a scan code fall back to the logical key. |
-| Windows | Uses the platform's virtual keys and physical-key mapping. The right Shift, Control, and Alt keys are sent as right-side keys, and Control with right Alt counts as AltGr and does not trigger local shortcuts. On `main` / upcoming 1.0.5, dead-key scan codes are preserved before local composition can drop the key press, so accent composition stays on the remote layout. |
+| Windows | Uses the platform's virtual keys and physical-key mapping. The right Shift, Control, and Alt keys are sent as right-side keys, and Control with right Alt counts as AltGr and does not trigger local shortcuts. In v1.0.5, dead-key scan codes are preserved before local composition can drop the key press, so accent composition stays on the remote layout. |
 | macOS | Uses the platform's physical-key mapping, including native keycode zero. |
 
-Dead keys are sent as key events, and the remote Windows layout composes the character. On Windows in `main` / upcoming 1.0.5, OpenNOW keeps the dead-key scan code when Qt would otherwise consume the press for local composition. Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; they do not transmit locally composed IME text. Dvorak, Turkish F, French BÉPO, and similar variants are not available as separate choices.
+Dead keys are sent as key events, and the remote Windows layout composes the character. On Windows in v1.0.5, OpenNOW keeps the dead-key scan code when Qt would otherwise consume the press for local composition. Chinese layouts (`zh-CN`, `zh-TW`) provide physical keys for the remote IME; they do not transmit locally composed IME text. Dvorak, Turkish F, French BÉPO, and similar variants are not available as separate choices.
 
 ### Supported layouts
 
@@ -116,11 +116,11 @@ The core rejects any other value. A saved alias keeps working and is sent as the
 
 ## Pointer lock and mouse
 
-- By default the stream view follows the game's cursor. When the game hides its cursor, OpenNOW switches to relative mouse mode and locks the pointer. When the game shows a cursor, OpenNOW uses absolute mode. On macOS in v1.0.4, capture follows **Settings → Controls → Pointer lock** (`macPointerLockEnabled`, default on) instead, so the game's cursor messages no longer decide it. v1.0.3 followed the game's cursor messages.
-- `F8` (`shortcutTogglePointerLock`) overrides the automatic choice and grabs or releases the mouse. On macOS in v1.0.4 it flips the saved **Pointer lock** setting, the **Ctrl+G** menu shows the same ON or OFF state, and turning it off shows a **Pointer lock is off** notice with an **Enable pointer lock** button.
+- By default the stream view follows the game's cursor. When the game hides its cursor, OpenNOW switches to relative mouse mode and locks the pointer. When the game shows a cursor, OpenNOW uses absolute mode. On macOS in v1.0.5 and v1.0.4, capture follows **Settings → Controls → Pointer lock** (`macPointerLockEnabled`, default on) instead, so the game's cursor messages no longer decide it. v1.0.3 followed the game's cursor messages.
+- `F8` (`shortcutTogglePointerLock`) overrides the automatic choice and grabs or releases the mouse. On macOS in v1.0.5 and v1.0.4 it flips the saved **Pointer lock** setting, the **Ctrl+G** menu shows the same ON or OFF state, and turning it off shows a **Pointer lock is off** notice with an **Enable pointer lock** button.
 - Focus loss and overlays such as the session menu release the pointer and all held input.
 - On Wayland, relative mode uses the pointer-constraints and relative-pointer protocols. On macOS it uses CoreGraphics pointer capture. On Windows the cursor is confined to the stream view while captured.
-- **Settings → Controls → Mouse sensitivity** (`mouseSensitivity`, default `1`, range 0.1–3.0) is passed only to the external renderer process in v1.0.4. The embedded stream view does not apply it.
+- **Settings → Controls → Mouse sensitivity** (`mouseSensitivity`, default `1`, range 0.1–3.0) is passed only to the external renderer process in v1.0.5. The embedded stream view does not apply it.
 
 ## Gamepad
 
@@ -132,7 +132,7 @@ Dead zones are radial. Stick movement inside the dead zone is ignored, and the r
 
 Outside gameplay, controllers drive the OpenNOW interface when **Controller input** (`controllerMode`) is on. Ownership moves between the interface and the stream with neutral states, so no button stays pressed in the game.
 
-**Settings → Controls → Gyroscope** (`enableGyroscopeControls`) is stored, but v1.0.4 does not send motion data.
+**Settings → Controls → Gyroscope** (`enableGyroscopeControls`) is stored, but v1.0.5 does not send motion data.
 
 | Setting | Description |
 | --- | --- |
@@ -140,7 +140,7 @@ Outside gameplay, controllers drive the OpenNOW interface when **Controller inpu
 | `launchInConsoleMode` | Start in console mode |
 | `switchToConsoleOnPad` | Enter console mode when a gamepad is the only input |
 | `leaveConsoleOnPointer` | Leave console mode on keyboard or mouse input |
-| `consoleProfilePickerOnLaunch` | v1.0.2 only. Stored but not read; it is no longer a setting in v1.0.4. See [Configuration](/docs/reference/configuration/) |
+| `consoleProfilePickerOnLaunch` | v1.0.2 only. Stored but not read; it is no longer a setting in v1.0.5. See [Configuration](/docs/reference/configuration/) |
 | `autoFullScreen` | Enter fullscreen when the session is ready |
 | `controllerLeftStickDeadzone` / `controllerRightStickDeadzone` | Stick dead zones in percent |
 | `controllerProfiles` | Per-controller dead zones and vibration |
